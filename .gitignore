@@ -1,5 +1,5 @@
 # Binaries
-finwipe
+/finwipe
 *.exe
 
 # Config with secrets (local)
