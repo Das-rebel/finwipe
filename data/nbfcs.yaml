@@ -243,6 +243,17 @@ nbfcs:
     notes: Credit marketplace + lending
     active: true
 
+  - id: finance-buddha
+    name: Ruloans Distribution Pvt Ltd (Finance Buddha)
+    short_name: Finance Buddha
+    category: fintech
+    grievance_email: grievance@financebuddha.in
+    grievance_phone: "+91 9555222333"
+    address: "Office No. 102, 1st Floor, Tower-2, Sector-127, Noida, Uttar Pradesh 201301"
+    website: https://www.financebuddha.com
+    notes: "Loan aggregator/distributor — not an NBFC. Sends data to lending partners (banks/NBFCs). GRO: Mr. Ankit Singh. PNO: Mr. Vikas Singh."
+    active: true
+
   - id: cred
     name: CRED Technologies Pvt Ltd
     short_name: CRED
