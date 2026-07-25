@@ -114,34 +114,77 @@ nbfcs:
     name: Navi Finserv Ltd
     short_name: Navi
     category: nbfc
-    grievance_email: gro@navi.com
+    grievance_email: grievance@navi.com
     address: "Navi Finserv, Suite 1, 3rd Floor, Olympia Technology Park, Plot No.1, SIDCO Industrial Estate, Guindy, Chennai 600032"
     dla_app: Navi app
     website: https://navi.com
     notes: Digital-first, DLG compliant
     active: true
 
-  - id: paisabazaar
-    name: PB Fintech Solutions Pvt Ltd (Paisabazaar)
-    short_name: Paisabazaar
-    category: fintech
-    grievance_email: grievance@paisabazaar.com
-    grievance_phone: "18001234567"
-    address: "Paisabazaar.com, 3rd Floor, Building No. 10, Tower B, DLF Cyber City, Gurugram 122002"
-    dla_app: Paisabazaar
-    website: https://www.paisabazaar.com
-    notes: Credit marketplace + lending
+  - id: zestmoney
+    name: ZestMoney (Kunai Leasing and Finance Pvt Ltd)
+    short_name: ZestMoney
+    category: nbfc
+    grievance_email: principalnodalofficer@zestmoney.in
+    address: "ZestMoney, Bengaluru, Karnataka"
+    dla_app: ZestMoney app
+    website: https://www.zestmoney.in
+    notes: BNPL + digital lending, DLG compliant
     active: true
 
-  - id: kissht
-    name: Kissht Consumer Finance Pvt Ltd
-    short_name: Kissht
+  - id: loantap
+    name: LoanTap Financial Technologies Pvt Ltd
+    short_name: LoanTap
+    category: nbfc
+    grievance_email: grievance@loantap.in
+    address: "LoanTap, Mumbai, Maharashtra"
+    dla_app: LoanTap app
+    website: https://www.loantap.in
+    notes: Digital lending for professionals
+    active: true
+
+  - id: rupeeredee
+    name: FincFriends Pvt Ltd (RupeeRedee)
+    short_name: RupeeRedee
+    category: nbfc
+    grievance_email: grievance@rupeeredee.com
+    address: "RupeeRedee, Delhi NCR"
+    dla_app: RupeeRedee app
+    website: https://www.rupeeredee.com
+    notes: Digital lending + BNPL
+    active: true
+
+  - id: kreditbee
+    name: Finnovation Tech Solutions Pvt Ltd (KreditBee)
+    short_name: KreditBee
     category: fintech
-    grievance_email: support@kissht.com
-    address: "Kissht, 1204, B-Wing, Kailash Business Park, Hiranandani Link Road, Mumbai 400076"
-    dla_app: Kissht
-    website: https://www.kissht.com
-    notes: Digital lending platform
+    grievance_email: grievance@kreditbee.in
+    address: "KreditBee, Bengaluru, Karnataka"
+    dla_app: KreditBee app
+    website: https://www.kreditbee.in
+    notes: Personal loans + digital lending
+    active: true
+
+  - id: earlysalary
+    name: EarlySalary Pvt Ltd
+    short_name: EarlySalary
+    category: fintech
+    grievance_email: grievance.officer@earlysalary.com
+    address: "EarlySalary, Pune, Maharashtra"
+    dla_app: EarlySalary app
+    website: https://www.earlysalary.com
+    notes: Salary advance + digital lending
+    active: true
+
+  - id: moneytap
+    name: MWYN Tech Pvt Ltd (MoneyTap)
+    short_name: MoneyTap
+    category: fintech
+    grievance_email: grievance@moneytap.com
+    address: "MoneyTap, Bengaluru, Karnataka"
+    dla_app: MoneyTap app
+    website: https://www.moneytap.com
+    notes: Credit line + personal loans
     active: true
 
   - id: stashfin
@@ -150,9 +193,20 @@ nbfcs:
     category: fintech
     grievance_email: care@stashfin.com
     address: "StashFin, 4th Floor, Plot No. 8, Local Shopping Centre, Pushpanjali, New Delhi 110058"
-    dla_app: StashFin
+    dla_app: StashFin app
     website: https://www.stashfin.com
     notes: Digital lending
+    active: true
+
+  - id: kissht
+    name: Kissht Consumer Finance Pvt Ltd
+    short_name: Kissht
+    category: fintech
+    grievance_email: support@kissht.com
+    address: "Kissht, 1204, B-Wing, Kailash Business Park, Hiranandani Link Road, Mumbai 400076"
+    dla_app: Kissht app
+    website: https://www.kissht.com
+    notes: Digital lending platform
     active: true
 
   - id: lazeeap
@@ -161,7 +215,7 @@ nbfcs:
     category: fintech
     grievance_email: support@lazeeap.com
     address: "LazeeAp, Bangalore, Karnataka"
-    dla_app: LazeeAp
+    dla_app: LazeeAp app
     website: https://www.lazeeap.com
     notes: Digital lending
     active: true
@@ -172,11 +226,386 @@ nbfcs:
     category: fintech
     grievance_email: support@krazencapital.com
     address: "Krazen Capital, Mumbai"
-    dla_app: Krazen
+    dla_app: Krazen app
     website: https://krazencapital.com
     notes: Digital lending platform
     active: true
 
+  - id: Paisabazaar
+    name: PB Fintech Solutions Pvt Ltd (Paisabazaar)
+    short_name: Paisabazaar
+    category: fintech
+    grievance_email: grievance@paisabazaar.com
+    grievance_phone: "18001234567"
+    address: "Paisabazaar.com, 3rd Floor, Building No. 10, Tower B, DLF Cyber City, Gurugram 122002"
+    dla_app: Paisabazaar app
+    website: https://www.paisabazaar.com
+    notes: Credit marketplace + lending
+    active: true
+
+  - id: cred
+    name: CRED Technologies Pvt Ltd
+    short_name: CRED
+    category: fintech
+    grievance_email: grievance.nodal@cred.club
+    grievance_phone: "18001020300"
+    address: "CRED, 3rd Floor, Citadel Building, Phoenix Marketcity, Kurla West, Mumbai 400070"
+    dla_app: CRED app
+    website: https://cred.club
+    notes: Credit card rewards + D2C lending
+    active: true
+
+  - id: lazypay
+    name: PayU Finance India Pvt Ltd (LazyPay)
+    short_name: LazyPay
+    category: nbfc
+    grievance_email: grievance.officer@payufinance.com
+    address: "LazyPay, 2nd Floor, Embassy Centre, Plot No.11, Free Press Journal Marg, Nariman Point, Mumbai 400021"
+    dla_app: LazyPay app
+    website: https://www.lazypay.in
+    notes: BNPL + digital lending
+    active: true
+
+  - id: simpl
+    name: One Tap Instant Solutions Pvt Ltd (Simpl)
+    short_name: Simpl
+    category: fintech
+    grievance_email: grievance.officer@getsimpl.com
+    address: "Simpl, Mumbai, Maharashtra"
+    dla_app: Simpl app
+    website: https://getsimpl.com
+    notes: BNPL, embedded credit
+    active: true
+
+  - id: postpe
+    name: BHARATPE GROUP (PostPe)
+    short_name: PostPe
+    category: fintech
+    grievance_email: grievance.officer@postpe.app
+    address: "PostPe, 5th Floor, Building No.8, Tower A, DLF Cyber City, Gurugram 122002"
+    dla_app: PostPe app
+    website: https://www.postpe.app
+    notes: BNPL via BharatPe
+    active: true
+
+  - id: slice
+    name: GaragePreneurs Internet Pvt Ltd (Slice)
+    short_name: Slice
+    category: fintech
+    grievance_email: grievance.officer@sliceit.com
+    address: "Slice, 3rd Floor, Raheja Tower, No.26-27, Mahatma Gandhi Road, Bengaluru 560001"
+    dla_app: Slice app
+    website: https://www.sliceit.com
+    notes: Cards + digital lending, RBI regulated
+    active: true
+
+  - id: paytm
+    name: One97 Communications Ltd (Paytm)
+    short_name: Paytm
+    category: fintech
+    grievance_email: nodalofficer.lending@paytm.com
+    grievance_phone: "18001806010"
+    address: "Paytm, 2nd Floor, B-121, Sector 5, Noida 201301"
+    dla_app: Paytm app
+    website: https://www.paytm.com
+    notes: Payments + lending, NPS2 certified
+    active: true
+
+  - id: phonepe
+    name: PhonePe Pvt Ltd
+    short_name: PhonePe
+    category: fintech
+    grievance_email: grievance.officer@phonepe.com
+    grievance_phone: "18002010444"
+    address: "PhonePe, 2nd Floor, Rename building, No.44, Brigade Road, Bengaluru 560025"
+    dla_app: PhonePe app
+    website: https://www.phonepe.com
+    notes: Payments + lending
+    active: true
+
+  - id: amazon-pay
+    name: Amazon Pay India Pvt Ltd
+    short_name: Amazon Pay
+    category: fintech
+    grievance_email: grievanceofficer@amazonpay.in
+    nodalofficer_email: nodalofficer@amazonpay.in
+    address: "Amazon Pay, 4th Floor, Brigade MResidency, No.42, Residency Road, Bengaluru 560025"
+    dla_app: Amazon Pay app
+    website: https://www.amazonpay.in
+    notes: Payments + lending
+    active: true
+
+  - id: google-pay
+    name: Google India Digital Services Pvt Ltd (Google Pay)
+    short_name: Google Pay
+    category: fintech
+    grievance_email: grievance-officer-gpay@google.com
+    address: "Google India, 4th Floor, Tower C, UB City, 24 Vittal Mallya Road, Bengaluru 560001"
+    dla_app: Google Pay app
+    website: https://pay.google.com
+    notes: UPI payments
+    active: true
+
+  - id: razorpay
+    name: Razorpay Pvt Ltd
+    short_name: Razorpay
+    category: fintech
+    grievance_email: privacy@razorpay.com
+    grievance_phone: "18008890202"
+    address: "Razorpay Pvt Ltd, 1st Floor, Prestige Square, Embassy Tech Village, Outer Ring Road, Devarabisanahalli, Bengaluru 560103"
+    dla_app: Razorpay app
+    website: https://razorpay.com
+    notes: Payment gateway + embedded lending
+    active: true
+
+  - id: cashfree
+    name: Cashfree Payments Pvt Ltd
+    short_name: Cashfree
+    category: fintech
+    grievance_email: support@cashfree.com
+    address: "Cashfree, Bengaluru, Karnataka"
+    dla_app: Cashfree app
+    website: https://www.cashfree.com
+    notes: Payments + lending
+    active: true
+
+  - id: acko
+    name: Acko General Insurance Ltd
+    short_name: Acko
+    category: fintech
+    grievance_email: cgo@acko.com
+    privacy_email: privacy@acko.com
+    address: "Acko, 2nd Floor, Embassy Square, #148, Infantry Road, Bengaluru 560001"
+    dla_app: Acko app
+    website: https://www.acko.com
+    notes: Digital insurance
+    active: true
+
+  - id: digit-insurance
+    name: Go Digit General Insurance Ltd (Digit)
+    short_name: Digit
+    category: fintech
+    grievance_email: cgo@godigit.com
+    address: "Digit Insurance, 4th Floor, Enterprise Square, Sector 126, Noida 201304"
+    dla_app: Digit app
+    website: https://www.digit.insure
+    notes: Digital insurance
+    active: true
+
+  - id: policybazaar
+    name: PB Fintech Ltd (PolicyBazaar)
+    short_name: PolicyBazaar
+    category: fintech
+    grievance_email: grievance@policybazaar.com
+    privacy_email: dataprotectionofficer@policybazaar.com
+    address: "PolicyBazaar, 3rd Floor, Plot No. 131, Sector 44, Gurugram 122002"
+    dla_app: PolicyBazaar app
+    website: https://www.policybazaar.com
+    notes: Insurance marketplace
+    active: true
+
+  - id: coverfox
+    name: Coverfox Insurance Broking Pvt Ltd
+    short_name: Coverfox
+    category: fintech
+    grievance_email: grievance@coverfox.com
+    address: "Coverfox, Mumbai, Maharashtra"
+    dla_app: Coverfox app
+    website: https://www.coverfox.com
+    notes: Insurance marketplace
+    active: true
+
+  - id: cardekho
+    name: Girnar Software Pvt Ltd (CarDekho)
+    short_name: CarDekho
+    category: fintech
+    grievance_email: grievanceofficer@girnarsoft.com
+    privacy_email: privacy@girnarsoft.com
+    address: "CarDekho, 3rd Floor, Building No.5, DLF Cyber City, Phase 3, Gurugram 122002"
+    dla_app: CarDekho app
+    website: https://www.cardekho.com
+    notes: Auto fintech + lending
+    active: true
+
+  # ──────────────────────────────────────────────────────────────────
+  # D2C Neobanks
+  # ──────────────────────────────────────────────────────────────────
+  - id: fi-money
+    name: "Fi Technologies Pvt Ltd (Fi Money)"
+    short_name: Fi
+    category: fintech
+    grievance_email: grievance@fi.money
+    address: "Fi Money, 3rd Floor, Plot No. 47, Institutional Area, Sector 32, Gurugram 122001"
+    dla_app: Fi app
+    website: https://fi.money
+    notes: D2C neobank
+    active: true
+
+  - id: juno
+    name: Juno (SpiceFi Pvt Ltd)
+    short_name: Juno
+    category: fintech
+    grievance_email: care@juno.finance
+    address: "Juno, Mumbai, Maharashtra"
+    dla_app: Juno app
+    website: https://juno.finance
+    notes: D2C neobank + metal card
+    active: true
+
+  - id: open-bank
+    name: Open Network Digital Ltd (Open Bank)
+    short_name: Open
+    category: fintech
+    grievance_email: grievance@bankopen.co
+    address: "Open Bank, 3rd Floor, Krishe Sapphire, Hitech City Main Road, Madhapur, Hyderabad 500081"
+    dla_app: Open app
+    website: https://www.bankopen.co
+    notes: Neobank for businesses
+    active: true
+
+  - id: niyo
+    name: Niyo Solutions Pvt Ltd
+    short_name: Niyo
+    category: fintech
+    grievance_email: grievance@goniyo.com
+    address: "Niyo, 2nd Floor, Tower A, Brigade Golden Geometry, 44 Device, Bengaluru 560001"
+    dla_app: Niyo app
+    website: https://www.goniyo.com
+    notes: D2C neobank + travel cards
+    active: true
+
+  - id: jupiter
+    name: Jupiter Abs Pvt Ltd
+    short_name: Jupiter
+    category: fintech
+    grievance_email: grievance@jupiter.money
+    address: "Jupiter, 3rd Floor, Akshay Square, Sector 17, Gurugram 122002"
+    dla_app: Jupiter app
+    website: https://jupiter.money
+    notes: D2C neobank
+    active: true
+
+  - id: freo-money
+    name: Freo (MoneyTap subsidiary)
+    short_name: Freo
+    category: fintech
+    grievance_email: grievance@freo.money
+    address: "Freo, Bengaluru, Karnataka"
+    dla_app: Freo app
+    website: https://www.freo.money
+    notes: D2C neobank + savings
+    active: true
+
+  - id: paytm-payments-bank
+    name: Paytm Payments Bank Ltd
+    short_name: Paytm Payments Bank
+    category: fintech
+    grievance_email: grievance.paymentsbank@paytm.com
+    address: "Paytm Payments Bank, B-121, Sector 5, Noida 201301"
+    dla_app: Paytm app
+    website: https://www.paytmbank.com
+    notes: Payments bank
+    active: true
+
+  # ──────────────────────────────────────────────────────────────────
+  # P2P Lending
+  # ──────────────────────────────────────────────────────────────────
+  - id: faircent
+    name: Faircent Fintech Pvt Ltd
+    short_name: Faircent
+    category: fintech
+    grievance_email: grievance@faircent.com
+    address: "Faircent, Gurugram, Haryana"
+    dla_app: Faircent app
+    website: https://www.faircent.com
+    notes: P2P lending marketplace
+    active: true
+
+  - id: i2ifunding
+    name: i2iFunding (Petlla Pvt Ltd)
+    short_name: i2iFunding
+    category: fintech
+    grievance_email: grievance@i2ifunding.com
+    address: "i2iFunding, Mumbai, Maharashtra"
+    dla_app: i2iFunding app
+    website: https://www.i2ifunding.com
+    notes: P2P lending
+    active: true
+
+  - id: lendbox
+    name: Lendbox Fintech Pvt Ltd
+    short_name: Lendbox
+    category: fintech
+    grievance_email: grievance@lendbox.in
+    address: "Lendbox, New Delhi, Delhi"
+    dla_app: Lendbox app
+    website: https://www.lendbox.in
+    notes: P2P lending
+    active: true
+
+  - id: lendenclub
+    name: LenDenClub (Disha Electronics)
+    short_name: LenDenClub
+    category: fintech
+    grievance_email: grievance@lendenclub.com
+    address: "LenDenClub, Mumbai, Maharashtra"
+    dla_app: LenDenClub app
+    website: https://www.lendenclub.com
+    notes: P2P lending
+    active: true
+
+  - id: rupeecircle
+    name: RupeeCircle Fintech Pvt Ltd
+    short_name: RupeeCircle
+    category: fintech
+    grievance_email: grievance@rupeecircle.com
+    address: "RupeeCircle, Gurugram, Haryana"
+    dla_app: RupeeCircle app
+    website: https://www.rupeecircle.com
+    notes: P2P lending
+    active: true
+
+  - id: monexo
+    name: Monexo Technologies Pvt Ltd
+    short_name: Monexo
+    category: fintech
+    grievance_email: grievance@monexo.com
+    address: "Monexo, Bengaluru, Karnataka"
+    dla_app: Monexo app
+    website: https://www.monexo.com
+    notes: P2P lending
+    active: true
+
+  # ──────────────────────────────────────────────────────────────────
+  # Housing Finance Companies (HFCs)
+  # ──────────────────────────────────────────────────────────────────
+  - id: aadhar-housing
+    name: Aadhar Housing Finance Ltd
+    short_name: Aadhar
+    category: hfc
+    grievance_email: customercare@aadharhousing.com
+    grievance_phone: "18001230012"
+    address: "Aadhar Housing Finance Ltd, Bangalore, Karnataka"
+    dla_app: Aadhar app
+    website: https://www.aadharhousing.com
+    notes: HFC, affordable housing
+    active: true
+
+  - id: pnb-housing
+    name: PNB Housing Finance Ltd
+    short_name: PNB HFC
+    category: hfc
+    grievance_email: customercare@pnbhousing.com
+    grievance_phone: "18001231000"
+    address: "PNB Housing Finance Ltd, 4th Floor, Antriksh Plaza, B-8, District Centre, Netaji Subhash Place, Delhi 110034"
+    dla_app: PNB Housing app
+    website: https://www.pnbhousing.com
+    notes: HFC, strong digital presence
+    active: true
+
+  # ──────────────────────────────────────────────────────────────────
+  # Banks (Retail Digital Lending)
+  # ──────────────────────────────────────────────────────────────────
   - id: indusind-bank
     name: IndusInd Bank Ltd
     short_name: IndusInd
@@ -237,118 +666,85 @@ nbfcs:
     notes: Premium digital banking
     active: true
 
-  # ──────────────────────────────────────────────────────────────────
-  # Housing Finance Companies (HFCs)
-  # ──────────────────────────────────────────────────────────────────
-  - id: aadhar-housing
-    name: Aadhar Housing Finance Ltd
-    short_name: Aadhar
-    category: hfc
-    grievance_email: customercare@aadharhousing.com
-    grievance_phone: "18001230012"
-    address: "Aadhar Housing Finance Ltd, Bangalore"
-    dla_app: Aadhar
-    website: https://www.aadharhousing.com
-    notes: HFC, affordable housing
+  - id: kotak-bank
+    name: Kotak Mahindra Bank Ltd
+    short_name: Kotak
+    category: bank
+    grievance_email: customer.service@kotak.com
+    grievance_phone: "18602662626"
+    address: "Kotak Mahindra Bank, 27BKC, C-27, G-Block, Bandra Kurla Complex, Mumbai 400051"
+    dla_app: Kotak app
+    website: https://www.kotak.com
+    notes: Large digital lender
     active: true
 
-  - id: pnb-housing
-    name: PNB Housing Finance Ltd
-    short_name: PNB HFC
-    category: hfc
-    grievance_email: customercare@pnbhousing.com
-    grievance_phone: "18001231000"
-    address: "PNB Housing Finance Ltd, 4th Floor, Antriksh Plaza, B-8, District Centre, Netaji Subhash Place, Delhi 110034"
-    dla_app: PNB Housing
-    website: https://www.pnbhousing.com
-    notes: HFC, strong digital presence
+  - id: yes-bank
+    name: YES BANK Ltd
+    short_name: YES
+    category: bank
+    grievance_email: customer.service@yesbank.in
+    grievance_phone: "18001212000"
+    address: "YES BANK, YES BANK Tower, Floor 7, G-Block, Bandra Kurla Complex, Mumbai 400051"
+    dla_app: YES Bank app
+    website: https://www.yesbank.in
+    notes: Digital banking focus
     active: true
 
-  - id: cara-housing
-    name: Cara Healthcare & Finance Pvt Ltd (Cara)
-    short_name: Cara
-    category: fintech
-    grievance_email: support@cara.care
-    address: "Cara, Mumbai"
-    dla_app: Cara
-    website: https://www.cara.care
-    notes: Healthcare + fintech lending
+  - id: idfc-first-bank
+    name: IDFC FIRST Bank Ltd
+    short_name: IDFC First
+    category: bank
+    grievance_email: customer.experience@idfcfirstbank.com
+    grievance_phone: "180010888"
+    address: "IDFC FIRST Bank, K-8, Building, Upper Ground Floor, Near Mahalaxmi Temple, Mahalaxmi, Mumbai 400011"
+    dla_app: IDFC First app
+    website: https://www.idfcfirstbank.com
+    notes: Digital-first bank
     active: true
 
-  - id: apt.capital
-    name: APT Capital Pvt Ltd
-    short_name: APT
-    category: fintech
-    grievance_email: support@apt.capital
-    address: "APT Capital, Mumbai"
-    dla_app: APT
-    website: https://apt.capital
-    notes: Digital lending
+  - id: federal-bank
+    name: Federal Bank Ltd
+    short_name: Federal
+    category: bank
+    grievance_email: itservices@federalbank.co.in
+    grievance_phone: "18004253838"
+    address: "Federal Bank, Federal Bank Tower, P B No. 158, Menages St, Palakkad 678014"
+    dla_app: Federal Bank app
+    website: https://www.federalbank.co.in
+    notes: Retail digital lending
     active: true
 
-  - id: razorpay
-    name: Razorpay Pvt Ltd
-    short_name: Razorpay
-    category: fintech
-    grievance_email: privacy@razorpay.com
-    grievance_phone: "18008890202"
-    address: "Razorpay Pvt Ltd, 1st Floor, Pres干细胞 Square, Embassy Tech Village, Outer Ring Road, Devarabisanahalli, Bengaluru 560103"
-    dla_app: Razorpay
-    website: https://razorpay.com
-    notes: Payment gateway + embedded lending
+  - id: au-small-finance
+    name: AU Small Finance Bank Ltd
+    short_name: AU
+    category: bank
+    grievance_email: grievance@auicici.com
+    grievance_phone: "18001200200"
+    address: "AU Small Finance Bank, E-8, EPIDC Zone, Bhiwadi, Rajasthan 301019"
+    dla_app: AU Bank app
+    website: https://www.aubank.in
+    notes: SFB, strong digital lending
     active: true
 
-  - id: cashfree
-    name: Cashfree Payments Pvt Ltd
-    short_name: Cashfree
-    category: fintech
-    grievance_email: support@cashfree.com
-    address: "Cashfree, Bengaluru"
-    dla_app: Cashfree
-    website: https://www.cashfree.com
-    notes: Payments + lending
+  - id: dbs-bank
+    name: DBS Bank India Ltd
+    short_name: DBS
+    category: bank
+    grievance_email: griefresolutions@dbs.com
+    grievance_phone: "18002094373"
+    address: "DBS Bank, 3rd Floor, Express Towers, Nariman Point, Mumbai 400021"
+    dla_app: digibank app
+    website: https://www.dbs.com/in
+    notes: Digital-first foreign bank
     active: true
 
-  - id: simpl
-    name: Simpl Fintech Pvt Ltd
-    short_name: Simpl
-    category: fintech
-    grievance_email: privacy@simpl
-    address: "Simpl, Mumbai"
-    dla_app: Simpl
-    website: https://www.simpl.in
-    notes: BNPL, embedded credit
-    active: true
-
-  - id: earlysalary
-    name: EarlySalary Pvt Ltd
-    short_name: EarlySalary
-    category: fintech
-    grievance_email: support@earlysalary.com
-    address: "EarlySalary, Pune"
-    dla_app: EarlySalary
-    website: https://www.earlysalary.com
-    notes: Salary advance + digital lending
-    active: true
-
-  - id: faircent
-    name: Faircent Fintech Pvt Ltd
-    short_name: Faircent
-    category: fintech
-    grievance_email: grievance@faircent.com
-    address: "Faircent, Gurugram"
-    dla_app: Faircent
-    website: https://www.faircent.com
-    notes: P2P lending marketplace
-    active: true
-
-  - id: moca
-    name: Moca Tech Fintech Solutions Pvt Ltd
-    short_name: Moca
-    category: fintech
-    grievance_email: support@moca.money
-    address: "Moca, Mumbai"
-    dla_app: Moca
-    website: https://www.moca.money
-    notes: Digital lending
+  - id: indusind-hdfc-bank-paras
+    name: IndusInd Bank (Paras)
+    short_name: IndusParas
+    category: bank
+    grievance_email: parasgrievance@indusind.com
+    address: "IndusInd Bank, Mumbai"
+    dla_app: IndusParas app
+    website: https://www.indusind.com
+    notes: Digital lending for loans against property
     active: true
