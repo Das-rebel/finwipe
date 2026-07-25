@@ -50,7 +50,6 @@ func main() {
 	rootCmd.AddCommand(reportCmd) // Compliance dashboard and reporting
 
 	// Interactive + Evidence
-	rootCmd.AddCommand(wizardCmd)    // Interactive wizard
 	rootCmd.AddCommand(evidenceCmd)   // Evidence management
 
 	// Utility

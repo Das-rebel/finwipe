@@ -90,6 +90,6 @@ jobs:
           path: ~/.finwipe/letters/
           retention-days: 30
 
-      - name: FinWipe Status
+      - name: FinWipe Report
         run: |
-          ./finwipe status
+          ./finwipe report
