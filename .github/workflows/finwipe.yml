@@ -1,0 +1,95 @@
+name: FinWipe MonthlyDeletion Run
+
+on:
+  schedule:
+    # Run at 9 AM on the 1st of every month
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        required: true
+        default: 'email'
+        type: choice
+        options:
+          - email
+          - letter
+          - both
+
+env:
+  FINWIPE_VERSION: ${{ github.sha }}
+  SMTP_HOST: ${{ secrets.SMTP_HOST }}
+  SMTP_PORT: ${{ secrets.SMTP_PORT }}
+  SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  FINWIPE_FULL_NAME: ${{ secrets.FINWIPE_FULL_NAME }}
+  FINWIPE_EMAIL: ${{ secrets.FINWIPE_EMAIL }}
+  FINWIPE_PHONE: ${{ secrets.FINWIPE_PHONE }}
+  FINWIPE_ADDRESS: ${{ secrets.FINWIPE_ADDRESS }}
+
+jobs:
+  finwipe:
+    runs-on: ubuntu-latest
+    container:
+      image: golang:1.23
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build
+        run: |
+          go build -o finwipe ./cmd/finwipe
+
+      - name: Create config directory
+        run: mkdir -p ~/.finwipe
+
+      - name: Write config
+        run: |
+          cat > ~/.finwipe/config.yaml << 'EOF'
+          profile:
+            name: "$FINWIPE_FULL_NAME"
+            email: "$FINWIPE_EMAIL"
+            phone: "$FINWIPE_PHONE"
+            address: "$FINWIPE_ADDRESS"
+
+          smtp:
+            host: "$SMTP_HOST"
+            port: $SMTP_PORT
+            username: "$SMTP_USERNAME"
+            password: "$SMTP_PASSWORD"
+            from: "$SMTP_USERNAME"
+            use_tls: true
+          EOF
+
+      - name: Run FinWipe
+        run: |
+          case "${{ inputs.mode }}" in
+            email)
+              ./finwipe send --rate-limit 2000
+              ;;
+            letter)
+              ./finwipe letter
+              ;;
+            both)
+              ./finwipe letter
+              ./finwipe send --rate-limit 2000
+              ;;
+          esac
+
+      - name: Upload letters
+        if: inputs.mode == 'letter' || inputs.mode == 'both'
+        uses: actions/upload-artifact@v4
+        with:
+          name: finwipe-letters
+          path: ~/.finwipe/letters/
+          retention-days: 30
+
+      - name: FinWipe Status
+        run: |
+          ./finwipe status

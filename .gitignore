@@ -1,0 +1,25 @@
+# Binaries
+finwipe
+*.exe
+
+# Config with secrets (local)
+config.local.yaml
+
+# Letters and history (local)
+.letter_output/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Go
+vendor/
+*.test
+coverage.txt
+
+# Local NBFC data override
+data/local_*.yaml
