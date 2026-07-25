@@ -759,3 +759,297 @@ nbfcs:
     website: https://www.indusind.com
     notes: Digital lending for loans against property
     active: true
+
+  # ──────────────────────────────────────────────────────────────────
+  # Additional from ABFL/Axis/Bajaj DSP Partner Lists
+  # ──────────────────────────────────────────────────────────────────
+  - id: lendingkart
+    name: Lendingkart Technologies Pvt Ltd
+    short_name: Lendingkart
+    category: fintech
+    grievance_email: grievance@lendingkart.com
+    grievance_phone: "18001200912"
+    address: "Lendingkart, 3rd Floor, Building 9, DivyaSree Omega, Hyderabad 500081"
+    dla_app: Lendingkart app
+    website: https://www.lendingkart.com
+    notes: MSME lending platform
+    active: true
+
+  - id: credavenue
+    name: Cred Avenue Pvt Ltd
+    short_name: CredAvenue
+    category: fintech
+    grievance_email: grievance@credavenue.com
+    address: "CredAvenue, Chennai, Tamil Nadu"
+    dla_app: CredAvenue app
+    website: https://www.credavenue.com
+    notes: B2B lending marketplace
+    active: true
+
+  - id: finbox
+    name: Digital Prestasi Pvt Ltd (FinBox)
+    short_name: FinBox
+    category: fintech
+    grievance_email: grievance.officer@finbox.in
+    address: "FinBox, Bengaluru, Karnataka"
+    dla_app: FinBox app
+    website: https://www.finbox.in
+    notes: DSP for banks/NBFCs, digital lending infrastructure
+    active: true
+
+  - id: indialends
+    name: GV Cabs Pvt Ltd (IndiaLends)
+    short_name: IndiaLends
+    category: fintech
+    grievance_email: grievance.officer@indialends.com
+    address: "IndiaLends, Gurugram, Haryana"
+    dla_app: IndiaLends app
+    website: https://www.indialends.com
+    notes: Digital lending marketplace
+    active: true
+
+  - id: niyogin
+    name: Niyogin Fintech Ltd
+    short_name: Niyogin
+    category: fintech
+    grievance_email: gro@niyogin.com
+    address: "Niyogin, Mumbai, Maharashtra"
+    dla_app: Niyogin app
+    website: https://www.niyogin.com
+    notes: MSME lending platform
+    active: true
+
+  - id: vivriti-capital
+    name: Vivriti Capital Pvt Ltd
+    short_name: Vivriti
+    category: nbfc
+    grievance_email: gro@vivriticapital.com
+    address: "Vivriti Capital, Gurugram, Haryana"
+    dla_app: Vivriti app
+    website: https://www.vivriticapital.com
+    notes: B2B lending, NBFC
+    active: true
+
+  - id: mobikwik
+    name: One Mobikwik Systems Pvt Ltd (MobiKwik)
+    short_name: MobiKwik
+    category: fintech
+    grievance_email: grievance.officer@mobikwik.com
+    address: "MobiKwik, 4th Floor, Tower 4, DLF Forum, DLF Cyber City, Gurugram 122002"
+    dla_app: MobiKwik app
+    website: https://www.mobikwik.com
+    notes: BNPL + digital lending
+    active: true
+
+  - id: freecharge
+    name: Accelyst Solutions Pvt Ltd (FreeCharge)
+    short_name: FreeCharge
+    category: fintech
+    grievance_email: grievanceofficer@freecharge.com
+    address: "FreeCharge, Mumbai, Maharashtra"
+    dla_app: FreeCharge app
+    website: https://www.freecharge.in
+    notes: Payments + lending
+    active: true
+
+  - id: bharatpe
+    name: Resilient Innovations Pvt Ltd (BharatPe)
+    short_name: BharatPe
+    category: fintech
+    grievance_email: grievanceofficer@bharatpe.com
+    grievance_phone: "18002134444"
+    address: "BharatPe, 5th Floor, Building No.8, Tower A, DLF Cyber City, Gurugram 122002"
+    dla_app: BharatPe app
+    website: https://www.bharatpe.com
+    notes: Payments + lending (PostPe BNPL)
+    active: true
+
+  - id: piramal-capital
+    name: Piramal Capital & Housing Finance Ltd
+    short_name: Piramal
+    category: nbfc
+    grievance_email: grievanceredressal@piramal.com
+    grievance_phone: "18001038888"
+    address: "Piramal Capital, 4th Floor, Piramal Tower, GS Road, Guwahati 781005"
+    dla_app: Piramal app
+    website: https://www.piramalcapital.com
+    notes: Housing + MSME finance, DLG compliant
+    active: true
+
+  - id: payu
+    name: PayU India Pvt Ltd
+    short_name: PayU
+    category: fintech
+    grievance_email: grievance@payu.in
+    address: "PayU, 4th Floor, Tower A, Park Campus, DLF Siloker B, Sector 54, Gurugram 122002"
+    dla_app: PayU app
+    website: https://www.payu.in
+    notes: Payments + lending
+    active: true
+
+  - id: dmi-finance
+    name: DMI Finance Pvt Ltd
+    short_name: DMI
+    category: nbfc
+    grievance_email: nodalofficer@dmifinance.in
+    address: "DMI Finance, 3rd Floor, DLF Forum, DLF Phase 2, Gurugram 122002"
+    dla_app: DMI app
+    website: https://www.dmifinance.in
+    notes: Digital lending, partner for Flipkart Pay Later
+    active: true
+
+  - id: iifl-finance
+    name: IIFL Finance Ltd
+    short_name: IIFL
+    category: nbfc
+    grievance_email: nodalofficer@iifl.com
+    grievance_phone: "18001030100"
+    address: "IIFL Finance, IIFL House, Sun Infotech Road, Vidyut Colony, Off FC Road, Pune 411006"
+    dla_app: IIFL app
+    website: https://www.iifl.com
+    notes: Retail lending, gold loans, home loans
+    active: true
+
+  - id: airtel-payments-bank
+    name: Airtel Payments Bank Ltd
+    short_name: Airtel Bank
+    category: fintech
+    grievance_email: nodal.officer@airtelbank.com
+    grievance_phone: "18001032010"
+    address: "Airtel Payments Bank, Airtel Centre, Window No.3, Greater Kailash, New Delhi 110048"
+    dla_app: Airtel Thanks app
+    website: https://www.airtel.in/apayments
+    notes: Payments bank with lending products
+    active: true
+
+  - id: rupeek
+    name: Rupeek Fintech Pvt Ltd
+    short_name: Rupeek
+    category: fintech
+    grievance_email: nodalofficer@rupeek.com
+    address: "Rupeek, Bengaluru, Karnataka"
+    dla_app: Rupeek app
+    website: https://www.rupeek.com
+    notes: Gold-backed lending
+    active: true
+
+  - id: bankbazaar
+    name: BankBazaar Technologies Pvt Ltd
+    short_name: BankBazaar
+    category: fintech
+    grievance_email: gro@bankbazaar.com
+    address: "BankBazaar, 4th Floor, RBD B-Building, Near Forum Mall, Koregaon Park, Pune 411001"
+    dla_app: BankBazaar app
+    website: https://www.bankbazaar.com
+    notes: Financial marketplace
+    active: true
+
+  - id: zopper
+    name: Zopper Technologies Pvt Ltd
+    short_name: Zopper
+    category: fintech
+    grievance_email: gro@zopper.com
+    address: "Zopper, Gurugram, Haryana"
+    dla_app: Zopper app
+    website: https://www.zopper.com
+    notes: Embedded insurance + lending
+    active: true
+
+  - id: ofbusiness
+    name: OfBusiness Financial Technologies Pvt Ltd
+    short_name: OfBusiness
+    category: fintech
+    grievance_email: grievance@ofbusiness.com
+    address: "OfBusiness, Gurugram, Haryana"
+    dla_app: OfBusiness app
+    website: https://www.ofbusiness.com
+    notes: MSME lending + commerce
+    active: true
+
+  - id: oxyloans
+    name: OxyLoans Fintech Pvt Ltd
+    short_name: OxyLoans
+    category: fintech
+    grievance_email: grievance@oxyloans.com
+    address: "OxyLoans, Hyderabad, Telangana"
+    dla_app: OxyLoans app
+    website: https://www.oxyloans.com
+    notes: P2P lending + retail
+    active: true
+
+  - id: luminous-power
+    name: Luminous Power Technologies Pvt Ltd (Luminous)
+    short_name: Luminous
+    category: fintech
+    grievance_email: grievance@luminousfin.com
+    address: "Luminous, Gurugram, Haryana"
+    dla_app: Luminous app
+    website: https://www.luminousfin.com
+    notes: Retail lending + solar
+    active: true
+
+  - id: qbera
+    name: Qbera Fintech Pvt Ltd
+    short_name: Qbera
+    category: fintech
+    grievance_email: gro@qbera.com
+    address: "Qbera, Gurugram, Haryana"
+    dla_app: Qbera app
+    website: https://www.qbera.com
+    notes: Personal loans
+    active: true
+
+  - id: upwards
+    name: Upwards Tech Fintech Pvt Ltd
+    short_name: Upwards
+    category: fintech
+    grievance_email: gro@upwards.in
+    address: "Upwards, Mumbai, Maharashtra"
+    dla_app: Upwards app
+    website: https://www.upwards.in
+    notes: Personal loans
+    active: true
+
+  - id: rapid-lending
+    name: Rapid Lending Pvt Ltd
+    short_name: Rapid
+    category: fintech
+    grievance_email: grievance@rapidfinance.in
+    address: "Rapid Lending, Mumbai, Maharashtra"
+    dla_app: Rapid app
+    website: https://www.rapidfinance.in
+    notes: Personal loans
+    active: true
+
+  - id: mswipe
+    name: Mswipe Technologies Pvt Ltd
+    short_name: Mswipe
+    category: fintech
+    grievance_email: grievance@mswipe.com
+    address: "Mswipe, Mumbai, Maharashtra"
+    dla_app: Mswipe app
+    website: https://www.mswipe.com
+    notes: Merchant payments + lending
+    active: true
+
+  - id: pinelabs
+    name: PineLabs Pvt Ltd
+    short_name: PineLabs
+    category: fintech
+    grievance_email: grievance.redressal@pinelabs.com
+    address: "PineLabs, 3rd Floor, Building No.8, Tower A, DLF Cyber City, Gurugram 122002"
+    dla_app: PineLabs app
+    website: https://www.pinelabs.com
+    notes: Merchant payments + EMI financing
+    active: true
+
+  - id: epifi
+    name: EpiFi Technologies Pvt Ltd
+    short_name: EpiFi
+    category: fintech
+    grievance_email: grievance@epifi.in
+    address: "EpiFi, Bengaluru, Karnataka"
+    dla_app: EpiFi app
+    website: https://www.epifi.in
+    notes: Neobank
+    active: true
