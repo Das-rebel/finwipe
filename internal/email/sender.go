@@ -227,3 +227,59 @@ Regards,
 {{.Address}}
 Date: {{.Date}}
 `
+
+// GenerateFollowupBody creates a follow-up email body for requests without acknowledgment.
+// dayNum is 7 for first reminder, 14 for second, 21 for final notice.
+func GenerateFollowupBody(reqID, nbfcName string, profile config.Profile, dayNum int) string {
+	urgency := map[int]string{
+		7:  "This is a follow-up reminder regarding my data deletion request.",
+		14: "This is a second reminder. Please note this matter will be escalated if unresolved.",
+		21: "FINAL NOTICE — This request remains unacknowledged and unresolved.",
+	}
+	preamble := urgency[dayNum]
+	if preamble == "" {
+		preamble = fmt.Sprintf("This is a follow-up (#%d) regarding my data deletion request.", dayNum/7)
+	}
+
+	return fmt.Sprintf(`Subject: DPDPA Data Deletion Request — FOLLOW-UP #%d — Ref: %s
+
+Dear Grievance Officer,
+
+%s
+
+I submitted a formal data deletion request to %s on %s (Ref: %s) under Section 8(6) of the Digital Personal Data Protection Act, 2023 and Rule 8 of the DPDP Rules, 2025.
+
+To date, I have received no acknowledgment of this request. This is a violation of Rule 8(3) which mandates acknowledgment within 48 hours.
+
+My original request specifically sought deletion of:
+  □ Marketing and promotional data
+  □ Third-party shared data
+  □ Behavioral/usage data collected through your app/website
+  □ Pre-approved loan offer profiles
+  □ Call recordings and customer service interaction logs
+
+Please:
+  1. Acknowledge this request immediately
+  2. Confirm the categories of data that will be deleted
+  3. Complete deletion within the remaining time available under the 30-day window
+
+This request does not extend to data whose retention is required by law (KYC, transaction records, active loan accounts).
+
+If no response is received within 7 days, I will escalate this matter to:
+  — Reserve Bank of India (Sachet Portal)
+  — Data Protection Board of India (DPB)
+  — Consumer Forum (for deficiency in service)
+
+Reference: %s
+Request ID: %s
+Date of original request: %s
+
+For any communication:
+Email: %s
+Phone: %s
+
+Regards,
+%s
+%s
+`, dayNum/7, reqID, preamble, nbfcName, time.Now().AddDate(0, 0, -dayNum).Format("02 January 2006"), reqID, reqID, reqID, time.Now().AddDate(0, 0, -dayNum).Format("02 January 2006"), profile.Email, profile.Phone, profile.Name, profile.Address)
+}
