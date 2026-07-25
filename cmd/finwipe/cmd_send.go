@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -10,6 +12,7 @@ import (
 	"github.com/das-rebel/finwipe/internal/config"
 	"github.com/das-rebel/finwipe/internal/email"
 	"github.com/das-rebel/finwipe/internal/history"
+	"github.com/das-rebel/finwipe/internal/evidence"
 	"github.com/das-rebel/finwipe/internal/nbfc"
 )
 
@@ -47,6 +50,10 @@ func runSend(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("open history: %w", err)
 	}
 	defer hist.Close()
+
+	// Evidence store for sent emails
+	evidenceBase := filepath.Join(os.Getenv("HOME"), ".finwipe", "evidence")
+	evStore, _ := evidence.New(evidenceBase)
 
 	// Load NBFCs for lookups
 	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
@@ -161,6 +168,17 @@ func runSend(cmd *cobra.Command, args []string) error {
 				fmt.Printf("  ⚠️  %s → %s: sent but dispatch record failed: %v\n",
 					req.RequestID, req.NBFCName, err)
 			} else {
+				// Store email as evidence (proof of what was sent)
+				if req.Channel == history.ChannelEmail && evStore != nil {
+					emailBody := email.GenerateFollowupBody(req.RequestID, req.NBFCName, cfg.Profile, 0)
+					ev, err := evStore.Save(req.RequestID, evidence.TypeEmailSent,
+						"DeletionRequest_"+req.RequestID+".eml",
+						io.NopCloser(strings.NewReader(emailBody)),
+						"Sent deletion request email to "+req.GrievanceEmail)
+					if err == nil {
+						fmt.Printf("  📎 Evidence: %s\n", ev.ID)
+					}
+				}
 				fmt.Printf("  ✅ %s → %s\n", req.RequestID, req.NBFCName)
 				sent++
 			}

@@ -54,14 +54,14 @@ const (
 
 // ValidTransitions maps current state -> allowed next states
 var ValidTransitions = map[State][]State{
-	StateInitiated:      {StateDispatched, StateClosed},
-	StateDispatched:     {StateAckReceived, StateDeliveryFailed, StateEscalated, StateClosed},
-	StateDeliveryFailed: {StateDispatched, StateClosed}, // Can retry dispatch
-	StateAckReceived:    {StateResponseOK, StatePendingReview, StateEscalated, StateClosed},
-	StatePendingReview:  {StateResponseOK, StateEscalated, StateClosed}, // User reviews NBFC response
-	StateResponseOK:     {StateClosed},
-	StateEscalated:      {StateClosed, StateAckReceived, StateResponseOK}, // Can de-escalate if resolved
-	StateClosed:         {},
+	StateInitiated:      {StateDispatched, StateClosed, StateInitiated},
+	StateDispatched:     {StateAckReceived, StateDeliveryFailed, StateEscalated, StateClosed, StateDispatched},
+	StateDeliveryFailed: {StateDispatched, StateClosed, StateDeliveryFailed}, // Can retry dispatch
+	StateAckReceived:    {StateResponseOK, StatePendingReview, StateEscalated, StateClosed, StateAckReceived},
+	StatePendingReview:  {StateResponseOK, StateEscalated, StateClosed, StatePendingReview}, // User reviews NBFC response
+	StateResponseOK:     {StateClosed, StateResponseOK},
+	StateEscalated:      {StateClosed, StateAckReceived, StateResponseOK, StateEscalated}, // Can de-escalate if resolved
+	StateClosed:         {StateClosed},
 }
 
 // IsValidTransition checks if a state transition is allowed
@@ -488,7 +488,7 @@ func (h *DB) RecordAck(reqID, externalRef, actor string, ackDate time.Time) erro
 
 	// Idempotency check
 	var existingRef string
-	err = tx.QueryRow(`SELECT external_ref FROM requests WHERE request_id = ?`, reqID).Scan(&existingRef)
+	err = tx.QueryRow(`SELECT COALESCE(external_ref, '') FROM requests WHERE request_id = ?`, reqID).Scan(&existingRef)
 	if err == sql.ErrNoRows {
 		tx.Rollback()
 		return fmt.Errorf("request %s not found", reqID)
@@ -537,6 +537,11 @@ func (h *DB) RecordAck(reqID, externalRef, actor string, ackDate time.Time) erro
 
 // SetEscalationLevel atomically sets the escalation level
 func (h *DB) SetEscalationLevel(reqID string, fromLevel, toLevel int, actor, detail string) error {
+	// Prevent downgrade (fromLevel must be < toLevel)
+	if toLevel <= fromLevel {
+		return fmt.Errorf("escalation level cannot decrease: %d → %d", fromLevel, toLevel)
+	}
+
 	tx, err := h.db.Begin()
 	if err != nil {
 		return err
@@ -854,7 +859,7 @@ func (h *DB) audit(reqID, action string, prevState, newState *string, prevEsc, n
 
 func (h *DB) GetAuditTrail(reqID string) ([]AuditEntry, error) {
 	rows, err := h.db.Query(`
-		SELECT id, request_id, action, prev_state, new_state, prev_escalation, new_escalation, actor, detail, ref_number, created_at
+		SELECT id, request_id, action, prev_state, new_state, prev_escalation, new_escalation, actor, detail, COALESCE(ref_number, ''), created_at
 		FROM audit_log WHERE request_id = ? ORDER BY created_at ASC
 	`, reqID)
 	if err != nil {
@@ -1169,6 +1174,7 @@ func EscalationLevelLabel(level int) string {
 		2: "L2 — DPDP Board of India (primary)",
 		3: "L3 — RBI Ombudsman / Consumer Forum",
 		4: "L4 — Legal / High Court",
+		5: "L5 — Legal / High Court",
 	}[level]
 }
 
