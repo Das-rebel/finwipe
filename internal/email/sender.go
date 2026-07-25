@@ -14,10 +14,11 @@ import (
 type Sender struct {
 	cfg  *config.SMTP
 	from string
+	Cfg  *config.SMTP
 }
 
 func New(cfg *config.SMTP) *Sender {
-	return &Sender{cfg: cfg, from: cfg.From}
+	return &Sender{cfg: cfg, from: cfg.From, Cfg: cfg}
 }
 
 func (s *Sender) Send(n nbfc.Entity, profile config.Profile, templateBody string) error {
@@ -44,7 +45,6 @@ func (s *Sender) Send(n nbfc.Entity, profile config.Profile, templateBody string
 		conn, err = tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true})
 	}
 	if err != nil {
-		// Fallback: plain SMTP
 		err = smtp.SendMail(addr, auth, s.from, []string{n.GrievanceEmail}, []byte(msg))
 		return err
 	}
@@ -98,12 +98,76 @@ func (s *Sender) SendBatch(nbfcs []nbfc.Entity, profile config.Profile, template
 			sent++
 		}
 
-		// Rate limit between emails
 		if i < len(nbfcs)-1 && rateLimitMs > 0 {
 			time.Sleep(time.Duration(rateLimitMs) * time.Millisecond)
 		}
 	}
 	return sent, failed
+}
+
+func (s *Sender) SendFollowup(reqID, grievanceEmail string, p config.Profile, body, subject string) (string, error) {
+	if s.cfg.Host == "" {
+		return "", fmt.Errorf("SMTP not configured")
+	}
+
+	addr := fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port)
+	var auth smtp.Auth
+	if s.cfg.Username != "" {
+		auth = smtp.PlainAuth("", s.cfg.Username, s.cfg.Password, s.cfg.Host)
+	}
+
+	msg := fmt.Sprintf(
+		"From: %s\r\n"+
+			"To: %s\r\n"+
+			"Subject: %s\r\n"+
+			"Date: %s\r\n"+
+			"Content-Type: text/plain; charset=\"UTF-8\"\r\n"+
+			"Message-ID: <%s.%s@finwipe>\r\n"+
+			"\r\n"+
+			"%s\r\n",
+		s.from, grievanceEmail, subject,
+		time.Now().Format(time.RFC1123Z),
+		reqID, time.Now().Format("20060102T150405"),
+		body,
+	)
+
+	tlsCfg := &tls.Config{ServerName: s.cfg.Host}
+	conn, err := tls.Dial("tcp", addr, tlsCfg)
+	if err != nil {
+		err = smtp.SendMail(addr, auth, s.from, []string{grievanceEmail}, []byte(msg))
+		return "", err
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, s.cfg.Host)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	if auth != nil {
+		if err = client.Auth(auth); err != nil {
+			return "", fmt.Errorf("SMTP auth: %w", err)
+		}
+	}
+	if err = client.Mail(s.from); err != nil {
+		return "", err
+	}
+	if err = client.Rcpt(grievanceEmail); err != nil {
+		return "", err
+	}
+	w, err := client.Data()
+	if err != nil {
+		return "", err
+	}
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		return "", err
+	}
+	w.Close()
+
+	msgID := fmt.Sprintf("<%s.%s@finwipe>", reqID, time.Now().Format("20060102T150405"))
+	return msgID, client.Quit()
 }
 
 func buildMessage(n nbfc.Entity, p config.Profile, body, from string) string {

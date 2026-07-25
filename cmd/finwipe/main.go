@@ -7,27 +7,46 @@ import (
 )
 
 var (
-	cfgFile string
-	dryRun bool
+	cfgFile       string
+	dryRun        bool
+	ackRequestID  string // used by ack.go, escalate.go, close.go, followup.go
+	escRequestID  string
+	closeRequestID string
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "finwipe",
-	Short: "FinWipe — DIY RBI data rights toolkit for India",
-	Long: `FinWipe sends data deletion requests to NBFCs, fintechs, and data brokers
-that hold your financial data — under India's DPDPA 2023 and RBI Digital Lending Guidelines.
+	Short: "FinWipe — DIY NBFC data deletion tracker for India",
+	Long: `FinWipe tracks your DPDPA 2023 data deletion requests through their
+full lifecycle: send → acknowledge → follow-up → escalate → close.
 
-No data ever leaves your server. All emails sent from YOUR email.`,
+Every request gets a unique DPR-ID (DPR-2026-000001) for full auditability.`,
 }
 
 func main() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default: ~/.finwipe/config.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "n", false, "preview what would be sent, don't actually send")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
+		"config file (default: ~/.finwipe/config.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "n", false,
+		"preview what would happen without making changes")
 
+	// Core setup commands
 	rootCmd.AddCommand(initCmd)
+
+	// NBFC registry
 	rootCmd.AddCommand(listCmd)
-	rootCmd.AddCommand(sendCmd)
-	rootCmd.AddCommand(statusCmd)
+
+	// Request lifecycle commands
+	rootCmd.AddCommand(newCmd)     // Create new request
+	rootCmd.AddCommand(sendCmd)     // Dispatch request
+	rootCmd.AddCommand(trackCmd)    // Track request lifecycle + audit trail
+	rootCmd.AddCommand(ackCmd)      // Record NBFC acknowledgment
+	rootCmd.AddCommand(escalateCmd) // Escalate to RBI/DPDP/Consumer Forum
+	rootCmd.AddCommand(closeCmd)    // Close with outcome
+
+	// Automation
+	rootCmd.AddCommand(cronCmd) // Daily follow-up + escalation automation
+
+	// Utility
 	rootCmd.AddCommand(letterCmd)
 	rootCmd.AddCommand(cicCmd)
 	rootCmd.AddCommand(parseCmd)
@@ -35,4 +54,10 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+// dbPath returns the SQLite history database path
+func dbPath() string {
+	home, _ := os.UserHomeDir()
+	return home + "/.finwipe/history.db"
 }

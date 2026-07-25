@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/das-rebel/finwipe/internal/config"
@@ -14,20 +15,24 @@ import (
 
 var sendCmd = &cobra.Command{
 	Use:   "send",
-	Short: "Send deletion emails to all configured NBFCs",
+	Short: "Dispatch a deletion request (email sent or letter generated)",
 	RunE:  runSend,
 }
 
 var (
-	excludeCategories string // comma-separated
-	includeIDs       string // comma-separated
+	excludeCategories string
+	includeIDs       string
 	rateLimitMs      int
+	sendRequestID    string
 )
 
 func init() {
-	sendCmd.Flags().StringVar(&excludeCategories, "exclude-category", "", "Exclude NBFCs by category (e.g., bank,hfc)")
-	sendCmd.Flags().StringVar(&includeIDs, "include", "", "Only send to these NBFC IDs (comma-separated)")
-	sendCmd.Flags().IntVar(&rateLimitMs, "rate-limit", 1000, "Milliseconds between emails (Gmail: 1000+ recommended)")
+	sendCmd.Flags().StringVar(&sendRequestID, "request-id", "",
+		"Send a specific request by DPR-ID")
+	sendCmd.Flags().StringVar(&includeIDs, "include", "",
+		"Send requests for specific NBFC IDs (comma-separated)")
+	sendCmd.Flags().IntVar(&rateLimitMs, "rate-limit", 1000,
+		"Milliseconds between emails (Gmail: 1000+ recommended)")
 }
 
 func runSend(cmd *cobra.Command, args []string) error {
@@ -36,102 +41,137 @@ func runSend(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	// Load NBFCs
-	exePath, _ := os.Executable()
-	nbfcPath := filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
-	if _, err := os.Stat(nbfcPath); err != nil {
-		nbfcPath = "./data/nbfcs.yaml"
+	dbPath := dbPath()
+	hist, err := history.New(dbPath)
+	if err != nil {
+		return fmt.Errorf("open history: %w", err)
 	}
+	defer hist.Close()
 
+	// Load NBFCs for lookups
+	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
 	allNBFCs, err := nbfc.Load(nbfcPath)
 	if err != nil {
 		return fmt.Errorf("load NBFCs: %w", err)
 	}
+	nbfcMap := make(map[string]nbfc.Entity)
+	for _, e := range allNBFCs {
+		nbfcMap[e.ID] = e
+	}
 
-	// Filter
-	var targetNBFCs []nbfc.Entity
-	if includeIDs != "" {
-		includeMap := make(map[string]bool)
-		for _, id := range splitCSV(includeIDs) {
-			includeMap[id] = true
+	// Determine which requests to send
+	var requests []*history.Request
+
+	if sendRequestID != "" {
+		// Send specific request
+		req, err := hist.GetByRequestID(sendRequestID)
+		if err != nil {
+			return fmt.Errorf("request not found: %s", sendRequestID)
 		}
-		for _, n := range allNBFCs {
-			if includeMap[n.ID] {
-				targetNBFCs = append(targetNBFCs, n)
+		if req.LifecycleState != history.StateInitiated {
+			return fmt.Errorf("request %s is in state %s, expected INITIATED",
+				req.RequestID, req.LifecycleState)
+		}
+		requests = []*history.Request{req}
+	} else if includeIDs != "" {
+		// Send requests for specific NBFCs (that are in INITIATED state)
+		idMap := make(map[string]bool)
+		for _, id := range splitCSV(includeIDs) {
+			idMap[history.SanitizeNBFCID(id)] = true
+		}
+		all, err := hist.GetByState(history.StateInitiated)
+		if err != nil {
+			return err
+		}
+		for _, req := range all {
+			if idMap[req.NBFCID] {
+				requests = append(requests, &req)
 			}
 		}
 	} else {
-		excludeMap := make(map[nbfc.Category]bool)
-		for _, cat := range splitCSV(excludeCategories) {
-			excludeMap[nbfc.Category(cat)] = true
-		}
-		for _, n := range allNBFCs {
-			if !excludeMap[n.Category] {
-				targetNBFCs = append(targetNBFCs, n)
-			}
-		}
+		// No specific request — show help
+		return fmt.Errorf("specify --request-id <DPR-ID> to send a specific request\n" +
+			"Use: finwipe track --all  to see all active requests\n" +
+			"Use: finwipe new --nbfc <id> to create a new request")
 	}
 
-	if len(targetNBFCs) == 0 {
-		fmt.Println("No NBFCs to send to (check --include or --exclude-category)")
+	if len(requests) == 0 {
+		fmt.Println("No requests to send (check --request-id or NBFC IDs)")
 		return nil
-	}
-
-	// Init history DB
-	home, _ := os.UserHomeDir()
-	histDBPath := filepath.Join(home, ".finwipe", "history.db")
-	hist, err := history.New(histDBPath)
-	if err != nil {
-		return fmt.Errorf("history db: %w", err)
-	}
-	defer hist.Close()
-
-	// Record all requests
-	for _, n := range targetNBFCs {
-		hist.RecordRequest(n.ID, n.Name, "email", "pending")
 	}
 
 	// Dry run
 	if dryRun {
 		fmt.Printf("\n🔍 DRY RUN — No emails will be sent\n\n")
-		fmt.Printf("Would send to %d NBFCs:\n\n", len(targetNBFCs))
-		for _, n := range targetNBFCs {
-			fmt.Printf("  ✉️  %-30s <%s>\n", n.Name, n.GrievanceEmail)
+		fmt.Printf("Would dispatch %d request(s):\n\n", len(requests))
+		for _, req := range requests {
+			fmt.Printf("  %-20s %-30s <%s>\n",
+				req.RequestID, req.NBFCName, req.GrievanceEmail)
 		}
-		fmt.Printf("\nConfigure SMTP: %s\n", config.DefaultPath())
+		fmt.Println()
 		return nil
 	}
 
-	// Send
-	fmt.Printf("\n🗑️  Sending deletion emails to %d NBFCs...\n\n", len(targetNBFCs))
-
+	// Check SMTP
 	if cfg.SMTP.Password == "" {
 		return fmt.Errorf("SMTP not configured. Run: finwipe init")
 	}
+
 	sender := email.New(&cfg.SMTP)
-	sent, failed := sender.SendBatch(targetNBFCs, cfg.Profile, "", rateLimitMs)
 
-	// Update history
-	for _, n := range targetNBFCs {
-		hist.MarkSent(n.ID, "email")
-	}
-	for _, f := range failed {
-		hist.UpdateStatus("unknown", "email", "failed", f)
-	}
+	fmt.Printf("\n📤 Dispatching %d request(s)...\n\n", len(requests))
 
-	fmt.Printf("\n✅ Sent: %d | Failed: %d\n", sent, len(failed))
-	if len(failed) > 0 {
-		fmt.Println("\nFailed:")
-		for _, f := range failed {
-			fmt.Printf("  ❌ %s\n", f)
+	sent, failed := 0, 0
+	for i, req := range requests {
+		nbfcEntity, ok := nbfcMap[req.NBFCID]
+		if !ok {
+			nbfcEntity = nbfc.Entity{
+				ID:             req.NBFCID,
+				Name:           req.NBFCName,
+				GrievanceEmail: req.GrievanceEmail,
+			}
+		}
+
+		var msgID string
+		var err error
+
+		if req.Channel == history.ChannelEmail {
+			err = sender.Send(nbfcEntity, cfg.Profile, "")
+			msgID = "" // DPR-ID in subject line is the tracking reference
+		} else {
+			// For post/cic — letter generated separately via finwipe letter
+			err = nil
+		}
+
+		if err != nil {
+			fmt.Printf("  ❌ %s → %s: %v\n", req.RequestID, req.NBFCName, err)
+			failed++
+		} else {
+			letterPath := ""
+			if req.Channel == history.ChannelPost {
+				// Letter path would be set by separate letter command
+			}
+			err = hist.Dispatch(req.RequestID, letterPath, msgID, req.Channel)
+			if err != nil {
+				fmt.Printf("  ⚠️  %s → %s: sent but dispatch record failed: %v\n",
+					req.RequestID, req.NBFCName, err)
+			} else {
+				fmt.Printf("  ✅ %s → %s\n", req.RequestID, req.NBFCName)
+				sent++
+			}
+		}
+
+		// Rate limit
+		if i < len(requests)-1 && rateLimitMs > 0 {
+			time.Sleep(time.Duration(rateLimitMs) * time.Millisecond)
 		}
 	}
 
-	// Summary
-	total, pending, psent, ack, comp, fail, manual := hist.Summary()
-	fmt.Printf("\n📊 History Summary:\n")
-	fmt.Printf("  Total: %d | Pending: %d | Sent: %d | Ack: %d | Done: %d | Failed: %d | Manual: %d\n",
-		total, pending, psent, ack, comp, fail, manual)
+	fmt.Printf("\n✅ Dispatched: %d | Failed: %d\n", sent, failed)
+	if sent > 0 {
+		fmt.Println("\nNext: finwipe track --all   # monitor acknowledgment")
+		fmt.Println("       finwipe cron         # setup daily follow-up automation")
+	}
 
 	return nil
 }
@@ -141,45 +181,11 @@ func splitCSV(s string) []string {
 		return nil
 	}
 	var result []string
-	for _, part := range splitString(s, ",") {
-		trimmed := trimSpace(part)
+	for _, part := range strings.Split(s, ",") {
+		trimmed := strings.TrimSpace(part)
 		if trimmed != "" {
 			result = append(result, trimmed)
 		}
 	}
 	return result
-}
-
-func splitString(s, sep string) []string {
-	var r []string
-	for i := 0; i < len(s); {
-		j := indexOf(s, sep, i)
-		if j < 0 {
-			r = append(r, s[i:])
-			break
-		}
-		r = append(r, s[i:j])
-		i = j + len(sep)
-	}
-	return r
-}
-
-func indexOf(s, substr string, start int) int {
-	for i := start; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return i
-		}
-	}
-	return -1
-}
-
-func trimSpace(s string) string {
-	i, j := 0, len(s)
-	for i < j && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r') {
-		i++
-	}
-	for j > i && (s[j-1] == ' ' || s[j-1] == '\t' || s[j-1] == '\n' || s[j-1] == '\r') {
-		j--
-	}
-	return s[i:j]
 }

@@ -2,9 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/das-rebel/finwipe/internal/history"
@@ -12,82 +9,44 @@ import (
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show deletion request history and status",
+	Short: "Show deletion request summary (alias: finwipe track --all)",
 	RunE:  runStatus,
 }
 
 func runStatus(cmd *cobra.Command, args []string) error {
-	home, _ := os.UserHomeDir()
-	histDBPath := filepath.Join(home, ".finwipe", "history.db")
-
-	hist, err := history.New(histDBPath)
+	dbPath := dbPath()
+	hist, err := history.New(dbPath)
 	if err != nil {
 		return fmt.Errorf("open history: %w", err)
 	}
 	defer hist.Close()
 
-	total, pending, sent, ack, comp, fail, manual := hist.Summary()
+	sum, err := hist.Summary()
+	if err != nil {
+		return fmt.Errorf("summary: %w", err)
+	}
 
 	fmt.Printf("\n📊 FinWipe Status\n")
 	fmt.Printf("────────────────────────────\n")
-	fmt.Printf("  Total requests: %d\n", total)
-	fmt.Printf("  ⏳ Pending:     %d\n", pending)
-	fmt.Printf("  ✉️  Sent:        %d\n", sent)
-	fmt.Printf("  ✅ Acknowledged: %d\n", ack)
-	fmt.Printf("  ✔️  Completed:   %d\n", comp)
-	fmt.Printf("  ❌ Failed:      %d\n", fail)
-	fmt.Printf("  🏛️  Manual req:  %d\n", manual)
+	fmt.Printf("  Total active:   %d\n", sum["total"])
+	fmt.Printf("  🆕 Initiated:  %d\n", sum["INITIATED"])
+	fmt.Printf("  📨 Dispatched: %d\n", sum["DISPATCHED"])
+	fmt.Printf("  ✅ Acked:      %d\n", sum["ACK_RECEIVED"])
+	fmt.Printf("  🔺 Escalated:  %d\n", sum["escalated"])
+	fmt.Printf("  ✔️  Closed:     %d\n", sum["CLOSED"])
 	fmt.Println()
 
-	// Show recent failed
-	if fail > 0 {
-		failed, _ := hist.GetByStatus("failed")
-		fmt.Println("❌ Failed requests:")
-		for _, r := range failed {
-			fmt.Printf("  • %s [%s]: %s\n", r.NBFCName, r.Channel, r.FailureReason)
-		}
-		fmt.Println()
+	if sum["DISPATCHED"] > 0 {
+		fmt.Printf("⚠️  %d request(s) awaiting acknowledgment.\n", sum["DISPATCHED"])
+		fmt.Println("  Run: finwipe track --all   to see details")
+		fmt.Println("  Run: finwipe cron          to send follow-ups")
 	}
 
-	// Show manual required
-	if manual > 0 {
-		man, _ := hist.GetByStatus("manual_required")
-		fmt.Println("🏛️  Requires manual action:")
-		for _, r := range man {
-			fmt.Printf("  • %s [%s]\n    %s\n", r.NBFCName, r.Channel, r.Notes)
-		}
-		fmt.Println()
+	if sum["escalated"] > 0 {
+		fmt.Printf("\n🔺 %d request(s) escalated.\n", sum["escalated"])
+		fmt.Println("  Run: finwipe track --escalated   to see details")
 	}
 
-	// Show pending
-	if pending > 0 {
-		pend, _ := hist.GetByStatus("pending")
-		fmt.Printf("⏳ Pending (%d):\n", len(pend))
-		for _, r := range pend {
-			if r.SentAt.IsZero() {
-				fmt.Printf("  • %s [%s]: not yet sent\n", r.NBFCName, r.Channel)
-			} else {
-				fmt.Printf("  • %s [%s]: sent %s\n", r.NBFCName, r.Channel, r.SentAt.Format("02 Jan 2006"))
-			}
-		}
-		fmt.Println()
-	}
-
-	// Show acknowledged
-	if ack > 0 {
-		acks, _ := hist.GetByStatus("acknowledged")
-		fmt.Printf("✅ Acknowledged (%d):\n", len(acks))
-		for _, r := range acks {
-			days := int(time.Since(r.AcknowledgedAt).Hours() / 24)
-			ref := ""
-			if r.ExternalRef != "" {
-				ref = " | Ref: " + r.ExternalRef
-			}
-			fmt.Printf("  • %s [%s]: acknowledged %d days ago%s\n",
-				r.NBFCName, r.Channel, days, ref)
-		}
-		fmt.Println()
-	}
-
+	fmt.Println()
 	return nil
 }
