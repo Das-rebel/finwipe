@@ -178,7 +178,7 @@ func runCron(cmd *cobra.Command, args []string) error {
 						}
 					}
 
-					hist.SetEscalationLevel(req.RequestID, 0, history.EscRBISachet,
+					hist.SetEscalationLevel(req.RequestID, 0, history.EscRBIOmbu,
 						"AUTOMATION",
 						fmt.Sprintf("auto-escalated: no ack in %d days", daysSinceDispatch))
 

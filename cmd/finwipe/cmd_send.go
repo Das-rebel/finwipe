@@ -68,8 +68,8 @@ func runSend(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("request not found: %s", sendRequestID)
 		}
-		if req.LifecycleState != history.StateInitiated {
-			return fmt.Errorf("request %s is in state %s, expected INITIATED",
+		if req.LifecycleState != history.StateInitiated && req.LifecycleState != history.StateDeliveryFailed {
+			return fmt.Errorf("request %s is in state %s, can only send from INITIATED or DELIVERY_FAILED",
 				req.RequestID, req.LifecycleState)
 		}
 		requests = []*history.Request{req}
@@ -146,6 +146,11 @@ func runSend(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			fmt.Printf("  ❌ %s → %s: %v\n", req.RequestID, req.NBFCName, err)
 			failed++
+			// Mark as DELIVERY_FAILED so user can investigate
+			if req.Channel == history.ChannelEmail {
+				hist.TransitionState(req.RequestID, req.LifecycleState, history.StateDeliveryFailed,
+					"SYSTEM", fmt.Sprintf("delivery failed: %v", err))
+			}
 		} else {
 			letterPath := ""
 			if req.Channel == history.ChannelPost {

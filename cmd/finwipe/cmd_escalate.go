@@ -15,17 +15,20 @@ import (
 
 var escalateCmd = &cobra.Command{
 	Use:   "escalate",
-	Short: "Escalate a request to RBI Sachet, DPDP Board, or Consumer Forum",
-	Long: `Escalate a tracked deletion request to a higher authority.
+	Short: "Escalate a request to a higher authority",
+	Long: `Escalate a tracked deletion request through the regulatory hierarchy.
 
-Channels:
-  rbi_sachet      RBI Sachet Portal (sachet.rbi.org.in) — for NBFC non-response
-  rbi_ombudsman   RBI Integrated Ombudsman (Form-IV) — for unresolved complaints
-  dpd_board       Data Protection Board of India (dpb.gov.in) — DPDPA enforcement
-  consumer_forum  District Consumer Forum — civil remedy for data harm
+Escalation path (in order):
+  1. dpo       — Escalate to NBFC's Data Protection Officer / CEO
+  2. dpd_board — Data Protection Board of India (PRIMARY for DPDPA issues)
+  3. rbi_ombudsman — RBI Integrated Ombudsman (for RBI-regulated entities)
+  4. consumer_forum — District Consumer Forum (CPA 2019 — compensation)
+  5. legal     — Civil litigation / High Court
 
-With --generate-only flag, generates the pre-filled complaint PDF + email body
-without recording the escalation in the DB (useful for review before committing).`,
+The council recommends exhausting the NBFC's internal mechanism first (DPO),
+then escalating to the DPDP Board as the primary regulator for data protection
+violations under DPDPA 2023. The RBI Ombudsman and Consumer Forum are
+parallel paths for financial/commercial remedies.`,
 	RunE: runEscalate,
 }
 
@@ -39,11 +42,11 @@ var (
 func init() {
 	escalateCmd.Flags().StringVar(&escRequestID, "request-id", "", "DPR-ID (required)")
 	escalateCmd.Flags().StringVar(&escChannel, "to", "",
-		"Escalation channel: rbi_sachet | dpd_board | consumer_forum | rbi_ombudsman (required)")
+		"Channel: dpo | dpd_board | rbi_ombudsman | consumer_forum | legal (required)")
 	escalateCmd.Flags().StringVar(&escRef, "ref", "", "Complaint reference number (if already filed)")
 	escalateCmd.Flags().StringVar(&escNotes, "notes", "", "Summary of escalation reason")
 	escalateCmd.Flags().BoolVar(&escGenOnly, "generate-only", false,
-		"Only generate complaint letter/email — don't record in DB")
+		"Only generate complaint letter — don't record in DB")
 	escalateCmd.MarkFlagRequired("request-id")
 	escalateCmd.MarkFlagRequired("to")
 }
@@ -60,15 +63,18 @@ func runEscalate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
+	// Channel map: CLI name → DB channel value
 	channelMap := map[string]string{
-		"rbi_sachet":     "RBI_SACHET",
-		"dpd_board":      "DPDP_BOARD",
+		"dpo":             "DPO",
+		"dpd_board":       "DPDP_BOARD",
+		"rbi_ombudsman":   "RBI_OMBUDSMAN",
+		"rbi_sachet":      "RBI_SACHET",
 		"consumer_forum":  "CONSUMER_FORUM",
-		"rbi_ombudsman":  "RBI_OMBUDSMAN",
+		"legal":           "LEGAL",
 	}
 	dbChannel, ok := channelMap[escChannel]
 	if !ok {
-		return fmt.Errorf("invalid channel: %s (use: rbi_sachet, dpd_board, consumer_forum, rbi_ombudsman)", escChannel)
+		return fmt.Errorf("invalid channel: %s\nValid: dpo | dpd_board | rbi_ombudsman | consumer_forum | legal", escChannel)
 	}
 
 	req, err := hist.GetByRequestID(escRequestID)
@@ -80,20 +86,24 @@ func runEscalate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("request %s is already CLOSED — cannot escalate", escRequestID)
 	}
 
+	// Level map: DB channel → escalation level
 	escLevelMap := map[string]int{
-		"RBI_SACHET":     history.EscRBISachet,
-		"DPDP_BOARD":      history.EscDPDPBoard,
-		"CONSUMER_FORUM":  history.EscForum,
-		"RBI_OMBUDSMAN":  history.EscForum,
+		"DPO":            history.EscDPO,
+		"DPDP_BOARD":     history.EscDPDPBoard,
+		"RBI_OMBUDSMAN":  history.EscRBIOmbu,
+		"RBI_SACHET":     history.EscRBIOmbu,
+		"CONSUMER_FORUM": history.EscConsumer,
+		"LEGAL":          history.EscLegal,
 	}
 	escLevel := escLevelMap[dbChannel]
 
 	if req.EscalationLevel > escLevel {
-		return fmt.Errorf("cannot downgrade escalation from L%d to L%d",
-			req.EscalationLevel, escLevel)
+		return fmt.Errorf("cannot downgrade escalation from %s to %s",
+			history.EscalationLevelLabel(req.EscalationLevel),
+			history.EscalationLevelLabel(escLevel))
 	}
 
-	// Load NBFC registry
+	// Load NBFC entity
 	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
 	entities, err := nbfc.Load(nbfcPath)
 	if err != nil {
@@ -108,13 +118,13 @@ func runEscalate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Generate complaint letter (RBI Ombudsman generates PDF + email)
+	// Generate complaint letter for regulatory channels
 	letterGen := letter.New(filepath.Join(os.TempDir(), "finwipe_letters"))
 	ageDays := int(time.Since(req.CreatedAt).Hours() / 24)
 
-	var pdfPath, emailBody string
+	var pdfPath string
 	if dbChannel == "RBI_OMBUDSMAN" {
-		pdfPath, emailBody, err = letterGen.GenerateRBIComplaint(
+		pdfPath, _, err = letterGen.GenerateRBIComplaint(
 			req.RequestID, entity, cfg.Profile, ageDays)
 		if err != nil {
 			return fmt.Errorf("generate RBI complaint: %w", err)
@@ -157,71 +167,121 @@ func runEscalate(cmd *cobra.Command, args []string) error {
 	// Display results
 	fmt.Printf("\n")
 	if !escGenOnly {
-		fmt.Printf("  🔺 Escalation filed\n")
+		fmt.Printf("  🔺 Escalation filed — %s\n", history.EscalationChannelLabel(dbChannel))
 		fmt.Printf("  %s\n", req.RequestID)
-		fmt.Printf("  Channel:  %s\n", history.EscalationChannelLabel(dbChannel))
+		fmt.Printf("  Level:    %s\n", history.EscalationLevelLabel(escLevel))
 		if escRef != "" {
 			fmt.Printf("  Ref:      %s\n", escRef)
 		}
 		if escNotes != "" {
-			fmt.Printf("  Summary:  %s\n", escNotes)
+			fmt.Printf("  Notes:    %s\n", escNotes)
 		}
 		fmt.Println()
 	}
 
-	// File complaint instructions
-	fmt.Println("  📋 HOW TO FILE YOUR COMPLAINT:")
-	fmt.Println()
-
+	// Filing instructions per channel
+	fmt.Printf("  📋 HOW TO FILE:\n\n")
 	switch dbChannel {
-	case "RBI_SACHET":
-		fmt.Println("  1. Go to: https://sachet.rbi.org.in")
-		fmt.Println("  2. Select category: Non-Banking Finance Companies (NBFCs)")
-		fmt.Println("  3. Select sub-category: Grievance Against NBFC")
-		fmt.Println("  4. Enter NBFC details and attach evidence")
-		fmt.Println("  5. Submit and save reference number")
-		fmt.Println("  6. Then update: finwipe escalate --request-id " + req.RequestID + " --to rbi_sachet --ref <ref>")
+	case "DPO":
+		// Escalate to NBFC CEO/DPO after grievance officer non-response
+		fmt.Printf("  This step escalates within the NBFC itself — to the CEO or DPO.\n")
+		fmt.Printf("  1. Draft a formal escalation email to the NBFC CEO/DPO\n")
+		fmt.Printf("  2. Reference your original DPR-ID: %s\n", req.RequestID)
+		fmt.Printf("  3. Copy the audit trail from: finwipe track --request-id %s\n", req.RequestID)
+		fmt.Printf("  4. Email the CEO directly (find on company website)\n")
+		fmt.Println()
+		fmt.Println("  ⚠️  If no response in 7 days, proceed to DPDP Board (step 2)")
+		emailPath := filepath.Join(os.TempDir(), "finwipe_dpo_email.txt")
+		body := fmt.Sprintf(`To: CEO/DPO, %s
+Subject: URGENT — Data Deletion Request Unacknowledged — Escalation Notice (Ref: %s)
+
+Dear Sir/Madam,
+
+I am escalating my data deletion request (Ref: %s) which was submitted to %s on %s.
+
+Despite multiple follow-ups, the Grievance Officer has failed to acknowledge or process my request under Section 8(6) of the DPDP Act 2023.
+
+I am escalating this matter to your office as the Chief Executive Officer / Data Protection Officer of %s.
+
+I request immediate action to:
+1. Acknowledge my data deletion request
+2. Process the deletion of my personal data as mandated by law
+3. Provide written confirmation of deletion
+
+If no response is received within 7 days, I will escalate to the Data Protection Board of India (dpb.gov.in), the primary regulatory authority for DPDPA enforcement.
+
+Reference: %s
+Original grievance email: %s
+
+Regards,
+%s
+%s | %s`,
+			entity.Name, req.RequestID, req.RequestID, entity.Name,
+			req.CreatedAt.Format("02 January 2006"),
+			entity.Name, req.RequestID, entity.GrievanceEmail,
+			cfg.Profile.Name, cfg.Profile.Email, cfg.Profile.Phone)
+		os.WriteFile(emailPath, []byte(body), 0600)
+		fmt.Printf("  📧 Pre-filled escalation email: %s\n", emailPath)
+
+	case "DPDP_BOARD":
+		// Primary regulatory path for DPDPA violations
+		fmt.Printf("  The Data Protection Board of India is the PRIMARY statutory\n")
+		fmt.Printf("  authority for enforcing DPDPA 2023. File here for any data\n")
+		fmt.Printf("  protection violation by a Data Fiduciary (including NBFCs).\n\n")
+		fmt.Printf("  1. Go to: https://dpb.gov.in\n")
+		fmt.Printf("  2. Click: File Complaint → DPDP Act 2023\n")
+		fmt.Printf("  3. Select: Section 8(6) — Right to Erasure\n")
+		fmt.Printf("  4. Attach evidence from: finwipe track --request-id %s\n", req.RequestID)
+		fmt.Println()
+		fmt.Println("  ⚠️  This is the PRIMARY path for DPDPA violations.")
+		fmt.Println("     Do this BEFORE RBI Ombudsman for data protection issues.")
+		if entity.Category == "bank" || entity.Category == "nbfc" {
+			fmt.Println("     For financial issues, you may also file with RBI Ombudsman (step 3).")
+		}
+		fmt.Println()
+		fmt.Println("  After filing, update with reference number:")
+		fmt.Printf("  finwipe escalate --request-id %s --to dpd_board --ref <ref>\n", req.RequestID)
 
 	case "RBI_OMBUDSMAN":
-		fmt.Println("  OPTION A — Online (fastest):")
-		fmt.Println("  1. Go to: https://rbis.rbi.org.in")
-		fmt.Println("  2. Login → Submit Complaint → Select: NBFC")
-		fmt.Println("  3. Attach PDF from below and submit")
+		fmt.Printf("  For RBI-regulated entities (banks, NBFCs), the RBI Ombudsman\n")
+		fmt.Printf("  can address data-related grievances framed as deficiency in\n")
+		fmt.Printf("  service or regulatory non-compliance.\n\n")
+		fmt.Printf("  OPTION A — Online (fastest): https://rbis.rbi.org.in\n")
+		fmt.Println("  1. Login → Submit Complaint → Select: NBFC/Bank")
+		fmt.Printf("  2. Attach PDF: %s\n", pdfPath)
+		fmt.Println("  3. Submit and save reference number")
 		fmt.Println()
 		fmt.Println("  OPTION B — Email (free):")
 		fmt.Println("  1. Email to: crpc@rbi.org.in")
-		fmt.Println("  2. Subject: Complaint — " + entity.Name + " — DPDPA Data Deletion")
-		fmt.Println("  3. Copy email body from file below")
+		fmt.Printf("  2. Subject: Complaint — %s — DPDPA Data Deletion (Ref: %s)\n", entity.Name, req.RequestID)
+		fmt.Println("  3. Copy body from: /tmp/finwipe_rbi_email_body.txt")
 		fmt.Println()
 		fmt.Println("  OPTION C — Physical:")
-		fmt.Println("  1. Print the PDF below")
-		fmt.Println("  2. Send to: The Centralised Receipt and Processing Centre,")
-		fmt.Println("     RBI Ombudsman, 4th Floor, SEA Building, Mahatma Gandhi Road,")
-		fmt.Println("     Fort, Mumbai — 400 001")
-		fmt.Println()
-		fmt.Println("  📎 Pre-filled complaint PDF:")
-		fmt.Printf("     %s\n", pdfPath)
-		fmt.Println()
-		fmt.Println("  📧 Pre-filled email body:")
-		emailPath := filepath.Join(os.TempDir(), "finwipe_rbi_email_body.txt")
-		os.WriteFile(emailPath, []byte(emailBody), 0600)
-		fmt.Printf("     %s\n", emailPath)
-
-	case "DPDP_BOARD":
-		fmt.Println("  1. Go to: https://dpb.gov.in")
-		fmt.Println("  2. Click: File Complaint → DPDP Act 2023")
-		fmt.Println("  3. Attach evidence of deletion request and NBFC non-response")
-		fmt.Println("     (audit trail from: finwipe track --request-id " + req.RequestID + ")")
-		fmt.Println("  4. Submit and save reference number")
-		fmt.Println("  5. Then update: finwipe escalate --request-id " + req.RequestID + " --to dpd_board --ref <ref>")
+		fmt.Println("  1. Print PDF → Send to: CRPC, RBI, 4th Floor, SEA Bldg, Mumbai 400 001")
+		fmt.Printf("\n  📎 PDF: %s\n", pdfPath)
+		fmt.Printf("  📧 Email: /tmp/finwipe_rbi_email_body.txt\n")
 
 	case "CONSUMER_FORUM":
+		fmt.Printf("  Consumer Forum is for compensation claims under CPA 2019.\n")
+		fmt.Printf("  Use when NBFC caused material harm through data misuse.\n\n")
 		fmt.Println("  1. Go to: https://consumercourt.in")
 		fmt.Println("     OR visit your District Consumer Forum (local civil court)")
-		fmt.Println("  2. File under: Consumer Protection Act 2019 — Deficiency in Service")
-		fmt.Println("     (data deletion is a service deficiency under CPA)")
-		fmt.Println("  3. Use audit trail: finwipe track --request-id " + req.RequestID)
-		fmt.Println("  4. Then update: finwipe escalate --request-id " + req.RequestID + " --to consumer_forum --ref <case-number>")
+		fmt.Println("  2. File under: Consumer Protection Act 2019")
+		fmt.Println("     — Deficiency in service (data breach, unauthorized sharing)")
+		fmt.Println("     — Unfair trade practice (selling user data without consent)")
+		fmt.Printf("  3. Use audit trail: finwipe track --request-id %s\n", req.RequestID)
+		fmt.Println("  4. Claim compensation for data harm (up to ₹1 crore in NCDRC)")
+		fmt.Println()
+		fmt.Println("  💡 Tip: Consumer Forum + DPDP Board = parallel paths, not sequential.")
+		fmt.Printf("  finwipe escalate --request-id %s --to consumer_forum --ref <case>\n", req.RequestID)
+
+	case "LEGAL":
+		fmt.Printf("  Civil litigation is the final recourse for data protection harm.\n\n")
+		fmt.Println("  1. Consult a lawyer specializing in DPDPA/data protection")
+		fmt.Println("  2. File writ petition in High Court under Article 226")
+		fmt.Println("     (right to privacy, data protection)")
+		fmt.Println("  3. Alternatively, file suit for damages under DPDPA Section 37")
+		fmt.Printf("  4. Use audit trail: finwipe track --request-id %s\n", req.RequestID)
 	}
 
 	fmt.Println()

@@ -46,6 +46,9 @@ func main() {
 	// Automation
 	rootCmd.AddCommand(cronCmd) // Daily follow-up + escalation automation
 
+	// Dashboard
+	rootCmd.AddCommand(reportCmd) // Compliance dashboard and reporting
+
 	// Utility
 	rootCmd.AddCommand(letterCmd)
 	rootCmd.AddCommand(cicCmd)

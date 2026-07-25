@@ -17,12 +17,14 @@ import (
 type State string
 
 const (
-	StateInitiated   State = "INITIATED"
-	StateDispatched  State = "DISPATCHED"
-	StateAckReceived State = "ACK_RECEIVED"
-	StateResponseOK  State = "RESPONSE_OK"
-	StateEscalated   State = "ESCALATED"
-	StateClosed      State = "CLOSED"
+	StateInitiated      State = "INITIATED"
+	StateDispatched     State = "DISPATCHED"
+	StateDeliveryFailed State = "DELIVERY_FAILED"
+	StateAckReceived    State = "ACK_RECEIVED"
+	StatePendingReview  State = "PENDING_REVIEW" // NBFC response needs user review
+	StateResponseOK     State = "RESPONSE_OK"
+	StateEscalated      State = "ESCALATED"
+	StateClosed         State = "CLOSED"
 )
 
 const (
@@ -36,12 +38,12 @@ const (
 )
 
 const (
-	EscNone      = 0
-	EscAwaiting  = 1
-	EscRBISachet = 2
-	EscDPDPBoard = 3
-	EscForum     = 4
-	EscLegal     = 5
+	EscNone       = 0
+	EscDPO        = 1 // Internal DPO/NBFC Grievance Officer (L0→L1)
+	EscDPDPBoard  = 2 // Primary regulatory: Data Protection Board of India (L1)
+	EscRBIOmbu    = 3 // For RBI-regulated entities: RBI Ombudsman (L2)
+	EscConsumer   = 4 // Consumer Forum: CPA 2019 deficiency in service (L3)
+	EscLegal      = 5 // Civil litigation / High Court (L4)
 )
 
 const (
@@ -52,12 +54,14 @@ const (
 
 // ValidTransitions maps current state -> allowed next states
 var ValidTransitions = map[State][]State{
-	StateInitiated:   {StateDispatched, StateClosed},
-	StateDispatched:  {StateAckReceived, StateEscalated, StateClosed},
-	StateAckReceived: {StateResponseOK, StateEscalated, StateClosed},
-	StateResponseOK:  {StateClosed},
-	StateEscalated:   {StateClosed},
-	StateClosed:      {},
+	StateInitiated:      {StateDispatched, StateClosed},
+	StateDispatched:     {StateAckReceived, StateDeliveryFailed, StateEscalated, StateClosed},
+	StateDeliveryFailed: {StateDispatched, StateClosed}, // Can retry dispatch
+	StateAckReceived:    {StateResponseOK, StatePendingReview, StateEscalated, StateClosed},
+	StatePendingReview:  {StateResponseOK, StateEscalated, StateClosed}, // User reviews NBFC response
+	StateResponseOK:     {StateClosed},
+	StateEscalated:      {StateClosed, StateAckReceived, StateResponseOK}, // Can de-escalate if resolved
+	StateClosed:         {},
 }
 
 // IsValidTransition checks if a state transition is allowed
@@ -701,6 +705,24 @@ func (h *DB) GetActive() ([]Request, error) {
 	return h.scanRequests(rows)
 }
 
+// GetAll returns all requests (active + closed) for reporting
+func (h *DB) GetAll() ([]Request, error) {
+	rows, err := h.db.Query(`
+		SELECT id, request_id, nbfc_id, nbfc_name, channel, lifecycle_state,
+			escalation_level, created_at, dispatched_at, ack_deadline_at,
+			ack_received_at, response_deadline_at, closed_at,
+			COALESCE(external_ref, ''), COALESCE(grievance_email, ''), COALESCE(user_email, ''), COALESCE(user_name, ''),
+			COALESCE(outcome, ''), COALESCE(outcome_notes, ''), COALESCE(letter_path, ''), active
+		FROM requests WHERE active = 1
+		ORDER BY created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return h.scanRequests(rows)
+}
+
 func (h *DB) GetPendingAck() ([]Request, error) {
 	rows, err := h.db.Query(`
 		SELECT id, request_id, nbfc_id, nbfc_name, channel, lifecycle_state,
@@ -1126,14 +1148,28 @@ func ChannelLabel(c string) string {
 }
 
 // EscalationChannelLabel maps channel to display label
+// Order reflects regulatory hierarchy: DPDP Board is primary data protection authority
 func EscalationChannelLabel(c string) string {
 	return map[string]string{
-		"FOLLOWUP_EMAIL":   "Follow-up Email",
-		"RBI_SACHET":       "RBI Sachet",
-		"DPDP_BOARD":       "DPDP Board",
-		"CONSUMER_FORUM":   "Consumer Forum",
-		"RBI_OMBUDSMAN":    "RBI Ombudsman",
+		"FOLLOWUP_EMAIL":  "Follow-up Email",
+		"DPO":             "NBFC Grievance Officer",
+		"DPDP_BOARD":      "Data Protection Board of India",
+		"RBI_OMBUDSMAN":   "RBI Integrated Ombudsman",
+		"RBI_SACHET":      "RBI Sachet Portal",
+		"CONSUMER_FORUM":  "Consumer Forum (CPA 2019)",
+		"LEGAL":           "Civil Litigation",
 	}[c]
+}
+
+// EscalationLevelLabel maps level number to display label
+func EscalationLevelLabel(level int) string {
+	return map[int]string{
+		0: "L0 — No escalation",
+		1: "L1 — DPO / Internal Grievance Officer",
+		2: "L2 — DPDP Board of India (primary)",
+		3: "L3 — RBI Ombudsman / Consumer Forum",
+		4: "L4 — Legal / High Court",
+	}[level]
 }
 
 // FollowupTypeLabel maps followup type to display label
@@ -1150,12 +1186,14 @@ func FollowupTypeLabel(t string) string {
 // StateLabel maps state to emoji label
 func StateLabel(s State) string {
 	return map[State]string{
-		StateInitiated:   "🆕 INITIATED",
-		StateDispatched:  "📨 DISPATCHED",
-		StateAckReceived: "✅ ACK_RECEIVED",
-		StateResponseOK: "✔️  RESPONSE_OK",
-		StateEscalated:   "🔺 ESCALATED",
-		StateClosed:      "✔️  CLOSED",
+		StateInitiated:      "🆕 INITIATED",
+		StateDispatched:     "📨 DISPATCHED",
+		StateDeliveryFailed: "❌ DELIVERY_FAILED",
+		StateAckReceived:    "✅ ACK_RECEIVED",
+		StatePendingReview:  "👁️  PENDING_REVIEW",
+		StateResponseOK:     "✔️  RESPONSE_OK",
+		StateEscalated:      "🔺 ESCALATED",
+		StateClosed:         "✔️  CLOSED",
 	}[s]
 }
 
