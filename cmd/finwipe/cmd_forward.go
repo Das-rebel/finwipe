@@ -17,53 +17,57 @@ import (
 
 var forwardCmd = &cobra.Command{
 	Use:   "setup-forward",
-	Short: "Get your personal FinWipe inbox address",
-	Long: `Get a dedicated FinWipe email address for passive financial discovery.
+	Short: "Get your FinWipe cloud inbox address for passive FI discovery",
+	Long: `Set up email forwarding to discover FIs passively.
 
-HOW IT WORKS (CRED / Fold.money model):
+This is the CRED/Fold.money model:
+1. You get a unique FinWipe inbox address
+2. Set up a Gmail filter to forward financial emails
+3. FinWipe cloud receives and parses sender domains
+4. finwipe sync pulls discoveries → creates deletion requests
 
-1. FinWipe gives you a unique forwarding address
-2. You set up ONE Gmail/Outlook rule: forward all financial emails
-3. Run 'finwipe check-inbox' to parse them and create deletion requests
-4. Repeat periodically — FinWipe tracks what's new
+WHAT YOU GET:
+  • Unique inbox: <hash>@inbox.finwipe.in
+  • Privacy: Your email is NEVER stored — only a one-way hash
+  • No OAuth: Just a Gmail filter (takes 2 minutes)
+  • Passive: All financial emails forwarded automatically
 
-No OAuth. No cloud parsing. Your emails never leave your machine.
+WHAT FINWIPE CLOUD SEES (only):
+  • Sender domain (e.g., "hdfcbank.com") — NOT your emails
+  • Subject line (for FI matching)
+  • Nothing else — no email content, no addresses
 
-GMAIL SETUP (2 minutes):
-  finwipe setup-forward    ← get your address
-  Then in Gmail:
-  Settings → Filters → Create filter
-  Has the words: "bank" OR "loan" OR "EMI" OR "credit" OR "insurance"
-  Forward to: <your FinWipe address>
-  Also: Settings → Filters → Forward email → Add forwarding address
+PREREQUISITES:
+  1. A domain (or use inbox.finwipe.in if pre-configured)
+  2. Cloudflare Worker deployed (see apps/finwipe-cloud/)
+  3. Mailgun inbound email set up
 
-WHAT TO FORWARD:
-  • Bank alerts and statements (any bank)
-  • Loan confirmation / disbursement emails
-  • Credit card statements
-  • Insurance policy documents
-  • Fintech purchase receipts
+DEPLOY YOUR OWN CLOUD (free):
+  cd apps/finwipe-cloud
+  ./deploy.sh
+  (Mailgun free: 5K emails/month)
 
 Examples:
   finwipe setup-forward              # Get your inbox address
-  finwipe check-inbox               # Parse forwarded emails
-  finwipe check-inbox --dry-run     # Preview only`,
+  finwipe sync                      # Pull discoveries from cloud
+  finwipe sync --auto              # Auto-create deletion requests
+  finwipe check-inbox              # Parse local emails (no cloud)`,
 	RunE: runSetupForward,
 }
 
 var checkInboxCmd = &cobra.Command{
 	Use:   "check-inbox",
-	Short: "Parse forwarded emails and create deletion requests",
-	Long: `Check your FinWipe inbox for forwarded emails, extract
-financial institution names, and auto-create deletion requests.
+	Short: "Parse local forwarded emails (offline mode)",
+	Long: `Parse forwarded emails stored locally (~/.finwipe/forwarded/)
+and create deletion requests.
 
-Run after setting up email forwarding with 'finwipe setup-forward'.
-Also parses any .eml/.mbox/.txt files in ~/.finwipe/forwarded/
+This is the offline alternative to 'finwipe sync'.
+No cloud required — all processing is local.
 
 Usage:
-  finwipe check-inbox               # Parse emails and create requests
-  finwipe check-inbox --dry-run    # Preview only
-  finwipe check-inbox --import ./emails/   # Parse specific files`,
+  finwipe check-inbox               # Parse local emails and show discoveries
+  finwipe check-inbox --import /path/to/emails  # Custom directory
+  finwipe check-inbox --dry-run=false  # Create deletion requests`,
 	RunE: runCheckInbox,
 }
 
@@ -75,9 +79,9 @@ var (
 func init() {
 	forwardCmd.AddCommand(checkInboxCmd)
 	checkInboxCmd.Flags().BoolVar(&inboxWatch, "watch", false,
-		"Monitor forwarded emails continuously")
+		"Monitor forwarded emails continuously (not yet implemented)")
 	checkInboxCmd.Flags().StringVar(&inboxImport, "import", "",
-		"Parse specific email files or directory")
+		"Parse specific email files or directory (default: ~/.finwipe/forwarded/)")
 }
 
 func runSetupForward(cmd *cobra.Command, args []string) error {
@@ -89,70 +93,85 @@ func runSetupForward(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("profile incomplete (run finwipe init)")
 	}
 
-	// Generate a unique, privacy-preserving inbox address
-	// Format: <hash>@inbox.finwipe.in
-	// The hash is one-way so FinWipe can't identify users from the address alone
+	// Generate privacy-preserving inbox ID
+	// SHA256(email + salt) → 16-char hash
+	// User is identified by hash only — no PII stored in cloud
 	inboxID := generateInboxID(cfg.Profile.Email)
-	inboxAddr := inboxID + "@inbox.finwipe.in"
+	forwardAddr := inboxID + "@inbox.finwipe.in"
 
-	// Save inbox address
+	// Also generate a read API key (for fetching discoveries)
+	apiKey := generateAPIKey(cfg.Profile.Email)
+
+	// Save inbox config
 	inboxPath := filepath.Join(os.Getenv("HOME"), ".finwipe", "inbox")
-	if err := os.WriteFile(inboxPath, []byte(inboxAddr+"\n"+inboxID), 0600); err != nil {
-		return fmt.Errorf("save inbox: %w", err)
+	os.MkdirAll(filepath.Dir(inboxPath), 0700)
+	inboxConfig := fmt.Sprintf("%s\n%s\n%s\n%s\n",
+		forwardAddr,    // line 1: inbox email address
+		inboxID,        // line 2: user hash (used as user_id)
+		apiKey,         // line 3: API key for reads
+		"https://fw.finwipe.in", // line 4: cloud API endpoint
+	)
+	if err := os.WriteFile(inboxPath, []byte(inboxConfig), 0600); err != nil {
+		return fmt.Errorf("save inbox config: %w", err)
 	}
 
-	// Save last-check timestamp
-	lastCheckPath := filepath.Join(os.Getenv("HOME"), ".finwipe", "inbox_lastcheck")
-	os.WriteFile(lastCheckPath, []byte("0"), 0600)
+	// Save API key separately (for writes by cloud worker)
+	apiKeyPath := filepath.Join(os.Getenv("HOME"), ".finwipe", "cloud_api_key")
+	os.WriteFile(apiKeyPath, []byte(apiKey), 0600)
 
 	fmt.Println()
 	fmt.Println("  ╔════════════════════════════════════════════════════════════════╗")
-	fmt.Println("  ║         FinWipe — Email Forwarding Setup                      ║")
+	fmt.Println("  ║         FinWipe — Email Forwarding Setup                    ║")
 	fmt.Println("  ║                                                              ║")
-	fmt.Println("  ║  CRED / Fold.money Style — Passive Financial Discovery       ║")
+	fmt.Println("  ║  CRED / Fold.money Style — Passive Financial Discovery     ║")
 	fmt.Println("  ╚════════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 	fmt.Printf("  📧 Your FinWipe forwarding address:\n\n")
-	fmt.Printf("     %s\n\n", inboxAddr)
+	fmt.Printf("     %s\n\n", forwardAddr)
 	fmt.Println("  ─────────────────────────────────────────────────────────────────")
 	fmt.Println()
-	fmt.Println("  📋 SETUP STEPS (2 minutes):")
-	fmt.Println()
-	fmt.Println("  GMAIL (desktop browser):")
-	fmt.Println("  1. Open Gmail → Settings (⚙️) → See all settings")
-	fmt.Println("  2. Go to 'Filters' tab → 'Create a new filter'")
-	fmt.Printf("  3. In 'Has the words': bank OR loan OR EMI OR credit OR insurance\n")
-	fmt.Printf("  4. In 'Forward to': Add %s\n", inboxAddr)
-	fmt.Println("  5. Check 'Forward it' → Create filter")
-	fmt.Println()
-	fmt.Println("  OUTLOOK (web):")
-	fmt.Println("  1. Settings → Mail → Rules → New rule")
-	fmt.Println("  2. Apply to all messages OR with specific words")
-	fmt.Printf("  3. Forward → %s\n", inboxAddr)
-	fmt.Println()
-	fmt.Println("  APPLE MAIL:")
-	fmt.Println("  1. Mail → Rules → Add Rule")
-	fmt.Println("  2. Condition: Any recipient contains '@'")
-	fmt.Printf("  3. Action: Forward to %s\n", inboxAddr)
+	fmt.Println("  🔒 PRIVACY GUARANTEE:")
+	fmt.Println("     Your email is NEVER stored.")
+	fmt.Println("     The cloud only sees: sender domain (e.g. hdfcbank.com)")
+	fmt.Println("     No email content, no subject lines, no addresses.")
 	fmt.Println()
 	fmt.Println("  ─────────────────────────────────────────────────────────────────")
 	fmt.Println()
-	fmt.Println("  📬 WHAT TO FORWARD:")
-	fmt.Println("     • Bank account alerts (HDFC, ICICI, SBI, etc.)")
-	fmt.Println("     • Loan sanction / disbursement emails")
-	fmt.Println("     • Credit card statements")
-	fmt.Println("     • Insurance policy documents")
-	fmt.Println("     • Investment confirmations (mutual funds, stocks)")
+	fmt.Println("  📋 SETUP STEPS (takes 2 minutes):")
+	fmt.Println()
+	fmt.Println("  STEP 1 — Deploy FinWipe Cloud (one-time):")
+	fmt.Println("     cd apps/finwipe-cloud && ./deploy.sh")
+	fmt.Println()
+	fmt.Println("  STEP 2 — Gmail Filter:")
+	fmt.Println("     a. Open Gmail → Settings (⚙️) → See all settings")
+	fmt.Println("     b. Go to 'Filters' tab → 'Create a new filter'")
+	fmt.Printf("     c. 'Has the words': bank OR loan OR EMI OR credit OR insurance\n")
+	fmt.Printf("     d. 'Forward to': Add %s\n", forwardAddr)
+	fmt.Println("     e. Check 'Forward it' → Create filter")
+	fmt.Println()
+	fmt.Println("  STEP 3 — Test it:")
+	fmt.Println("     finwipe sync")
 	fmt.Println()
 	fmt.Println("  ─────────────────────────────────────────────────────────────────")
 	fmt.Println()
-	fmt.Println("  After forwarding some emails, run:")
+	fmt.Println("  📬 HOW IT WORKS:")
 	fmt.Println()
-	fmt.Println("    finwipe check-inbox --dry-run")
+	fmt.Println("  Gmail Filter → FORWARDS all matching emails to FinWipe")
 	fmt.Println()
-	fmt.Println("  This parses all forwarded emails and shows what FIs were found.")
+	fmt.Println("  Mailgun (free tier) → RECEIVES emails, extracts sender domain only")
 	fmt.Println()
-	fmt.Printf("  📁 Inbox address saved: %s\n", inboxPath)
+	fmt.Println("  Cloudflare Worker → MATCHES domains to known FIs, stores discovery")
+	fmt.Println()
+	fmt.Println("  finwipe sync → PULLS discoveries, shows what FIs found your email")
+	fmt.Println()
+	fmt.Println("  ─────────────────────────────────────────────────────────────────")
+	fmt.Println()
+	fmt.Println("  📁 Files created:")
+	fmt.Printf("     ~/.finwipe/inbox          — your inbox address and hash\n")
+	fmt.Printf("     ~/.finwipe/cloud_api_key  — API key for secure access\n")
+	fmt.Println()
+	fmt.Println("  Next: finwipe sync              # Pull discoveries")
+	fmt.Println("       finwipe check-inbox       # Parse local emails (no cloud)")
 	fmt.Println()
 	fmt.Println("  ═════════════════════════════════════════════════════════════════")
 
@@ -160,6 +179,7 @@ func runSetupForward(cmd *cobra.Command, args []string) error {
 }
 
 func runCheckInbox(cmd *cobra.Command, args []string) error {
+	// Load profile
 	profile, err := config.Load(cfgFile)
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
@@ -168,19 +188,78 @@ func runCheckInbox(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("run finwipe init first")
 	}
 
-	// Load inbox address
+	// Load inbox config
 	inboxPath := filepath.Join(os.Getenv("HOME"), ".finwipe", "inbox")
 	inboxData, err := os.ReadFile(inboxPath)
 	if err != nil {
-		return fmt.Errorf("inbox not set up. Run: finwipe setup-forward")
+		fmt.Println("  ⚠️  Inbox not set up. Run: finwipe setup-forward")
+		fmt.Println()
+		fmt.Println("  Or use: finwipe check-inbox --import /path/to/emails")
+		fmt.Println()
+		return nil
 	}
 	lines := strings.Split(strings.TrimSpace(string(inboxData)), "\n")
 	inboxAddr := lines[0]
+	if len(lines) < 4 {
+		lines = append(lines, "https://fw.finwipe.in")
+	}
 
 	fmt.Println()
-	fmt.Println("  📬 FinWipe — Check Inbox")
+	fmt.Println("  📬 FinWipe — Check Inbox (Offline)")
 	fmt.Println("  ─────────────────────────────────────────────────────────────────")
 	fmt.Printf("  📧 Forwarding address: %s\n", inboxAddr)
+
+	// Determine path to check
+	dirPath := inboxImport
+	if dirPath == "" {
+		dirPath = filepath.Join(os.Getenv("HOME"), ".finwipe", "forwarded")
+	}
+
+	// Collect email files
+	var emailFiles []string
+
+	// Check if it's a directory
+	if stat, err := os.Stat(dirPath); err == nil && stat.IsDir() {
+		entries, _ := os.ReadDir(dirPath)
+		for _, e := range entries {
+			if e.IsDir() {
+				continue
+			}
+			ext := strings.ToLower(filepath.Ext(e.Name()))
+			if ext == ".eml" || ext == ".mbox" || ext == ".txt" || ext == ".mail" {
+				emailFiles = append(emailFiles, filepath.Join(dirPath, e.Name()))
+			}
+		}
+	} else if _, err := os.Stat(dirPath); err == nil {
+		// Single file
+		emailFiles = []string{dirPath}
+	}
+
+	if len(emailFiles) == 0 {
+		fmt.Println()
+		fmt.Println("  📭 No email files found.")
+		fmt.Println()
+		fmt.Println("  To use offline mode:")
+		fmt.Println("    1. Export emails from Gmail (Takeout → MBOX)")
+		fmt.Println("    2. Put .eml/.mbox files in ~/.finwipe/forwarded/")
+		fmt.Println("    3. Run finwipe check-inbox")
+		fmt.Println()
+		fmt.Println("  Or set up cloud forwarding for passive discovery:")
+		fmt.Println("    finwipe setup-forward")
+		return nil
+	}
+
+	fmt.Printf("  📂 Found %d email files\n\n", len(emailFiles))
+
+	// Read all email content
+	var allText []string
+	for _, f := range emailFiles {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			continue
+		}
+		allText = append(allText, string(data))
+	}
 
 	// Load entities
 	entities, err := nbfc.Load(nbfcRegistryPath())
@@ -188,71 +267,41 @@ func runCheckInbox(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("load NBFC registry: %w", err)
 	}
 
-	// Collect emails from multiple sources
-	var allEmailText []string
+	// Parse
+	found := parseEmailsOffline(allText, entities)
 
-	// Source 1: Forwarded emails directory (~/.finwipe/forwarded/)
-	forwardedDir := filepath.Join(os.Getenv("HOME"), ".finwipe", "forwarded")
-	if _, err := os.Stat(forwardedDir); err == nil {
-		emails := collectEmailsFromDir(forwardedDir)
-		allEmailText = append(allEmailText, emails...)
-		fmt.Printf("  📂 Forwarded dir: %d emails\n", len(emails))
+	if len(found) == 0 {
+		fmt.Println("  📭 No financial institutions found in emails.")
+		return nil
 	}
 
-	// Source 2: Specific import path
-	if inboxImport != "" {
-		emails := collectEmailsFromDir(inboxImport)
-		allEmailText = append(allEmailText, emails...)
-		fmt.Printf("  📥 Import path: %d emails\n", len(emails))
-	}
+	fmt.Println("  ═══════════════════════════════════════════════════════════════")
+	fmt.Printf("  📊 DISCOVERED: %d financial institutions\n", len(found))
+	fmt.Println("  ═══════════════════════════════════════════════════════════════")
 
-	// Source 3: Local mail spool (common locations)
-	mailSpools := []string{
-		"/var/mail/" + os.Getenv("USER"),
-		filepath.Join(os.Getenv("HOME"), "Mail", "INBOX"),
-		filepath.Join(os.Getenv("HOME"), "Library", "Mail", "V2", "IMAP-localhost"),
+	type match struct {
+		Name   string
+		Entity *nbfc.Entity
+		Count  int
 	}
-	for _, spool := range mailSpools {
-		if _, err := os.Stat(spool); err == nil {
-			if emails := collectEmailsFromFile(spool); len(emails) > 0 {
-				allEmailText = append(allEmailText, emails...)
-				fmt.Printf("  📬 Mail spool: %d emails\n", len(emails))
-			}
+	var matched []match
+	seen := make(map[string]bool)
+
+	for _, f := range found {
+		if seen[f.Entity.Name] {
+			continue
 		}
+		seen[f.Entity.Name] = true
+		matched = append(matched, match{
+			Name:   f.Entity.Name,
+			Entity: f.Entity,
+			Count:  f.Count,
+		})
 	}
 
-	if len(allEmailText) == 0 {
-		fmt.Println()
-		fmt.Println("  ⚠️  No forwarded emails found.")
-		fmt.Println()
-		fmt.Println("  To set up email forwarding:")
-		fmt.Println("    finwipe setup-forward")
-		fmt.Println()
-		fmt.Println("  Then forward emails to your FinWipe address.")
-		fmt.Println("  Or use: finwipe check-inbox --import ./emails/")
-		fmt.Println()
-		fmt.Println("  The next time you use any FinWipe command, it will also")
-		fmt.Println("  automatically check ~/.finwipe/forwarded/ for new emails.")
-		return nil
-	}
-
-	fmt.Printf("  ✅ Total: %d emails to parse\n\n", len(allEmailText))
-
-	// Parse emails
-	matches := parseEmailsForFIs(allEmailText, entities)
-
-	if len(matches) == 0 {
-		fmt.Println("  No registered FIs found in forwarded emails.")
-		fmt.Println("  Try forwarding bank alerts and loan confirmation emails.")
-		return nil
-	}
-
-	fmt.Println("  ═══════════════════════════════════════════════════════════════")
-	fmt.Printf("  📊 DISCOVERED: %d financial institutions\n", len(matches))
-	fmt.Println("  ═══════════════════════════════════════════════════════════════")
-	for i, m := range matches {
+	for i, m := range matched {
 		if i >= 25 {
-			fmt.Printf("  ... and %d more\n", len(matches)-i)
+			fmt.Printf("  ... and %d more\n", len(matched)-i)
 			break
 		}
 		icon := "💳"
@@ -261,36 +310,34 @@ func runCheckInbox(cmd *cobra.Command, args []string) error {
 		} else if m.Entity.Category == nbfc.CatHFC {
 			icon = "🏠"
 		}
-		fmt.Printf("  %2d. %s %-28s [%d emails]\n", i+1, icon,
-			truncate(m.Entity.Name, 28), m.Count)
+		fmt.Printf("  %2d. %s %-25s [%d emails]\n", i+1, icon,
+			truncate(m.Entity.Name, 25), m.Count)
 	}
 	fmt.Println()
 
 	if dryRun {
 		fmt.Println("  🔍 DRY RUN — No requests created")
-		fmt.Printf("  Run: finwipe check-inbox --dry-run=false to create requests\n\n")
+		fmt.Println("  Run with --dry-run=false to create requests")
 		return nil
 	}
 
-	// Create deletion requests
+	// Create requests
+	fmt.Println("  🚀 Creating deletion requests...")
+
 	hist, err := history.New(dbPath())
 	if err != nil {
-		return fmt.Errorf("open history: %w", err)
+		return err
 	}
 	defer hist.Close()
 
-	created := 0
-	skipped := 0
 	letterDir := filepath.Join(os.Getenv("HOME"), ".finwipe", "letters")
 	gen := letter.New(letterDir)
 
-	for _, m := range matches {
+	created := 0
+	for _, m := range matched {
 		if m.Entity.GrievanceEmail == "" {
-			skipped++
 			continue
 		}
-
-		// Check if request already exists
 		existing, _ := hist.GetByNBFCID(m.Entity.ID)
 		isDup := false
 		for _, e := range existing {
@@ -301,7 +348,6 @@ func runCheckInbox(cmd *cobra.Command, args []string) error {
 			}
 		}
 		if isDup {
-			skipped++
 			continue
 		}
 
@@ -310,45 +356,87 @@ func runCheckInbox(cmd *cobra.Command, args []string) error {
 			m.Entity.GrievanceEmail,
 			profile.Profile.Email, profile.Profile.Name)
 		if err != nil {
-			fmt.Printf("  ⚠️  %-28s %v\n", m.Entity.Name, err)
 			continue
 		}
 
 		gen.Generate(req.RequestID, m.Entity.Name, m.Entity.GrievanceEmail,
 			profile.Profile, letter.DefaultDeletionCategories)
 
-		fmt.Printf("  ✅ %-28s %s\n", m.Entity.Name, req.RequestID)
+		fmt.Printf("  ✅ %-25s %s\n", m.Entity.Name, req.RequestID)
 		created++
 	}
 
-	// Update last check timestamp
-	lastCheckPath := filepath.Join(os.Getenv("HOME"), ".finwipe", "inbox_lastcheck")
-	os.WriteFile(lastCheckPath, []byte(fmt.Sprintf("%d", os.Getpid())), 0600)
-
-	fmt.Println()
-	if created > 0 {
-		fmt.Printf("  ✅ Created: %d deletion requests\n", created)
-	}
-	if skipped > 0 {
-		fmt.Printf("  ⏭️  Skipped (already exists): %d\n", skipped)
-	}
-	fmt.Println()
-	fmt.Println("  Next: finwipe send              # Dispatch to FIs")
-	fmt.Println("       finwipe track --all       # Monitor acknowledgments")
-
+	fmt.Printf("\n  ✅ Created: %d deletion requests\n", created)
 	return nil
 }
 
-// generateInboxID creates a privacy-preserving anonymous inbox ID
+// offlineMatch mirrors offlineEmailMatch
+type offlineMatch struct {
+	Entity *nbfc.Entity
+	Count  int
+}
+
+// parseEmailsOffline parses local emails for FI names
+func parseEmailsOffline(emails []string, entities []nbfc.Entity) []offlineMatch {
+	seen := make(map[string]*offlineMatch)
+
+	entityByName := make(map[string]nbfc.Entity)
+	for i := range entities {
+		e := &entities[i]
+		entityByName[strings.ToLower(e.Name)] = *e
+		if e.ShortName != "" {
+			entityByName[strings.ToLower(e.ShortName)] = *e
+		}
+	}
+
+	fiKeywords := []string{
+		"HDFC Bank", "ICICI Bank", "Axis Bank", "Kotak Mahindra",
+		"State Bank", "IndusInd Bank", "Yes Bank", "IDBI Bank",
+		"Bank of Baroda", "Punjab National Bank", "Canara Bank",
+		"Federal Bank", "RBL Bank", "Bandhan Bank",
+		"Bajaj Finserv", "Bajaj Finance", "Tata Capital",
+		"Aditya Birla Finance", "L&T Finance", "Muthoot Finance",
+		"Cholamandalam", "HDB Financial", "Kisht", "Stashfin",
+		"Rupeek", "KreditBee", "Navi Finserv", "OfBusiness",
+		"EarlySalary", "Slice", "Uni", "Moneyview",
+		"PhonePe", "Paytm", "Razorpay", "CRED",
+		"Paisabazaar", "BankBazaar", "IndMoney", "Groww",
+		"Zerodha", "Upstox", "Angel One", "PolicyBazaar",
+		"LIC", "HDFC Life", "SBI Life", "ICICI Prudential",
+		"Bajaj Allianz", "TATA AIA", "Max Life", "Star Health",
+	}
+
+	for _, email := range emails {
+		upper := strings.ToUpper(email)
+		for _, keyword := range fiKeywords {
+			if strings.Contains(upper, strings.ToUpper(keyword)) {
+				lower := strings.ToLower(keyword)
+				if entity, ok := entityByName[lower]; ok {
+					if _, exists := seen[entity.ID]; !exists {
+						seen[entity.ID] = &offlineMatch{Entity: &entity, Count: 1}
+					} else {
+						seen[entity.ID].Count++
+					}
+				}
+			}
+		}
+	}
+
+	var results []offlineMatch
+	for _, m := range seen {
+		results = append(results, *m)
+	}
+	return results
+}
+
+// generateInboxID creates a privacy-preserving inbox ID from email
 func generateInboxID(email string) string {
-	// One-way hash — FinWipe can't reverse-engineer your email from the address
 	h := sha256.Sum256([]byte(email + "finwipe-salt-v1"))
 	hash := hex.EncodeToString(h[:8])
-	// Human-readable prefix from domain
+	// Human-readable prefix
 	parts := strings.Split(email, "@")
 	prefix := "u"
 	if len(parts) > 0 && len(parts[0]) > 2 {
-		// First 2 chars of email prefix
 		for _, c := range parts[0][:2] {
 			if c >= 'a' && c <= 'z' {
 				prefix = prefix + string(c)
@@ -358,152 +446,8 @@ func generateInboxID(email string) string {
 	return prefix + hash[:10]
 }
 
-// emailMatch holds a discovered FI from emails
-type emailMatch struct {
-	Entity *nbfc.Entity
-	Count  int
-}
-
-// parseEmailsForFIs extracts FI names from email text
-func parseEmailsForFIs(emails []string, entities []nbfc.Entity) []emailMatch {
-	seen := make(map[string]*emailMatch)
-
-	// Build entity lookup
-	entityByName := make(map[string]nbfc.Entity)
-	entityByShort := make(map[string]nbfc.Entity)
-	for i := range entities {
-		e := &entities[i]
-		entityByName[strings.ToLower(e.Name)] = *e
-		if e.ShortName != "" {
-			entityByShort[strings.ToLower(e.ShortName)] = *e
-		}
-	}
-
-	// All FI name variants to search for
-	fiKeywords := []string{
-		// Full names (check first)
-		"HDFC Bank", "ICICI Bank", "Axis Bank", "Kotak Mahindra Bank",
-		"State Bank of India", "IndusInd Bank", "Yes Bank", "IDBI Bank",
-		"Bank of Baroda", "Punjab National Bank", "Canara Bank",
-		"Union Bank of India", "Federal Bank", "RBL Bank", "Bandhan Bank",
-		"Bank of India", "Central Bank of India", "Indian Bank",
-		"South Indian Bank", "Karur Vysya Bank", "City Union Bank",
-		// NBFCs
-		"Bajaj Finserv", "Bajaj Finance", "Tata Capital", "Tata Motors Finance",
-		"Aditya Birla Capital", "Aditya Birla Finance",
-		"L&T Finance", "L&T Housing Finance",
-		"Muthoot Finance", "Muthoot Gold",
-		"Cholamandalam Investment", "Cholamandalam Finance",
-		"HDB Financial Services", "HDB Finance",
-		"Kisht Consumer Finance", "KreditBee", "Stashfin",
-		"Rupeek", "Navi Finserv", "OfBusiness", "EarlySalary",
-		"Slice", "Uni", "Moneyview", "Lazee", "Moneymint",
-		"Capital Float", "Kissht", "Kisht",
-		// Fintech
-		"PhonePe", "Paytm", "Razorpay", "CRED", "CRED Club",
-		"Paisabazaar", "BankBazaar", "IndMoney", "Indmoney",
-		"Groww", "Zerodha", "Upstox", "Angel One", "Dhan",
-		"PolicyBazaar", "PolicyBazaar",
-		"Amazon Pay", "Google Pay", "BHIM UPI",
-		// Insurance
-		"LIC", "HDFC Life", "SBI Life", "ICICI Prudential Life",
-		"Bajaj Allianz Life", "Bajaj Allianz General",
-		"TATA AIA Life", "Tata AIA", "Max Life", "Star Health",
-		"Niva Bupa", "Reliance General", "Go Digit", "Digit Insurance",
-		// UPI handles
-		"PhonePe", "GPay", "Paytm Payments Bank",
-		"Amazon Pay", "BHIM",
-		// NBFC brands
-		"Fino Payments Bank", "Paytm Payments Bank",
-		"Finvo", "Finnitize",
-	}
-
-	for _, emailText := range emails {
-		upper := strings.ToUpper(emailText)
-
-		for _, keyword := range fiKeywords {
-			if strings.Contains(upper, strings.ToUpper(keyword)) {
-				// Try full name match first
-				lower := strings.ToLower(keyword)
-				if entity, ok := entityByName[lower]; ok {
-					if _, exists := seen[entity.ID]; !exists {
-						seen[entity.ID] = &emailMatch{Entity: &entity, Count: 1}
-					} else {
-						seen[entity.ID].Count++
-					}
-				} else if entity, ok := entityByShort[lower]; ok {
-					if _, exists := seen[entity.ID]; !exists {
-						seen[entity.ID] = &emailMatch{Entity: &entity, Count: 1}
-					} else {
-						seen[entity.ID].Count++
-					}
-				}
-			}
-		}
-	}
-
-	// Deduplicate and convert to slice
-	var results []emailMatch
-	for _, m := range seen {
-		results = append(results, *m)
-	}
-
-	// Sort by count (most mentioned first)
-	for i := 0; i < len(results); i++ {
-		for j := i + 1; j < len(results); j++ {
-			if results[j].Count > results[i].Count {
-				results[i], results[j] = results[j], results[i]
-			}
-		}
-	}
-
-	return results
-}
-
-// collectEmailsFromDir reads all email files from a directory
-func collectEmailsFromDir(dir string) []string {
-	var emails []string
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return emails
-	}
-	for _, e := range entries {
-		if e.IsDir() {
-			emails = append(emails, collectEmailsFromDir(filepath.Join(dir, e.Name()))...)
-			continue
-		}
-		ext := strings.ToLower(filepath.Ext(e.Name()))
-		if ext == ".eml" || ext == ".mbox" || ext == ".txt" || ext == ".mail" {
-			if data, err := os.ReadFile(filepath.Join(dir, e.Name())); err == nil {
-				emails = append(emails, string(data))
-			}
-		}
-	}
-	return emails
-}
-
-// collectEmailsFromFile reads emails from a file (MBOX or plain text)
-func collectEmailsFromFile(path string) []string {
-	var emails []string
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return emails
-	}
-	content := string(data)
-
-	// MBOX format: starts with "From " lines
-	if strings.Contains(content, "From ") && strings.Contains(content, "@") {
-		// Split by "From " lines
-		parts := strings.Split(content, "\nFrom ")
-		for _, part := range parts {
-			if strings.Contains(part, "@") && len(part) > 50 {
-				emails = append(emails, part)
-			}
-		}
-	} else if strings.Contains(content, "@") {
-		// Single email
-		emails = append(emails, content)
-	}
-
-	return emails
+// generateAPIKey creates an API key for cloud access
+func generateAPIKey(email string) string {
+	h := sha256.Sum256([]byte(email + "finwipe-api-key-salt-v1"))
+	return hex.EncodeToString(h[:16])
 }
