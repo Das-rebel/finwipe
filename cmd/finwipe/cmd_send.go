@@ -11,15 +11,27 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/das-rebel/finwipe/internal/config"
 	"github.com/das-rebel/finwipe/internal/email"
-	"github.com/das-rebel/finwipe/internal/history"
 	"github.com/das-rebel/finwipe/internal/evidence"
+	"github.com/das-rebel/finwipe/internal/history"
+	"github.com/das-rebel/finwipe/internal/letter"
 	"github.com/das-rebel/finwipe/internal/nbfc"
 )
 
 var sendCmd = &cobra.Command{
 	Use:   "send",
-	Short: "Dispatch a deletion request (email sent or letter generated)",
-	RunE:  runSend,
+	Short: "Dispatch deletion requests via email or registered post",
+	Long: `Send deletion requests to NBFCs, banks, and other financial entities.
+
+A valid FinWipe request (created via finwipe new) must exist first.
+SMTP must be configured (finwipe init) for email dispatch.
+
+Examples:
+  finwipe send                                    # Send all INITIATED requests
+  finwipe send --request-id DPR-2026-000001      # Send specific request
+  finwipe send --include bajaj-finserv,hdfc-bank  # By NBFC IDs
+  finwipe send --category fintech                 # By category
+  finwipe send --dry-run                         # Preview only`,
+	RunE: runSend,
 }
 
 var (
@@ -27,15 +39,21 @@ var (
 	includeIDs       string
 	rateLimitMs      int
 	sendRequestID    string
+	sendChannel      string // email, post, cic
 )
 
 func init() {
-	sendCmd.Flags().StringVar(&sendRequestID, "request-id", "",
-		"Send a specific request by DPR-ID")
+	sendCmd.Flags().StringVar(&excludeCategories, "exclude-category", "",
+		"Exclude NBFCs by category (e.g., bank,hfc)")
 	sendCmd.Flags().StringVar(&includeIDs, "include", "",
 		"Send requests for specific NBFC IDs (comma-separated)")
 	sendCmd.Flags().IntVar(&rateLimitMs, "rate-limit", 1000,
-		"Milliseconds between emails (Gmail: 1000+ recommended)")
+		"Milliseconds to wait between requests (default 1000)")
+	sendCmd.Flags().StringVar(&sendRequestID, "request-id", "",
+		"Send a specific request by DPR-ID")
+	sendCmd.Flags().StringVar(&sendChannel, "channel", "email",
+		"Dispatch channel: email, post, cic (default: email)")
+	rootCmd.AddCommand(sendCmd)
 }
 
 func runSend(cmd *cobra.Command, args []string) error {
@@ -44,91 +62,84 @@ func runSend(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	dbPath := dbPath()
-	hist, err := history.New(dbPath)
+	entities, err := nbfc.Load(nbfcRegistryPath())
+	if err != nil {
+		return fmt.Errorf("load NBFCs: %w", err)
+	}
+	nbfcMap := make(map[string]nbfc.Entity)
+	for _, e := range entities {
+		nbfcMap[e.ID] = e
+	}
+
+	hist, err := history.New(dbPath())
 	if err != nil {
 		return fmt.Errorf("open history: %w", err)
 	}
 	defer hist.Close()
 
-	// Evidence store for sent emails
 	evidenceBase := filepath.Join(os.Getenv("HOME"), ".finwipe", "evidence")
 	evStore, _ := evidence.New(evidenceBase)
 
-	// Load NBFCs for lookups
-	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
-	allNBFCs, err := nbfc.Load(nbfcPath)
-	if err != nil {
-		return fmt.Errorf("load NBFCs: %w", err)
-	}
-	nbfcMap := make(map[string]nbfc.Entity)
-	for _, e := range allNBFCs {
-		nbfcMap[e.ID] = e
-	}
-
-	// Determine which requests to send
 	var requests []*history.Request
 
 	if sendRequestID != "" {
-		// Send specific request
 		req, err := hist.GetByRequestID(sendRequestID)
 		if err != nil {
 			return fmt.Errorf("request not found: %s", sendRequestID)
 		}
-		if req.LifecycleState != history.StateInitiated && req.LifecycleState != history.StateDeliveryFailed {
-			return fmt.Errorf("request %s is in state %s, can only send from INITIATED or DELIVERY_FAILED",
+		if req.LifecycleState != history.StateInitiated &&
+			req.LifecycleState != history.StateDeliveryFailed {
+			return fmt.Errorf("request %s is not in INITIATED or DELIVERY_FAILED state (current: %s)",
 				req.RequestID, req.LifecycleState)
 		}
-		requests = []*history.Request{req}
-	} else if includeIDs != "" {
-		// Send requests for specific NBFCs (that are in INITIATED state)
-		idMap := make(map[string]bool)
-		for _, id := range splitCSV(includeIDs) {
-			idMap[history.SanitizeNBFCID(id)] = true
-		}
+		requests = append(requests, req)
+	} else {
 		all, err := hist.GetByState(history.StateInitiated)
 		if err != nil {
-			return err
+			return fmt.Errorf("get initiated: %w", err)
 		}
-		for _, req := range all {
-			if idMap[req.NBFCID] {
-				requests = append(requests, &req)
+		failed, _ := hist.GetByState(history.StateDeliveryFailed)
+		all = append(all, failed...)
+
+		if includeIDs != "" {
+			includeMap := make(map[string]bool)
+			for _, id := range strings.Split(includeIDs, ",") {
+				includeMap[strings.TrimSpace(id)] = true
+			}
+			for i := range all {
+				if includeMap[all[i].NBFCID] {
+					requests = append(requests, &all[i])
+				}
+			}
+		} else {
+			for i := range all {
+				requests = append(requests, &all[i])
 			}
 		}
-	} else {
-		// No specific request — show help
-		return fmt.Errorf("specify --request-id <DPR-ID> to send a specific request\n" +
-			"Use: finwipe track --all  to see all active requests\n" +
-			"Use: finwipe new --nbfc <id> to create a new request")
 	}
 
 	if len(requests) == 0 {
-		fmt.Println("No requests to send (check --request-id or NBFC IDs)")
+		fmt.Println("No requests to send.")
 		return nil
 	}
 
-	// Dry run
-	if dryRun {
-		fmt.Printf("\n🔍 DRY RUN — No emails will be sent\n\n")
-		fmt.Printf("Would dispatch %d request(s):\n\n", len(requests))
-		for _, req := range requests {
-			fmt.Printf("  %-20s %-30s <%s>\n",
-				req.RequestID, req.NBFCName, req.GrievanceEmail)
-		}
-		fmt.Println()
-		return nil
+	if sendChannel == "email" && cfg.SMTP.Password == "" && !dryRun {
+		return fmt.Errorf("SMTP not configured. Run: finwipe init\nOr use --channel post for registered post")
 	}
 
-	// Check SMTP
-	if cfg.SMTP.Password == "" {
-		return fmt.Errorf("SMTP not configured. Run: finwipe init")
+	profile := cfg.Profile
+	if profile.Name == "" {
+		return fmt.Errorf("profile not configured. Run: finwipe init")
 	}
 
 	sender := email.New(&cfg.SMTP)
+	letterDir := filepath.Join(os.Getenv("HOME"), ".finwipe", "letters")
+	letterGen := letter.New(letterDir)
 
 	fmt.Printf("\n📤 Dispatching %d request(s)...\n\n", len(requests))
 
 	sent, failed := 0, 0
+
 	for i, req := range requests {
 		nbfcEntity, ok := nbfcMap[req.NBFCID]
 		if !ok {
@@ -139,76 +150,84 @@ func runSend(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		var msgID string
-		var err error
-
-		if req.Channel == history.ChannelEmail {
-			err = sender.Send(nbfcEntity, cfg.Profile, "")
-			msgID = "" // DPR-ID in subject line is the tracking reference
-		} else {
-			// For post/cic — letter generated separately via finwipe letter
-			err = nil
+		var categories []letter.DeletionCategory
+		switch nbfcEntity.Category {
+		case nbfc.CatNBFC, nbfc.CatFINTECH, nbfc.CatBANK, nbfc.CatHFC:
+			categories = letter.DefaultDeletionCategories
+		default:
+			categories = letter.DefaultDeletionCategories
 		}
 
-		if err != nil {
-			fmt.Printf("  ❌ %s → %s: %v\n", req.RequestID, req.NBFCName, err)
-			failed++
-			// Mark as DELIVERY_FAILED so user can investigate
-			if req.Channel == history.ChannelEmail {
-				hist.TransitionState(req.RequestID, req.LifecycleState, history.StateDeliveryFailed,
-					"SYSTEM", fmt.Sprintf("delivery failed: %v", err))
-			}
-		} else {
-			letterPath := ""
-			if req.Channel == history.ChannelPost {
-				// Letter path would be set by separate letter command
-			}
-			err = hist.Dispatch(req.RequestID, letterPath, msgID, req.Channel)
+		var err error
+
+		if sendChannel == "email" || req.Channel == history.ChannelEmail {
+			emailBody := letter.GenerateEmailBody(req.RequestID, nbfcEntity.Name, profile, categories)
+			err = sender.Send(nbfcEntity, profile, "")
+
 			if err != nil {
-				fmt.Printf("  ⚠️  %s → %s: sent but dispatch record failed: %v\n",
-					req.RequestID, req.NBFCName, err)
+				hist.TransitionState(req.RequestID, req.LifecycleState,
+					history.StateDeliveryFailed, "SYSTEM",
+					fmt.Sprintf("email send failed: %v", err))
+				fmt.Printf("  ❌ %s → %s: %v\n", req.RequestID, req.NBFCName, err)
+				failed++
 			} else {
-				// Store email as evidence (proof of what was sent)
-				if req.Channel == history.ChannelEmail && evStore != nil {
-					emailBody := email.GenerateFollowupBody(req.RequestID, req.NBFCName, cfg.Profile, 0)
-					ev, err := evStore.Save(req.RequestID, evidence.TypeEmailSent,
+				if evStore != nil {
+					evStore.Save(req.RequestID, evidence.TypeEmailSent,
 						"DeletionRequest_"+req.RequestID+".eml",
 						io.NopCloser(strings.NewReader(emailBody)),
-						"Sent deletion request email to "+req.GrievanceEmail)
-					if err == nil {
-						fmt.Printf("  📎 Evidence: %s\n", ev.ID)
-					}
+						"Sent: "+nbfcEntity.GrievanceEmail)
 				}
-				fmt.Printf("  ✅ %s → %s\n", req.RequestID, req.NBFCName)
+				err = hist.Dispatch(req.RequestID, "", req.RequestID, history.ChannelEmail)
+				if err != nil {
+					fmt.Printf("  ⚠️  %s → %s: sent but record failed: %v\n",
+						req.RequestID, req.NBFCName, err)
+				} else {
+					fmt.Printf("  ✅ %s → %s [%s]\n",
+						req.RequestID, req.NBFCName, nbfcEntity.GrievanceEmail)
+					sent++
+				}
+			}
+		} else {
+			letterPath, err := letterGen.Generate(req.RequestID, nbfcEntity.Name,
+				nbfcEntity.GrievanceEmail, profile, categories)
+			if err != nil {
+				fmt.Printf("  ❌ %s → %s: letter generation failed: %v\n",
+					req.RequestID, req.NBFCName, err)
+				failed++
+				continue
+			}
+			err = hist.Dispatch(req.RequestID, letterPath, "", history.ChannelPost)
+			if err != nil {
+				fmt.Printf("  ⚠️  %s → %s: letter generated but dispatch record failed: %v\n",
+					req.RequestID, req.NBFCName, err)
+			} else {
+				fmt.Printf("  ✅ %s → %s [📄 %s]\n",
+					req.RequestID, req.NBFCName, filepath.Base(letterPath))
 				sent++
 			}
 		}
 
-		// Rate limit
-		if i < len(requests)-1 && rateLimitMs > 0 {
+		if i < len(requests)-1 && rateLimitMs > 0 && !dryRun {
 			time.Sleep(time.Duration(rateLimitMs) * time.Millisecond)
 		}
 	}
 
-	fmt.Printf("\n✅ Dispatched: %d | Failed: %d\n", sent, failed)
-	if sent > 0 {
-		fmt.Println("\nNext: finwipe track --all   # monitor acknowledgment")
-		fmt.Println("       finwipe cron         # setup daily follow-up automation")
+	fmt.Printf("\n")
+	if dryRun {
+		fmt.Printf("🔍 DRY RUN — No emails/letters actually sent\n")
+	} else {
+		fmt.Printf("✅ Dispatched: %d | ❌ Failed: %d\n", sent, failed)
+	}
+
+	if sent > 0 && !dryRun {
+		fmt.Println("\nTimeline expectations (per DPDPA Rule 8):")
+		fmt.Println("  • NBFC must acknowledge within 48 hours")
+		fmt.Println("  • NBFC must complete deletion within 30 days")
+		fmt.Println()
+		fmt.Println("  finwipe track --all       # Monitor acknowledgments")
+		fmt.Println("  finwipe cron --followup    # Auto-follow-up after 48h")
+		fmt.Println("  finwipe report            # Compliance dashboard")
 	}
 
 	return nil
-}
-
-func splitCSV(s string) []string {
-	if s == "" {
-		return nil
-	}
-	var result []string
-	for _, part := range strings.Split(s, ",") {
-		trimmed := strings.TrimSpace(part)
-		if trimmed != "" {
-			result = append(result, trimmed)
-		}
-	}
-	return result
 }

@@ -324,12 +324,6 @@ func printRequests(hist *history.DB, reqs []history.Request, json bool) error {
 	return nil
 }
 
-func truncate(s string, max int) string {
-	if len(s) <= max {
-		return s
-	}
-	return s[:max-2] + ".."
-}
 
 // scanRequests scans requests from a *sql.Rows into []history.Request
 func scanRequests(hist *history.DB, rows *sql.Rows) ([]history.Request, error) {

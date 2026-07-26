@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/das-rebel/finwipe/internal/config"
@@ -119,13 +118,10 @@ func runEscalate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Generate complaint letter for regulatory channels
-	letterGen := letter.New(filepath.Join(os.TempDir(), "finwipe_letters"))
-	ageDays := int(time.Since(req.CreatedAt).Hours() / 24)
-
 	var pdfPath string
 	if dbChannel == "RBI_OMBUDSMAN" {
-		pdfPath, _, err = letterGen.GenerateRBIComplaint(
-			req.RequestID, entity, cfg.Profile, ageDays)
+		pdfPath, _, err = letter.GenerateRBIComplaint(
+			req.RequestID, &entity, cfg.Profile)
 		if err != nil {
 			return fmt.Errorf("generate RBI complaint: %w", err)
 		}

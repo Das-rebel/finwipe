@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/das-rebel/finwipe/internal/config"
@@ -52,7 +53,7 @@ func runLetter(cmd *cobra.Command, args []string) error {
 	var targetNBFCs []nbfc.Entity
 	if letterNBFCs != "" {
 		idMap := make(map[string]bool)
-		for _, id := range splitCSV(letterNBFCs) {
+		for _, id := range strings.Split(letterNBFCs, ",") {
 			idMap[id] = true
 		}
 		for _, n := range allNBFCs {
@@ -72,7 +73,7 @@ func runLetter(cmd *cobra.Command, args []string) error {
 	}
 
 	gen := letter.New(outDir)
-	generated, failed := gen.GenerateAll(targetNBFCs, cfg.Profile)
+	generated, failed := gen.GenerateBatch(targetNBFCs, cfg.Profile, letter.DefaultDeletionCategories)
 
 	fmt.Printf("\n📄 Generated: %d PDFs\n", generated)
 	fmt.Printf("📁 Output: %s/\n", outDir)

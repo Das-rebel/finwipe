@@ -1,9 +1,11 @@
 package letter
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jung-kurt/gofpdf"
@@ -11,105 +13,212 @@ import (
 	"github.com/das-rebel/finwipe/internal/nbfc"
 )
 
+// DeletionCategory represents a category of data that can be requested for deletion
+type DeletionCategory string
+
+const (
+	CatMarketing         DeletionCategory = "marketing_data"
+	CatThirdParty       DeletionCategory = "third_party_shared"
+	CatBehavioral       DeletionCategory = "behavioral_analytics"
+	CatAppUsage         DeletionCategory = "app_usage_metadata"
+	CatCallRecords      DeletionCategory = "call_interaction_logs"
+	CatSMSLogs          DeletionCategory = "sms_communication_logs"
+	CatLocation         DeletionCategory = "location_cell_metadata"
+	CatEmployment       DeletionCategory = "employment_proof_data"
+	CatMedical          DeletionCategory = "medical_health_records"
+	CatNominee          DeletionCategory = "nominee_personal_data"
+	CatCreditProfile    DeletionCategory = "credit_profile_shared"
+	CatKYCSupplements   DeletionCategory = "kyc_supplementary_data"
+	CatMarketingPref   DeletionCategory = "promotional_preferences"
+	CatAllNonEssential  DeletionCategory = "all_non_essential_data"
+)
+
+// DeletionCategoryLabel returns a human-readable label
+func (c DeletionCategory) Label() string {
+	return map[DeletionCategory]string{
+		CatMarketing:        "Marketing & Promotional Data",
+		CatThirdParty:       "Third-Party Shared Data",
+		CatBehavioral:       "Behavioral/Analytics Data",
+		CatAppUsage:         "App Usage & Metadata",
+		CatCallRecords:      "Call Records & Interaction Logs",
+		CatSMSLogs:          "SMS Communication Logs",
+		CatLocation:         "Location & Cell Tower Metadata",
+		CatEmployment:       "Employment & Income Proof Data",
+		CatMedical:          "Medical & Health Records",
+		CatNominee:          "Nominee & Beneficiary Data",
+		CatCreditProfile:    "Credit Profile Shared with Third Parties",
+		CatKYCSupplements:   "KYC Supplementary Documents",
+		CatMarketingPref:    "Marketing & Communication Preferences",
+		CatAllNonEssential:  "All Non-Essential Personal Data",
+	}[c]
+}
+
+// DeletionCategories is the default set of categories for financial entities
+var DefaultDeletionCategories = []DeletionCategory{
+	CatMarketing,
+	CatThirdParty,
+	CatBehavioral,
+	CatAppUsage,
+	CatMarketingPref,
+}
+
+// InsuranceDeletionCategories for insurance companies
+var InsuranceDeletionCategories = []DeletionCategory{
+	CatMedical,
+	CatNominee,
+	CatEmployment,
+	CatThirdParty,
+	CatBehavioral,
+	CatMarketingPref,
+}
+
+// TelecomDeletionCategories for telecom operators
+var TelecomDeletionCategories = []DeletionCategory{
+	CatCallRecords,
+	CatSMSLogs,
+	CatLocation,
+	CatBehavioral,
+	CatAppUsage,
+	CatMarketing,
+}
+
+// Generator creates professional PDF deletion letters
 type Generator struct {
 	outputDir string
 }
 
+// New creates a new letter generator
 func New(outputDir string) *Generator {
 	os.MkdirAll(outputDir, 0755)
 	return &Generator{outputDir: outputDir}
 }
 
-func (g *Generator) Generate(n nbfc.Entity, profile config.Profile) (string, error) {
-	filename := filepath.Join(g.outputDir, fmt.Sprintf("deletion_letter_%s_%s.pdf",
-		n.ID, time.Now().Format("2006-01-02")))
-
+// Generate creates a professional PDF deletion letter
+func (g *Generator) Generate(reqID, entityName, grievanceEmail string, profile config.Profile, categories []DeletionCategory) (string, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
 	pdf.AddPage()
 
 	// Header
 	pdf.SetFont("Arial", "B", 16)
-	pdf.CellFormat(0, 8, "DATA DELETION REQUEST", "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 8, "PRIVACY DATA DELETION REQUEST", "", 1, "C", false, 0, "")
 	pdf.SetFont("Arial", "", 10)
-	pdf.CellFormat(0, 5, "Pursuant to Section 8(6) of the DPDP Act, 2023 and Rule 8 of the DPDP Rules, 2025", "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 5, "Under Section 8(6), Digital Personal Data Protection Act, 2023", "", 1, "C", false, 0, "")
+
 	pdf.Ln(5)
 
-	// From/To
+	// Request Reference
 	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "From:", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 11)
-	pdf.MultiCell(0, 5, fmt.Sprintf("%s\n%s\nEmail: %s\nPhone: %s", profile.Name, profile.Address, profile.Email, profile.Phone), "", "L", false)
+	pdf.CellFormat(0, 6, fmt.Sprintf("Request Reference: %s", reqID), "", 1, "R", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, fmt.Sprintf("Date: %s", time.Now().Format("02 January 2006")), "", 1, "R", false, 0, "")
 	pdf.Ln(3)
 
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "To:", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 11)
-	pdf.MultiCell(0, 5, fmt.Sprintf("%s\nGrievance Officer\n%s\nEmail: %s", n.Name, n.Address, n.GrievanceEmail), "", "L", false)
+	// Divider
+	pdf.SetDrawColor(200, 200, 200)
+	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
 	pdf.Ln(5)
 
-	pdf.SetFont("Arial", "", 11)
-	pdf.CellFormat(0, 6, fmt.Sprintf("Date: %s", time.Now().Format("02 January 2006")), "", 1, "", false, 0, "")
+	// To
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "To:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, entityName, "", 1, "L", false, 0, "")
+	pdf.CellFormat(0, 5, fmt.Sprintf("Grievance Officer: %s", grievanceEmail), "", 1, "L", false, 0, "")
 	pdf.Ln(3)
 
+	// From
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "From:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5, profile.Name+"\nEmail: "+profile.Email+"\nPhone: "+profile.Phone+"\n"+profile.Address, "", "L", false)
+	pdf.Ln(3)
+
+	// Subject
 	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "Subject: Request for Erasure of Personal Data under Section 8(6), DPDP Act 2023", "", 1, "", false, 0, "")
+	pdf.CellFormat(0, 6, "Subject: Request for Erasure of Personal Data under Section 8(6), DPDP Act, 2023", "", 1, "L", false, 0, "")
+	pdf.Ln(2)
+
+	// Body
+	body := `I, the undersigned, am exercising my right to erasure of personal data under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8(5) of the DPDP Rules, 2025.
+
+I request deletion of the following categories of personal data held by your organization in connection with my relationship/service with you:`
+
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5, body, "", "L", false)
 	pdf.Ln(3)
 
-	pdf.SetFont("Arial", "", 11)
-	body := fmt.Sprintf(`Dear Grievance Officer,
-
-I, %s, am exercising my right to erasure of personal data under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8 of the DPDP Rules, 2025.
-
-The purpose for which my personal data was collected by %s is no longer being served. I hereby request deletion of the following categories of personal data held by %s:
-
-  □ Marketing and promotional data
-  □ Third-party shared data
-  □ Behavioral/usage data collected through your digital lending app or website
-  □ Pre-approved loan offer profiles
-  □ Call recordings and customer service interaction logs
-  □ Device fingerprint and metadata data
-
-I request acknowledgment of this request within 48 hours as mandated by Rule 8(3) of the DPDP Rules, 2025, and completion of deletion within 30 days of this notice.
-
-This request does not extend to personal data whose retention is required by or under any law for the time being in force, including but not limited to the RBI Act, Companies Act, and Income Tax Act. Specifically, this request does not seek deletion of:
-  □ KYC documents and identity records
-  □ Transaction and loan account records
-  □ Records required for ongoing loan servicing
-  □ Regulatory reporting records
-
-In accordance with Rule 8(5) of the DPDP Rules, 2025, please confirm in writing the categories of data deleted and the manner of deletion.
-
-If no response is received within 30 days, I reserve the right to escalate this matter to the Data Protection Board of India and the Reserve Bank of India.
-
-For any communication regarding this request:
-  Email: %s
-  Phone: %s
-
-Regards,
-%s
-%s`, profile.Name, n.Name, n.Name, profile.Email, profile.Phone, profile.Name, profile.Address)
-
-	pdf.MultiCell(0, 6, body, "", "L", false)
-
-	pdf.Ln(10)
-	pdf.SetFont("Arial", "I", 9)
-	pdf.CellFormat(0, 5, "This letter was generated by FinWipe (github.com/das-rebel/finwipe)", "", 1, "C", false, 0, "")
-
-	if err := pdf.OutputFileAndClose(filename); err != nil {
-		return "", err
+	// Checkboxes for categories
+	for _, cat := range categories {
+		pdf.SetFont("Arial", "", 10)
+		pdf.CellFormat(5, 5, "☐", "", 0, "L", false, 0, "")
+		pdf.CellFormat(0, 5, cat.Label(), "", 1, "L", false, 0, "")
 	}
 
-	return filename, nil
+	pdf.Ln(3)
+
+	// Exclusions
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "Data Excluded from This Request:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	exclusions := `I understand that the following data may be retained as permitted under Section 9 of the DPDP Act:
+• KYC documents and identification records as required by law
+• Transaction records required for tax/compliance purposes
+• Data required to be maintained under any other law for the time being in force`
+
+	pdf.MultiCell(0, 5, exclusions, "", "L", false)
+	pdf.Ln(3)
+
+	// Verification and Acknowledgment
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "Acknowledgment and Timeline:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	ack := `As required under Rule 8(3) of the DPDP Rules, 2025, please acknowledge receipt of this request within 48 hours.
+
+As required under Rule 8(5), please complete the erasure of personal data within 30 days of this request.
+
+Please confirm in writing (email preferred) once the deletion is complete, specifying the scope of data deleted.`
+	pdf.MultiCell(0, 5, ack, "", "L", false)
+	pdf.Ln(3)
+
+	// Non-Compliance Consequence
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "Note on Non-Compliance:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	note := `Failure to comply with this request within the stipulated timeline constitutes a violation of the DPDP Act, 2023. I reserve the right to escalate this matter to:
+• The Data Protection Board of India (once operational), or
+• The relevant sectoral regulator (RBI/IRDAI/SEBI/TRAI), or
+• A consumer forum having jurisdiction.`
+	pdf.MultiCell(0, 5, note, "", "L", false)
+	pdf.Ln(3)
+
+	// Footer
+	pdf.SetDrawColor(200, 200, 200)
+	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
+	pdf.Ln(3)
+	pdf.SetFont("Arial", "I", 9)
+	pdf.CellFormat(0, 5, fmt.Sprintf("Generated by FinWipe | %s | This is an automatically generated request.", reqID), "", 1, "C", false, 0, "")
+
+	// Save
+	filename := fmt.Sprintf("DPDPA_Deletion_%s_%s.pdf",
+		strings.ReplaceAll(reqID, "/", "_"),
+		strings.ReplaceAll(entityName, " ", "_"))
+	path := filepath.Join(g.outputDir, filename)
+	err := pdf.OutputFileAndClose(path)
+	return path, err
 }
 
-func (g *Generator) GenerateAll(nbfcs []nbfc.Entity, profile config.Profile) (generated int, failed []string) {
-	for _, n := range nbfcs {
-		if n.Address == "" {
-			n.Address = "[Address on file with " + n.Name + "]"
+// GenerateBatch creates multiple letters
+func (g *Generator) GenerateBatch(entities []nbfc.Entity, profile config.Profile, categories []DeletionCategory) (generated int, failed []string) {
+	for _, e := range entities {
+		if e.GrievanceEmail == "" {
+			failed = append(failed, e.Name+" (no grievance email)")
+			continue
 		}
-		_, err := g.Generate(n, profile)
+		reqID := fmt.Sprintf("DPR-%d-XXXXXX", time.Now().Year())
+		_, err := g.Generate(reqID, e.Name, e.GrievanceEmail, profile, categories)
 		if err != nil {
-			failed = append(failed, fmt.Sprintf("%s: %v", n.ID, err))
+			failed = append(failed, e.Name+": "+err.Error())
 		} else {
 			generated++
 		}
@@ -117,141 +226,178 @@ func (g *Generator) GenerateAll(nbfcs []nbfc.Entity, profile config.Profile) (ge
 	return
 }
 
-// GenerateRBIComplaint generates a pre-filled RBI Ombudsman complaint (Form-IV equivalent)
-// for cases where NBFC failed to acknowledge or act on the deletion request.
-// Outputs both a PDF letter and an email body for crpc@rbi.org.in.
-func (g *Generator) GenerateRBIComplaint(reqID string, entity nbfc.Entity, profile config.Profile, reqAgeDays int) (pdfPath string, emailBody string, err error) {
-	filename := filepath.Join(g.outputDir, fmt.Sprintf("rbi_complaint_%s_%s.pdf",
-		entity.ID, time.Now().Format("2006-01-02")))
-
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.AddPage()
-
-	// RBI Ombudsman header
-	pdf.SetFont("Arial", "B", 14)
-	pdf.CellFormat(0, 8, "RESERVE BANK OF INDIA — INTEGRATED OMBUDSMAN SCHEME", "", 1, "C", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	pdf.CellFormat(0, 5, "Complaint under Section 18 of the RBl Act, 1934 / Form-IV / Online: https://rbis.rbi.org.in", "", 1, "C", false, 0, "")
-	pdf.Ln(8)
-
-	// Complainant details
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "1. COMPLAINANT DETAILS", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	pdf.MultiCell(0, 5, fmt.Sprintf("Name: %s\nAddress: %s\nEmail: %s\nPhone: %s\nDPR Reference: %s", profile.Name, profile.Address, profile.Email, profile.Phone, reqID), "", "L", false)
-	pdf.Ln(3)
-
-	// Respondent details
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "2. RESPONDENT (NBFC / DATA FIDUCIARY)", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	pdf.MultiCell(0, 5, fmt.Sprintf("Name: %s\nGrievance Officer Email: %s\nCategory: %s", entity.Name, entity.GrievanceEmail, entity.Category), "", "L", false)
-	pdf.Ln(3)
-
-	// Complaint details
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "3. NATURE OF COMPLAINT", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	pdf.MultiCell(0, 5, fmt.Sprintf("Category: Non-compliance with DPDPA 2023 / Data Protection\nSub-category: Failure to honor data deletion request under Section 8(6), DPDP Act 2023\nDate of Request: %s\nDays Elapsed: %d days\nAcknowledgment Received: No\nResponse / Deletion Received: No", time.Now().AddDate(0, 0, -reqAgeDays).Format("02 January 2006"), reqAgeDays), "", "L", false)
-	pdf.Ln(3)
-
-	// Facts
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "4. FACTS OF THE CASE", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	body := fmt.Sprintf(`I submitted a formal data deletion request to %s on %s (Ref: %s) pursuant to Section 8(6) of the Digital Personal Data Protection Act, 2023 and Rule 8 of the DPDP Rules, 2025.
-
-The NBFC was given 30 days to:
-  a) Acknowledge receipt of the request, and
-  b) Complete deletion of personal data categories listed in my request.
-
-To date (%d days elapsed), %s has:
-  ❌ Failed to acknowledge the request (as required by Rule 8(3))
-  ❌ Failed to respond to the deletion request
-  ❌ Failed to provide confirmation of data deletion (as required by Rule 8(5))
-
-I have exhausted the Grievance Redressal Mechanism of the NBFC and have not received a satisfactory resolution.
-
-Relevant correspondence: All communications sent to %s (Grievance Officer).
-The request was tracked under DPR-ID: %s`, entity.Name, time.Now().AddDate(0, 0, -reqAgeDays).Format("02 January 2006"), reqID, reqAgeDays, entity.Name, entity.GrievanceEmail, reqID)
-	pdf.MultiCell(0, 5, body, "", "L", false)
-	pdf.Ln(3)
-
-	// Relief sought
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "5. RELIEF SOUGHT", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	pdf.MultiCell(0, 5, fmt.Sprintf(`a) Direction to %s to acknowledge the data deletion request,
-b) Direction to %s to complete deletion of personal data categories listed in my original request,
-c) Confirmation in writing of the categories deleted and the manner of deletion,
-d) Any other relief the Hon'ble Ombudsman deems fit to grant.`, entity.Name, entity.Name), "", "L", false)
-	pdf.Ln(3)
-
-	// Declaration
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "6. DECLARATION", "", 1, "", false, 0, "")
-	pdf.SetFont("Arial", "", 10)
-	pdf.MultiCell(0, 5, "I declare that the above facts are true and correct to the best of my knowledge. I have not filed any other complaint or suit before any court/authority regarding the same subject matter.", "", "L", false)
-	pdf.Ln(5)
-
-	// Signature
-	pdf.CellFormat(0, 6, fmt.Sprintf("Date: %s", time.Now().Format("02 January 2006")), "", 1, "", false, 0, "")
-	pdf.Ln(5)
-	pdf.CellFormat(0, 6, "Signature: ___________________________", "", 1, "", false, 0, "")
-	pdf.Ln(3)
-	pdf.CellFormat(0, 6, fmt.Sprintf("Name: %s", profile.Name), "", 1, "", false, 0, "")
-
-	pdf.Ln(10)
-	pdf.SetFont("Arial", "I", 8)
-	pdf.CellFormat(0, 4, "Generated by FinWipe | rbi.org.in/Secure/OnlineRBI Ombudsman | Email: crpc@rbi.org.in | Phone: 14448 (toll-free)", "", 1, "C", false, 0, "")
-
-	if err := pdf.OutputFileAndClose(filename); err != nil {
-		return "", "", err
+// GenerateEmailBody creates a plain-text email body for the deletion request
+func GenerateEmailBody(reqID, entityName string, profile config.Profile, categories []DeletionCategory) string {
+	var catList strings.Builder
+	for _, cat := range categories {
+		catList.WriteString("  ☐ " + cat.Label() + "\n")
 	}
 
-	// Build email body
-	emailBody = fmt.Sprintf(`To: crpc@rbi.org.in
-Subject: Complaint — %s — Non-compliance with DPDPA 2023 Data Deletion Request (Ref: %s)
+	return fmt.Sprintf(`Subject: DPDPA Section 8(6) — Request for Erasure of Personal Data [%s]
+
+To,
+%s
+Grievance Officer
+
+Request Reference: %s
+Date: %s
+
+Dear Grievance Officer,
+
+I, %s, exercising my right to erasure under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8(5) of the DPDP Rules, 2025, hereby request deletion of the following categories of personal data held by your organization:
+
+%s
+I understand that the following data may be retained as permitted under Section 9 of the DPDP Act:
+  ☐ KYC documents required by law
+  ☐ Transaction records for tax/compliance purposes
+  ☐ Data required under any other law
+
+As required under Rule 8(3), please acknowledge receipt within 48 hours.
+As required under Rule 8(5), please complete deletion within 30 days.
+
+Failure to comply will result in escalation to the Data Protection Board of India and/or relevant sectoral regulator.
+
+Contact: %s | %s | %s
+
+Regards,
+%s
+
+---
+Generated by FinWipe | %s`,
+		reqID,
+		entityName,
+		reqID,
+		time.Now().Format("02 January 2006"),
+		profile.Name,
+		catList.String(),
+		profile.Email,
+		profile.Phone,
+		profile.Address,
+		profile.Name,
+		reqID)
+}
+
+// GenerateFollowupBody creates a follow-up email for requests not acknowledged
+func GenerateFollowupBody(reqID, entityName string, profile config.Profile, dayNum int) string {
+	return fmt.Sprintf(`Subject: FOLLOW-UP [%d] — DPDPA Deletion Request Not Acknowledged [%s]
+
+Dear Grievance Officer,
+
+This is a follow-up (day %d) to my earlier request dated [ORIGINAL DATE] under Section 8(6), DPDP Act 2023.
+
+Request Reference: %s
+
+I have not received acknowledgment of my deletion request within the 48-hour timeline mandated under Rule 8(3) of the DPDP Rules, 2025.
+
+I hereby reiterate my request for:
+  ☐ Marketing & Promotional Data
+  ☐ Third-Party Shared Data
+  ☐ Behavioral/Analytics Data
+  ☐ App Usage Metadata
+
+Please treat this as priority and confirm receipt and expected deletion timeline immediately.
+
+If no response is received within 7 days, I will escalate to the Data Protection Board of India.
+
+Regards,
+%s | %s
+
+---
+Generated by FinWipe | %s`, dayNum, reqID, dayNum, reqID, profile.Name, profile.Email, reqID)
+}
+
+// GenerateRBIComplaint generates a RBI Ombudsman complaint letter
+func GenerateRBIComplaint(reqID string, entity *nbfc.Entity, profile config.Profile) (string, string, error) {
+	var body bytes.Buffer
+	body.WriteString(fmt.Sprintf(`To,
+The Appellate Officer / Principal Nodal Officer
+RBI Ombudsman
+
+Complainant: %s
+Email: %s
+Phone: %s
+Address: %s
+
+Date: %s
+
+Subject: Complaint under Clause __(_) of the [Banking|Financial Services|Ombudsman] Scheme, 202_ — Non-compliance with DPDPA 2023 Deletion Request
+
+Reference Request: %s
+Entity Complained Against: %s (%s)
 
 Dear Sir/Madam,
 
-I wish to file a complaint under the Reserve Bank of India — Integrated Ombudsman Scheme, 2021, against %s (NBFC Reg. No.: %s) for non-compliance with my data deletion request under Section 8(6) of the Digital Personal Data Protection Act, 2023.
+I submitted a Data Erasure Request under Section 8(6), DPDP Act 2023 to %s on [DATE] (Ref: %s).
 
-COMPLAINANT: %s | %s | %s
+The entity has failed to:
+1. Acknowledge the request within 48 hours (Rule 8(3))
+2. Complete deletion within 30 days (Rule 8(5))
+3. Provide any substantive response to repeated follow-ups
 
-RESPONDENT: %s | Grievance Email: %s
+I therefore file this complaint requesting your intervention to ensure compliance with the DPDP Act, 2023.
 
-FACTS:
-- Submitted data deletion request on: %s (Ref: %s)
-- Days elapsed without acknowledgment: %d
-- Acknowledgment received: NO
-- Deletion confirmed: NO
-- Grievance mechanism exhausted: YES
+Supporting documents attached:
+  1. Original deletion request [%s]
+  2. Follow-up communications (if any)
+  3. Evidence of no response / unsatisfactory response
 
-I request your kind intervention to direct the NBFC to:
-1. Acknowledge the data deletion request immediately
-2. Complete deletion of personal data categories in my original request
-3. Provide written confirmation of deletion as mandated by Rule 8(5), DPDP Rules, 2025
+I request that you direct %s to comply with my deletion request and submit a compliance report.
 
-A detailed complaint letter is attached (PDF) for your reference.
-
-I request the Hon'ble Ombudsman to take suo motu cognizance and initiate action under Section 18 of the RBI Act, 1934.
-
-Thanking you,
-%s (%s)
-Email: %s | Phone: %s
-
----
-Ref DPR-ID: %s
-This complaint was generated using FinWipe (github.com/das-rebel/finwipe)`,
-
-		entity.Name, reqID,
-		entity.Name, entity.ShortName,
-		profile.Name, profile.Email, profile.Phone,
+Regards,
+%s`, profile.Name, profile.Email, profile.Phone, profile.Address,
+		time.Now().Format("02 January 2006"),
+		reqID,
 		entity.Name, entity.GrievanceEmail,
-		time.Now().AddDate(0, 0, -reqAgeDays).Format("02 January 2006"), reqID, reqAgeDays,
-		profile.Name, profile.Name, profile.Email, profile.Phone,
-		reqID)
+		entity.Name, reqID,
+		reqID,
+		entity.Name,
+		profile.Name))
 
-	return filename, emailBody, nil
+	// Generate PDF
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 14)
+	pdf.CellFormat(0, 8, "RBI OMBUDSMAN / APPELLATE AUTHORITY COMPLAINT", "", 1, "C", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5, body.String(), "", "L", false)
+
+	filename := fmt.Sprintf("RBI_Complaint_%s_%s.pdf",
+		strings.ReplaceAll(reqID, "/", "_"),
+		strings.ReplaceAll(entity.Name, " ", "_"))
+	path := filepath.Join(os.TempDir(), filename)
+	err := pdf.OutputFileAndClose(path)
+	return path, body.String(), err
+}
+
+// GenerateInsuranceLetter creates a letter specific to insurance companies
+func (g *Generator) GenerateInsuranceLetter(reqID string, entity *nbfc.Entity, profile config.Profile, policyNumber string) (string, error) {
+	return g.Generate(reqID, entity.Name, entity.GrievanceEmail, profile, InsuranceDeletionCategories)
+}
+
+// GenerateTelecomLetter creates a letter specific to telecom operators
+func (g *Generator) GenerateTelecomLetter(reqID string, entity *nbfc.Entity, profile config.Profile, msisdn string) (string, error) {
+	// Telecom letters include call/SMS metadata
+	categories := TelecomDeletionCategories
+	return g.Generate(reqID, entity.Name, entity.GrievanceEmail, profile, categories)
+}
+
+// AllDeletionCategories returns all available deletion categories
+func AllDeletionCategories() []DeletionCategory {
+	return []DeletionCategory{
+		CatMarketing,
+		CatThirdParty,
+		CatBehavioral,
+		CatAppUsage,
+		CatCallRecords,
+		CatSMSLogs,
+		CatLocation,
+		CatEmployment,
+		CatMedical,
+		CatNominee,
+		CatCreditProfile,
+		CatKYCSupplements,
+		CatMarketingPref,
+		CatAllNonEssential,
+	}
 }
