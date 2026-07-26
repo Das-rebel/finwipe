@@ -52,6 +52,8 @@ func main() {
 	// Email forwarding discovery (CRED/Fold model)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(checkInboxCmd)
+	rootCmd.AddCommand(syncCmd)       // Cloud sync + auto-create
+	rootCmd.AddCommand(cloudCmd)      // Cloud status check
 
 	// Interactive + Evidence
 	rootCmd.AddCommand(evidenceCmd)   // Evidence management
