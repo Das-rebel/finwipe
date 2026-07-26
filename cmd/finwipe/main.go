@@ -49,6 +49,10 @@ func main() {
 	// Dashboard
 	rootCmd.AddCommand(reportCmd) // Compliance dashboard and reporting
 
+	// Email forwarding discovery (CRED/Fold model)
+	rootCmd.AddCommand(forwardCmd)
+	rootCmd.AddCommand(checkInboxCmd)
+
 	// Interactive + Evidence
 	rootCmd.AddCommand(evidenceCmd)   // Evidence management
 
