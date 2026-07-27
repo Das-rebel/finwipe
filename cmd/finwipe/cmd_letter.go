@@ -27,7 +27,7 @@ var (
 func init() {
 	letterCmd.Flags().StringVar(&letterOutputDir, "output", "", "Output directory for PDFs (default: ~/.finwipe/letters/)")
 	letterCmd.Flags().StringVar(&letterNBFCs, "nbfcs", "", "Generate letters for specific NBFC IDs (comma-separated)")
-	letterCmd.Flags().StringVar(&letterLegalBasis, "legal-basis", "both",
+	letterCmd.Flags().StringVar(&letterLegalBasis, "legal-basis", "withdrawal",
 		"Legal basis: dpdp, rbi, both")
 }
 
@@ -79,7 +79,7 @@ func runLetter(cmd *cobra.Command, args []string) error {
 	var legalBasis letter.LegalBasis
 	switch letterLegalBasis {
 	case "dpdp":
-		legalBasis = letter.LegalBasisDPDP
+		legalBasis = letter.LegalBasisWithdrawal
 	case "rbi":
 		legalBasis = letter.LegalBasisRBI
 	default:

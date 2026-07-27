@@ -60,8 +60,8 @@ func init() {
 		"Your registered email (or set in finwipe init)")
 	newCmd.Flags().StringVar(&newCategories, "categories", "",
 		"Comma-separated deletion categories: marketing,third_party,behavioral,app_usage,medical,nominee,employment")
-	newCmd.Flags().StringVar(&newLegalBasis, "legal-basis", "both",
-		"Legal basis: dpdp (DPDP Act only), rbi (RBI DLG only), both (recommended)")
+	newCmd.Flags().StringVar(&newLegalBasis, "legal-basis", "withdrawal",
+		"Withdrawal: Sec 8(7) - broadest. Erasure: Sec 8(6) - fraud. RBI: NBFC/bank. Access: Sec 6 - data inventory")
 	newCmd.Flags().BoolVar(&newDryRun, "dry-run", false,
 		"Preview requests without creating")
 }

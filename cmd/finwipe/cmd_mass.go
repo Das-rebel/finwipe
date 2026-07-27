@@ -54,7 +54,7 @@ func init() {
 		"Include only these NBFC IDs (comma-separated)")
 	massCmd.Flags().IntVar(&massCount, "count", 0,
 		"Send to exactly N entities (picks randomly)")
-	massCmd.Flags().StringVar(&massLegalBasis, "legal-basis", "both",
+	massCmd.Flags().StringVar(&massLegalBasis, "legal-basis", "withdrawal",
 		"Legal basis: dpdp, rbi, both")
 }
 
@@ -213,7 +213,7 @@ func runMassRequest(cmd *cobra.Command, args []string) error {
 	var legalBasis letter.LegalBasis
 	switch massLegalBasis {
 	case "dpdp":
-		legalBasis = letter.LegalBasisDPDP
+		legalBasis = letter.LegalBasisWithdrawal
 	case "rbi":
 		legalBasis = letter.LegalBasisRBI
 	default:

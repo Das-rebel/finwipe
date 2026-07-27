@@ -54,8 +54,8 @@ func init() {
 		"Send a specific request by DPR-ID")
 	sendCmd.Flags().StringVar(&sendChannel, "channel", "email",
 		"Dispatch channel: email, post, cic (default: email)")
-	sendCmd.Flags().StringVar(&sendLegalBasis, "legal-basis", "both",
-		"Legal basis: dpdp, rbi, both (default: both)")
+	sendCmd.Flags().StringVar(&sendLegalBasis, "legal-basis", "withdrawal",
+		"Legal basis: withdrawal (Sec 8(7)), erasure (Sec 8(6)), rbi, both, access (Sec 6)")
 }
 
 func runSend(cmd *cobra.Command, args []string) error {
@@ -164,7 +164,7 @@ func runSend(cmd *cobra.Command, args []string) error {
 		var legalBasis letter.LegalBasis
 		switch sendLegalBasis {
 		case "dpdp":
-			legalBasis = letter.LegalBasisDPDP
+			legalBasis = letter.LegalBasisWithdrawal
 		case "rbi":
 			legalBasis = letter.LegalBasisRBI
 		default:

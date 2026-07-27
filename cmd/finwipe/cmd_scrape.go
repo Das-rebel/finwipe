@@ -189,7 +189,7 @@ func runScrape(cmd *cobra.Command, args []string) error {
 		var lb letter.LegalBasis
 		switch scrapeLegalBasis {
 		case "dpdp":
-			lb = letter.LegalBasisDPDP
+			lb = letter.LegalBasisWithdrawal
 		case "rbi":
 			lb = letter.LegalBasisRBI
 		default:
