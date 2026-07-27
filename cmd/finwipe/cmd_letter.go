@@ -21,11 +21,14 @@ var letterCmd = &cobra.Command{
 var (
 	letterOutputDir string
 	letterNBFCs    string // comma-separated IDs
+	letterLegalBasis string // dpdp, rbi, both
 )
 
 func init() {
 	letterCmd.Flags().StringVar(&letterOutputDir, "output", "", "Output directory for PDFs (default: ~/.finwipe/letters/)")
 	letterCmd.Flags().StringVar(&letterNBFCs, "nbfcs", "", "Generate letters for specific NBFC IDs (comma-separated)")
+	letterCmd.Flags().StringVar(&letterLegalBasis, "legal-basis", "both",
+		"Legal basis: dpdp, rbi, both")
 }
 
 func runLetter(cmd *cobra.Command, args []string) error {
@@ -72,8 +75,19 @@ func runLetter(cmd *cobra.Command, args []string) error {
 		outDir = filepath.Join(home, ".finwipe", "letters")
 	}
 
+	// Parse legal basis
+	var legalBasis letter.LegalBasis
+	switch letterLegalBasis {
+	case "dpdp":
+		legalBasis = letter.LegalBasisDPDP
+	case "rbi":
+		legalBasis = letter.LegalBasisRBI
+	default:
+		legalBasis = letter.LegalBasisBoth
+	}
+
 	gen := letter.New(outDir)
-	generated, failed := gen.GenerateBatch(targetNBFCs, cfg.Profile, letter.DefaultDeletionCategories)
+	generated, failed := gen.GenerateBatch(targetNBFCs, cfg.Profile, letter.DefaultDeletionCategories, legalBasis)
 
 	fmt.Printf("\n📄 Generated: %d PDFs\n", generated)
 	fmt.Printf("📁 Output: %s/\n", outDir)

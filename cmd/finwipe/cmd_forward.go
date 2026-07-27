@@ -360,7 +360,7 @@ func runCheckInbox(cmd *cobra.Command, args []string) error {
 		}
 
 		gen.Generate(req.RequestID, m.Entity.Name, m.Entity.GrievanceEmail,
-			profile.Profile, letter.DefaultDeletionCategories)
+			profile.Profile, letter.DefaultDeletionCategories, letter.LegalBasisBoth)
 
 		fmt.Printf("  ✅ %-25s %s\n", m.Entity.Name, req.RequestID)
 		created++

@@ -299,7 +299,7 @@ func runWhatsappDiscover(cmd *cobra.Command, args []string) error {
 			}
 
 			gen.Generate(req.RequestID, m.Entity.Name, m.Entity.GrievanceEmail,
-				cfg.Profile, letter.DefaultDeletionCategories)
+				cfg.Profile, letter.DefaultDeletionCategories, letter.LegalBasisBoth)
 
 			fmt.Printf("  ✅ %-28s %s\n", m.Entity.Name, req.RequestID)
 			created++

@@ -290,8 +290,7 @@ func runDiscoverFromCibil(cmd *cobra.Command, args []string) error {
 		}
 
 		// Store evidence
-		emailBody := letter.GenerateEmailBody(req.RequestID, m.Entity.Name, profile,
-			letter.DefaultDeletionCategories)
+		emailBody := letter.GenerateEmailBody(req.RequestID, m.Entity.Name, profile, letter.DefaultDeletionCategories, letter.LegalBasisBoth)
 
 		if smtpConfigured {
 			sender := email.New(&cfg.SMTP)
@@ -318,7 +317,7 @@ func runDiscoverFromCibil(cmd *cobra.Command, args []string) error {
 
 		// Generate letter PDF
 		letterPath, _ := letterGen.Generate(req.RequestID, m.Entity.Name,
-			m.Entity.GrievanceEmail, profile, letter.DefaultDeletionCategories)
+			m.Entity.GrievanceEmail, profile, letter.DefaultDeletionCategories, letter.LegalBasisBoth)
 		_ = letterPath // stored in history
 
 		created++

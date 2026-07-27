@@ -53,6 +53,36 @@ func (c DeletionCategory) Label() string {
 	}[c]
 }
 
+// LegalBasis represents the legal basis for the deletion request
+type LegalBasis string
+
+const (
+	// LegalBasisDPDP uses only DPDPA 2023 (Section 8(6))
+	LegalBasisDPDP LegalBasis = "dpdp"
+	// LegalBasisRBI uses only RBI Digital Lending Guidelines 2022
+	LegalBasisRBI LegalBasis = "rbi"
+	// LegalBasisBoth uses both DPDPA 2023 and RBI DLG 2022
+	LegalBasisBoth LegalBasis = "both"
+)
+
+// LegalBasisLabel returns human-readable label
+func (l LegalBasis) Label() string {
+	return map[LegalBasis]string{
+		LegalBasisDPDP: "DPDP Act 2023",
+		LegalBasisRBI:  "RBI Digital Lending Guidelines 2022",
+		LegalBasisBoth: "DPDP Act 2023 + RBI Digital Lending Guidelines 2022",
+	}[l]
+}
+
+// LegalBasisDescription returns the legal citation
+func (l LegalBasis) Description() string {
+	return map[LegalBasis]string{
+		LegalBasisDPDP: "Section 8(6), Digital Personal Data Protection Act, 2023",
+		LegalBasisRBI:  "RBI Digital Lending Guidelines 2022 — Para 10.2, 11.1, 11.2",
+		LegalBasisBoth: "Section 8(6), DPDP Act 2023 + RBI DLG 2022 (Para 10.2, 11.1, 11.2)",
+	}[l]
+}
+
 // DeletionCategories is the default set of categories for financial entities
 var DefaultDeletionCategories = []DeletionCategory{
 	CatMarketing,
@@ -94,16 +124,20 @@ func New(outputDir string) *Generator {
 }
 
 // Generate creates a professional PDF deletion letter
-func (g *Generator) Generate(reqID, entityName, grievanceEmail string, profile config.Profile, categories []DeletionCategory) (string, error) {
+func (g *Generator) Generate(reqID, entityName, grievanceEmail string, profile config.Profile, categories []DeletionCategory, legalBasis LegalBasis) (string, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetMargins(20, 20, 20)
 	pdf.AddPage()
 
-	// Header
+	// Header - varies by legal basis
 	pdf.SetFont("Arial", "B", 16)
-	pdf.CellFormat(0, 8, "PRIVACY DATA DELETION REQUEST", "", 1, "C", false, 0, "")
+	if legalBasis == LegalBasisRBI {
+		pdf.CellFormat(0, 8, "DATA DELETION REQUEST — RBI DIGITAL LENDING", "", 1, "C", false, 0, "")
+	} else {
+		pdf.CellFormat(0, 8, "PRIVACY DATA DELETION REQUEST", "", 1, "C", false, 0, "")
+	}
 	pdf.SetFont("Arial", "", 10)
-	pdf.CellFormat(0, 5, "Under Section 8(6), Digital Personal Data Protection Act, 2023", "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 5, legalBasis.Description(), "", 1, "C", false, 0, "")
 
 	pdf.Ln(5)
 
@@ -134,15 +168,37 @@ func (g *Generator) Generate(reqID, entityName, grievanceEmail string, profile c
 	pdf.MultiCell(0, 5, profile.Name+"\nEmail: "+profile.Email+"\nPhone: "+profile.Phone+"\n"+profile.Address, "", "L", false)
 	pdf.Ln(3)
 
-	// Subject
+	// Subject - varies by legal basis
 	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 6, "Subject: Request for Erasure of Personal Data under Section 8(6), DPDP Act, 2023", "", 1, "L", false, 0, "")
+	if legalBasis == LegalBasisRBI {
+		pdf.CellFormat(0, 6, "Subject: Request for Deletion of Personal Data — RBI Digital Lending Guidelines 2022 (Para 10.2, 11.1, 11.2)", "", 1, "L", false, 0, "")
+	} else {
+		pdf.CellFormat(0, 6, "Subject: Request for Erasure of Personal Data under Section 8(6), DPDP Act, 2023", "", 1, "L", false, 0, "")
+	}
 	pdf.Ln(2)
 
-	// Body
-	body := `I, the undersigned, am exercising my right to erasure of personal data under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8(5) of the DPDP Rules, 2025.
+	// Body - varies by legal basis
+	var body string
+	if legalBasis == LegalBasisRBI {
+		body = `I, the undersigned, am exercising my right to request deletion of personal data under the RBI Digital Lending Guidelines, 2022.
+
+Specifically:
+• Para 10.2: "The DSP shall not retain data, whether directly or through any third party, beyond the period necessary for the purpose for which it was collected."
+• Para 11.1: "Data shared with the DSP shall be used only for the purpose for which it was obtained."
+• Para 11.2: "Data collected shall be deleted after the purpose is served."
+
+I request deletion of the following categories of personal data held by your organization in excess of what is necessary for regulatory compliance:`
+	} else if legalBasis == LegalBasisBoth {
+		body = `I, the undersigned, am exercising my rights under:
+(A) Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) — Right to Erasure, and
+(B) RBI Digital Lending Guidelines, 2022 — Para 10.2, 11.1, 11.2 — Data minimization and deletion
 
 I request deletion of the following categories of personal data held by your organization in connection with my relationship/service with you:`
+	} else {
+		body = `I, the undersigned, am exercising my right to erasure of personal data under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8(5) of the DPDP Rules, 2025.
+
+I request deletion of the following categories of personal data held by your organization in connection with my relationship/service with you:`
+	}
 
 	pdf.SetFont("Arial", "", 10)
 	pdf.MultiCell(0, 5, body, "", "L", false)
@@ -157,27 +213,43 @@ I request deletion of the following categories of personal data held by your org
 
 	pdf.Ln(3)
 
-	// Exclusions
+	// Exclusions - varies by legal basis
 	pdf.SetFont("Arial", "B", 10)
 	pdf.CellFormat(0, 5, "Data Excluded from This Request:", "", 1, "L", false, 0, "")
 	pdf.SetFont("Arial", "", 10)
-	exclusions := `I understand that the following data may be retained as permitted under Section 9 of the DPDP Act:
+	var exclusions string
+	if legalBasis == LegalBasisRBI {
+		exclusions = `The following may be retained as permitted under applicable law:
+• KYC documents as required by PMLA/AML regulations
+• Transaction records required for tax/compliance purposes
+• Data required under any other law for the time being in force`
+	} else {
+		exclusions = `I understand that the following data may be retained as permitted under Section 9 of the DPDP Act:
 • KYC documents and identification records as required by law
 • Transaction records required for tax/compliance purposes
 • Data required to be maintained under any other law for the time being in force`
-
+	}
 	pdf.MultiCell(0, 5, exclusions, "", "L", false)
 	pdf.Ln(3)
 
-	// Verification and Acknowledgment
+	// Verification and Acknowledgment - varies by legal basis
 	pdf.SetFont("Arial", "B", 10)
 	pdf.CellFormat(0, 5, "Acknowledgment and Timeline:", "", 1, "L", false, 0, "")
 	pdf.SetFont("Arial", "", 10)
-	ack := `As required under Rule 8(3) of the DPDP Rules, 2025, please acknowledge receipt of this request within 48 hours.
+	var ack string
+	if legalBasis == LegalBasisRBI {
+		ack = `As per RBI Digital Lending Guidelines, please acknowledge receipt within 48 hours.
+
+Please complete the deletion of unnecessary personal data within 30 days.
+
+Please confirm in writing (email preferred) once the deletion is complete, specifying the scope of data deleted.`
+	} else {
+		ack = `As required under Rule 8(3) of the DPDP Rules, 2025, please acknowledge receipt of this request within 48 hours.
 
 As required under Rule 8(5), please complete the erasure of personal data within 30 days of this request.
 
 Please confirm in writing (email preferred) once the deletion is complete, specifying the scope of data deleted.`
+	}
 	pdf.MultiCell(0, 5, ack, "", "L", false)
 	pdf.Ln(3)
 
@@ -185,10 +257,22 @@ Please confirm in writing (email preferred) once the deletion is complete, speci
 	pdf.SetFont("Arial", "B", 10)
 	pdf.CellFormat(0, 5, "Note on Non-Compliance:", "", 1, "L", false, 0, "")
 	pdf.SetFont("Arial", "", 10)
-	note := `Failure to comply with this request within the stipulated timeline constitutes a violation of the DPDP Act, 2023. I reserve the right to escalate this matter to:
-• The Data Protection Board of India (once operational), or
+	var note string
+	if legalBasis == LegalBasisBoth {
+		note = `Failure to comply with this request constitutes a violation of both:
+(A) DPDP Act, 2023 — Section 8(6), and
+(B) RBI Digital Lending Guidelines, 2022 — Para 10.2, 11.1, 11.2
+
+I reserve the right to escalate this matter to:
+• The Data Protection Board of India (Section 27(3), DPDP Act), or
+• The RBI Ombudsman / relevant sectoral regulator, or
+• A consumer forum having jurisdiction.`
+	} else {
+		note = `Failure to comply with this request within the stipulated timeline constitutes a violation of the ` + legalBasis.Label() + `. I reserve the right to escalate this matter to:
+• The Data Protection Board of India (Section 27(3), DPDP Act), or
 • The relevant sectoral regulator (RBI/IRDAI/SEBI/TRAI), or
 • A consumer forum having jurisdiction.`
+	}
 	pdf.MultiCell(0, 5, note, "", "L", false)
 	pdf.Ln(3)
 
@@ -197,10 +281,17 @@ Please confirm in writing (email preferred) once the deletion is complete, speci
 	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
 	pdf.Ln(3)
 	pdf.SetFont("Arial", "I", 9)
-	pdf.CellFormat(0, 5, fmt.Sprintf("Generated by FinWipe | %s | This is an automatically generated request.", reqID), "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 5, fmt.Sprintf("Generated by FinWipe | %s | Legal Basis: %s", reqID, legalBasis.Label()), "", 1, "C", false, 0, "")
 
 	// Save
-	filename := fmt.Sprintf("DPDPA_Deletion_%s_%s.pdf",
+	prefix := "DPDPA_Deletion"
+	if legalBasis == LegalBasisRBI {
+		prefix = "RBI_Deletion"
+	} else if legalBasis == LegalBasisBoth {
+		prefix = "Dual_Deletion"
+	}
+	filename := fmt.Sprintf("%s_%s_%s.pdf",
+		prefix,
 		strings.ReplaceAll(reqID, "/", "_"),
 		strings.ReplaceAll(entityName, " ", "_"))
 	path := filepath.Join(g.outputDir, filename)
@@ -209,14 +300,14 @@ Please confirm in writing (email preferred) once the deletion is complete, speci
 }
 
 // GenerateBatch creates multiple letters
-func (g *Generator) GenerateBatch(entities []nbfc.Entity, profile config.Profile, categories []DeletionCategory) (generated int, failed []string) {
+func (g *Generator) GenerateBatch(entities []nbfc.Entity, profile config.Profile, categories []DeletionCategory, legalBasis LegalBasis) (generated int, failed []string) {
 	for _, e := range entities {
 		if e.GrievanceEmail == "" {
 			failed = append(failed, e.Name+" (no grievance email)")
 			continue
 		}
 		reqID := fmt.Sprintf("DPR-%d-XXXXXX", time.Now().Year())
-		_, err := g.Generate(reqID, e.Name, e.GrievanceEmail, profile, categories)
+		_, err := g.Generate(reqID, e.Name, e.GrievanceEmail, profile, categories, legalBasis)
 		if err != nil {
 			failed = append(failed, e.Name+": "+err.Error())
 		} else {
@@ -227,24 +318,72 @@ func (g *Generator) GenerateBatch(entities []nbfc.Entity, profile config.Profile
 }
 
 // GenerateEmailBody creates a plain-text email body for the deletion request
-func GenerateEmailBody(reqID, entityName string, profile config.Profile, categories []DeletionCategory) string {
+func GenerateEmailBody(reqID, entityName string, profile config.Profile, categories []DeletionCategory, legalBasis LegalBasis) string {
 	var catList strings.Builder
 	for _, cat := range categories {
 		catList.WriteString("  ☐ " + cat.Label() + "\n")
 	}
 
-	return fmt.Sprintf(`Subject: DPDPA Section 8(6) — Request for Erasure of Personal Data [%s]
+	// Subject and body vary by legal basis
+	var subject, body string
+	if legalBasis == LegalBasisRBI {
+		subject = fmt.Sprintf("DATA DELETION REQUEST — RBI Digital Lending Guidelines 2022 [%s]", reqID)
+		body = fmt.Sprintf(`I, %s, exercising my rights under the RBI Digital Lending Guidelines, 2022 (Para 10.2, 11.1, 11.2), hereby request deletion of the following categories of personal data held by your organization:
 
-To,
 %s
-Grievance Officer
 
-Request Reference: %s
-Date: %s
+Under RBI DLG Para 10.2, data shall not be retained beyond the period necessary for the purpose for which it was collected.
+Under RBI DLG Para 11.1, data shall be used only for the purpose for which it was obtained.
+Under RBI DLG Para 11.2, data shall be deleted after the purpose is served.
 
-Dear Grievance Officer,
+Please acknowledge within 48 hours and complete deletion within 30 days.
 
-I, %s, exercising my right to erasure under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8(5) of the DPDP Rules, 2025, hereby request deletion of the following categories of personal data held by your organization:
+Contact: %s | %s | %s
+
+Regards,
+%s
+
+---
+Generated by FinWipe | %s | Legal Basis: RBI Digital Lending Guidelines 2022`,
+			profile.Name,
+			catList.String(),
+			profile.Email,
+			profile.Phone,
+			profile.Address,
+			profile.Name,
+			reqID)
+	} else if legalBasis == LegalBasisBoth {
+		subject = fmt.Sprintf("DUAL LEGAL BASIS — DPDPA + RBI DLG — Deletion Request [%s]", reqID)
+		body = fmt.Sprintf(`I, %s, exercising my rights under:
+(A) Section 8(6), Digital Personal Data Protection Act, 2023, and
+(B) RBI Digital Lending Guidelines, 2022 (Para 10.2, 11.1, 11.2)
+
+hereby request deletion of the following categories of personal data held by your organization:
+
+%s
+
+As required under Rule 8(3), please acknowledge within 48 hours.
+As required under Rule 8(5), please complete deletion within 30 days.
+
+Non-compliance constitutes violation of both DPDP Act 2023 and RBI DLG 2022.
+
+Contact: %s | %s | %s
+
+Regards,
+%s
+
+---
+Generated by FinWipe | %s | Legal Basis: DPDPA 2023 + RBI DLG 2022`,
+			profile.Name,
+			catList.String(),
+			profile.Email,
+			profile.Phone,
+			profile.Address,
+			profile.Name,
+			reqID)
+	} else {
+		subject = fmt.Sprintf("DPDP Act Section 8(6) — Request for Erasure of Personal Data [%s]", reqID)
+		body = fmt.Sprintf(`I, %s, exercising my right to erasure under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8(5) of the DPDP Rules, 2025, hereby request deletion of the following categories of personal data held by your organization:
 
 %s
 I understand that the following data may be retained as permitted under Section 9 of the DPDP Act:
@@ -263,27 +402,58 @@ Regards,
 %s
 
 ---
-Generated by FinWipe | %s`,
-		reqID,
+Generated by FinWipe | %s | Legal Basis: DPDP Act 2023`,
+			profile.Name,
+			catList.String(),
+			profile.Email,
+			profile.Phone,
+			profile.Address,
+			profile.Name,
+			reqID)
+	}
+
+	return fmt.Sprintf("Subject: %s\n\nTo,\n%s\nGrievance Officer\n\nRequest Reference: %s\nDate: %s\n\nDear Grievance Officer,\n\n%s\n\nRegards,\n%s\n\n---\nGenerated by FinWipe",
+		subject,
 		entityName,
 		reqID,
 		time.Now().Format("02 January 2006"),
-		profile.Name,
-		catList.String(),
-		profile.Email,
-		profile.Phone,
-		profile.Address,
-		profile.Name,
-		reqID)
+		body,
+		profile.Name)
 }
 
+
 // GenerateFollowupBody creates a follow-up email for requests not acknowledged
-func GenerateFollowupBody(reqID, entityName string, profile config.Profile, dayNum int) string {
-	return fmt.Sprintf(`Subject: FOLLOW-UP [%d] — DPDPA Deletion Request Not Acknowledged [%s]
+func GenerateFollowupBody(reqID, entityName string, profile config.Profile, dayNum int, legalBasis LegalBasis) string {
+	var subject, body string
+	if legalBasis == LegalBasisRBI {
+		subject = fmt.Sprintf("FOLLOW-UP [%d] — RBI DLG Deletion Request — NOT ACKNOWLEDGED [%s]", dayNum, reqID)
+		body = fmt.Sprintf(`This is a follow-up (day %d) to my earlier request dated [ORIGINAL DATE] under RBI Digital Lending Guidelines 2022.
 
-Dear Grievance Officer,
+Request Reference: %s
 
-This is a follow-up (day %d) to my earlier request dated [ORIGINAL DATE] under Section 8(6), DPDP Act 2023.
+I have not received acknowledgment of my deletion request within 48 hours.
+
+I hereby reiterate my request for deletion of personal data under RBI DLG Para 10.2, 11.1, 11.2.
+
+Please treat this as priority and confirm receipt and expected deletion timeline immediately.
+
+If no response is received within 7 days, I will escalate to the RBI Ombudsman.`, dayNum, reqID)
+	} else if legalBasis == LegalBasisBoth {
+		subject = fmt.Sprintf("URGENT FOLLOW-UP [%d] — DPDPA + RBI DLG Deletion — NOT ACKNOWLEDGED [%s]", dayNum, reqID)
+		body = fmt.Sprintf(`This is a follow-up (day %d) to my earlier request dated [ORIGINAL DATE] under both:
+(A) Section 8(6), DPDP Act 2023, and
+(B) RBI Digital Lending Guidelines 2022
+
+Request Reference: %s
+
+I have not received acknowledgment within the mandated 48-hour timeline.
+
+I hereby reiterate my request for deletion of personal data.
+
+If no response is received within 7 days, I will escalate to both the Data Protection Board of India and the RBI Ombudsman.`, dayNum, reqID)
+	} else {
+		subject = fmt.Sprintf("FOLLOW-UP [%d] — DPDPA Deletion Request Not Acknowledged [%s]", dayNum, reqID)
+		body = fmt.Sprintf(`This is a follow-up (day %d) to my earlier request dated [ORIGINAL DATE] under Section 8(6), DPDP Act 2023.
 
 Request Reference: %s
 
@@ -297,13 +467,11 @@ I hereby reiterate my request for:
 
 Please treat this as priority and confirm receipt and expected deletion timeline immediately.
 
-If no response is received within 7 days, I will escalate to the Data Protection Board of India.
+If no response is received within 7 days, I will escalate to the Data Protection Board of India.`, dayNum, reqID)
+	}
 
-Regards,
-%s | %s
-
----
-Generated by FinWipe | %s`, dayNum, reqID, dayNum, reqID, profile.Name, profile.Email, reqID)
+	return fmt.Sprintf("Subject: %s\n\nDear Grievance Officer,\n\n%s\n\nRegards,\n%s | %s\n\n---\nGenerated by FinWipe | %s | Legal Basis: %s",
+		subject, body, profile.Name, profile.Email, reqID, legalBasis.Label())
 }
 
 // GenerateRBIComplaint generates a RBI Ombudsman complaint letter
@@ -372,14 +540,14 @@ Regards,
 
 // GenerateInsuranceLetter creates a letter specific to insurance companies
 func (g *Generator) GenerateInsuranceLetter(reqID string, entity *nbfc.Entity, profile config.Profile, policyNumber string) (string, error) {
-	return g.Generate(reqID, entity.Name, entity.GrievanceEmail, profile, InsuranceDeletionCategories)
+	return g.Generate(reqID, entity.Name, entity.GrievanceEmail, profile, InsuranceDeletionCategories, LegalBasisDPDP)
 }
 
 // GenerateTelecomLetter creates a letter specific to telecom operators
 func (g *Generator) GenerateTelecomLetter(reqID string, entity *nbfc.Entity, profile config.Profile, msisdn string) (string, error) {
 	// Telecom letters include call/SMS metadata
 	categories := TelecomDeletionCategories
-	return g.Generate(reqID, entity.Name, entity.GrievanceEmail, profile, categories)
+	return g.Generate(reqID, entity.Name, entity.GrievanceEmail, profile, categories, LegalBasisDPDP)
 }
 
 // AllDeletionCategories returns all available deletion categories

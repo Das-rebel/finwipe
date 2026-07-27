@@ -40,6 +40,7 @@ var (
 	rateLimitMs      int
 	sendRequestID    string
 	sendChannel      string // email, post, cic
+	sendLegalBasis   string // dpdp, rbi, both
 )
 
 func init() {
@@ -53,6 +54,8 @@ func init() {
 		"Send a specific request by DPR-ID")
 	sendCmd.Flags().StringVar(&sendChannel, "channel", "email",
 		"Dispatch channel: email, post, cic (default: email)")
+	sendCmd.Flags().StringVar(&sendLegalBasis, "legal-basis", "both",
+		"Legal basis: dpdp, rbi, both (default: both)")
 	rootCmd.AddCommand(sendCmd)
 }
 
@@ -158,10 +161,21 @@ func runSend(cmd *cobra.Command, args []string) error {
 			categories = letter.DefaultDeletionCategories
 		}
 
+		// Parse legal basis
+		var legalBasis letter.LegalBasis
+		switch sendLegalBasis {
+		case "dpdp":
+			legalBasis = letter.LegalBasisDPDP
+		case "rbi":
+			legalBasis = letter.LegalBasisRBI
+		default:
+			legalBasis = letter.LegalBasisBoth
+		}
+
 		var err error
 
 		if sendChannel == "email" || req.Channel == history.ChannelEmail {
-			emailBody := letter.GenerateEmailBody(req.RequestID, nbfcEntity.Name, profile, categories)
+			emailBody := letter.GenerateEmailBody(req.RequestID, nbfcEntity.Name, profile, categories, legalBasis)
 			err = sender.Send(nbfcEntity, profile, "")
 
 			if err != nil {
@@ -189,7 +203,7 @@ func runSend(cmd *cobra.Command, args []string) error {
 			}
 		} else {
 			letterPath, err := letterGen.Generate(req.RequestID, nbfcEntity.Name,
-				nbfcEntity.GrievanceEmail, profile, categories)
+				nbfcEntity.GrievanceEmail, profile, categories, legalBasis)
 			if err != nil {
 				fmt.Printf("  ❌ %s → %s: letter generation failed: %v\n",
 					req.RequestID, req.NBFCName, err)

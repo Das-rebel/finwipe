@@ -42,6 +42,7 @@ var (
 	massExclude  string
 	massInclude  string
 	massCount    int
+	massLegalBasis string // dpdp, rbi, both
 )
 
 func init() {
@@ -54,6 +55,8 @@ func init() {
 		"Include only these NBFC IDs (comma-separated)")
 	massCmd.Flags().IntVar(&massCount, "count", 0,
 		"Send to exactly N entities (picks randomly)")
+	massCmd.Flags().StringVar(&massLegalBasis, "legal-basis", "both",
+		"Legal basis: dpdp, rbi, both")
 }
 
 func runMassRequest(cmd *cobra.Command, args []string) error {
@@ -206,6 +209,18 @@ func runMassRequest(cmd *cobra.Command, args []string) error {
 
 	letterDir := filepath.Join(os.Getenv("HOME"), ".finwipe", "letters")
 	os.MkdirAll(letterDir, 0700)
+
+	// Parse legal basis
+	var legalBasis letter.LegalBasis
+	switch massLegalBasis {
+	case "dpdp":
+		legalBasis = letter.LegalBasisDPDP
+	case "rbi":
+		legalBasis = letter.LegalBasisRBI
+	default:
+		legalBasis = letter.LegalBasisBoth
+	}
+
 	gen := letter.New(letterDir)
 
 	created := 0
@@ -242,7 +257,7 @@ func runMassRequest(cmd *cobra.Command, args []string) error {
 		}
 
 		gen.Generate(req.RequestID, e.Name, e.GrievanceEmail,
-			cfg.Profile, letter.DefaultDeletionCategories)
+			cfg.Profile, letter.DefaultDeletionCategories, legalBasis)
 
 		icon := "💳"
 		if e.Category == nbfc.CatBANK {

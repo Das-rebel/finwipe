@@ -248,7 +248,7 @@ func runDiscoverFromStatement(cmd *cobra.Command, args []string) error {
 		letterDir := filepath.Join(os.Getenv("HOME"), ".finwipe", "letters")
 		gen := letter.New(letterDir)
 		gen.Generate(req.RequestID, m.Entity.Name, m.Entity.GrievanceEmail,
-			profile, letter.DefaultDeletionCategories)
+			profile, letter.DefaultDeletionCategories, letter.LegalBasisBoth)
 		fmt.Printf("  ✅ %-28s %s\n", m.Entity.Name, req.RequestID)
 		created++
 	}

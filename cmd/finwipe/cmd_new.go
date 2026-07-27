@@ -39,6 +39,7 @@ var (
 	newName         string
 	newEmail        string
 	newCategories   string // comma-separated deletion categories
+	newLegalBasis   string // legal basis: dpdp, rbi, both
 	newDryRun       bool
 )
 
@@ -59,6 +60,8 @@ func init() {
 		"Your registered email (or set in finwipe init)")
 	newCmd.Flags().StringVar(&newCategories, "categories", "",
 		"Comma-separated deletion categories: marketing,third_party,behavioral,app_usage,medical,nominee,employment")
+	newCmd.Flags().StringVar(&newLegalBasis, "legal-basis", "both",
+		"Legal basis: dpdp (DPDP Act only), rbi (RBI DLG only), both (recommended)")
 	newCmd.Flags().BoolVar(&newDryRun, "dry-run", false,
 		"Preview requests without creating")
 	rootCmd.AddCommand(newCmd)
