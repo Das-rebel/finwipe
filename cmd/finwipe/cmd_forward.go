@@ -111,13 +111,13 @@ func runSetupForward(cmd *cobra.Command, args []string) error {
 		apiKey,         // line 3: API key for reads
 		"https://fw.finwipe.in", // line 4: cloud API endpoint
 	)
-	if err := os.WriteFile(inboxPath, []byte(inboxConfig), 0600); err != nil {
+	if err := os.WriteFile(inboxPath, []byte(inboxConfig), 0400); err != nil {
 		return fmt.Errorf("save inbox config: %w", err)
 	}
 
 	// Save API key separately (for writes by cloud worker)
 	apiKeyPath := filepath.Join(os.Getenv("HOME"), ".finwipe", "cloud_api_key")
-	os.WriteFile(apiKeyPath, []byte(apiKey), 0600)
+	os.WriteFile(apiKeyPath, []byte(apiKey), 0400)
 
 	fmt.Println()
 	fmt.Println("  ╔════════════════════════════════════════════════════════════════╗")

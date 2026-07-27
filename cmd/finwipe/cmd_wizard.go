@@ -64,10 +64,21 @@ func runWizard(cmd *cobra.Command, args []string) error {
 
 	// Step 2: Load NBFC registry
 	fmt.Println("  ▶ Step 2: Loading NBFC registry...")
-	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
+	nbfcPath := nbfcRegistryPath()
 	entities, err := nbfc.Load(nbfcPath)
 	if err != nil {
-		return fmt.Errorf("load NBFCs: %w", err)
+		// Registry not found — offer to fetch it
+		fmt.Println("  ⚠️  NBFC registry not found.")
+		fmt.Println("  Running finwipe update-registry to fetch the latest list...")
+		fmt.Println()
+		// Try to fetch via update-registry (sets dry-run=false)
+		// Since we can't call another command directly, tell the user
+		fmt.Println("  Run this first:")
+		fmt.Println("    finwipe update-registry")
+		fmt.Println("  Then re-run this wizard:")
+		fmt.Println("    finwipe wizard")
+		fmt.Println()
+		return fmt.Errorf("run 'finwipe update-registry' first, then re-run 'finwipe wizard'")
 	}
 	fmt.Printf("  ✅ %d NBFCs loaded\n", len(entities))
 	fmt.Println()

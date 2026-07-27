@@ -18,7 +18,7 @@ var newCmd = &cobra.Command{
 
 A DPR-ID (DPR-2026-000001) is your tracking reference. Use it to:
   - Track acknowledgment:  finwipe track --request-id DPR-2026-000001
-  - Follow up:           finwipe followup --request-id DPR-2026-000001
+  - Follow up:           finwipe track --request-id DPR-2026-000001
   - Escalate:             finwipe escalate --request-id DPR-2026-000001
 
 Examples:

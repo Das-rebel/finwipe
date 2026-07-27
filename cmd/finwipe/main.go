@@ -9,7 +9,7 @@ import (
 var (
 	cfgFile       string
 	dryRun        bool
-	ackRequestID  string // used by ack.go, escalate.go, close.go, followup.go
+	ackRequestID  string // used by ack.go, escalate.go, close.go
 	escRequestID  string
 	closeRequestID string
 )
@@ -23,17 +23,21 @@ full lifecycle: send → acknowledge → follow-up → escalate → close.
 Every request gets a unique DPR-ID (DPR-2026-000001) for full auditability.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 GETTING STARTED
+📋 GETTING STARTED (5 steps)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  1. finwipe init              → Set up your profile (name, email, phone, SMTP)
-  2. finwipe list --search cred  → Find an NBFC in the registry
-  3. finwipe new --nbfc cred    → Create a deletion request (get DPR-ID)
-  4. finwipe send --dry-run      → Preview the email before sending
-  5. finwipe send                → Send the deletion request
-  6. finwipe track --request-id DPR-2026-000001  → Track progress
+  1. finwipe init                    → Set up your profile (name, email, phone, SMTP)
+  2. finwipe update-registry         → Download the latest NBFC list (run once)
+  3. finwipe list --search bajaj    → Find an NBFC in the registry
+  4. finwipe new --nbfc bajaj-finserv → Create a deletion request (get DPR-ID)
+  5. finwipe send --dry-run          → Preview the email before sending
+  6. finwipe send                    → Send the deletion request
 
-Need help?  finwipe wizard        → Interactive step-by-step guide
+After the NBFC responds:
+  finwipe ack --request-id DPR-2026-000001  → Record their acknowledgment
+  finwipe close --request-id DPR-2026-000001  → Close the request with outcome
+
+Need help?  finwipe wizard  → Interactive step-by-step guide
 Full docs: https://github.com/das-rebel/finwipe
 `,
 }

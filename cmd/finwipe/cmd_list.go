@@ -29,8 +29,8 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	dataDir := dataDir()
-	nbfcPath := filepath.Join(dataDir, "nbfcs.yaml")
+	nbfcDataDir := dataDir()
+	nbfcPath := filepath.Join(nbfcDataDir, "nbfcs.yaml")
 	if _, err := os.Stat(nbfcPath); err != nil {
 		exePath, _ := os.Executable()
 		nbfcPath = filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
@@ -112,19 +112,4 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Total: %d NBFCs\n\n", len(nbfcs))
 	return nil
-}
-
-func dataDir() string {
-	home, _ := os.UserHomeDir()
-	paths := []string{
-		filepath.Join(home, ".finwipe", "data"),
-		"./data",
-		"../data",
-	}
-	for _, p := range paths {
-		if fi, err := os.Stat(p); err == nil && fi.IsDir() {
-			return p
-		}
-	}
-	return "./data"
 }

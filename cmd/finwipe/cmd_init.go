@@ -144,5 +144,5 @@ letter:
 		"dpdpa",
 	)
 
-	return os.WriteFile(path, []byte(content), 0600)
+	return os.WriteFile(path, []byte(content), 0400)
 }

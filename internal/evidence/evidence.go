@@ -80,7 +80,7 @@ func (s *Store) Save(requestID string, etype EvidenceType, filename string, cont
 	safeFilename := fmt.Sprintf("%s_%s_%s%s", timestamp, etype, safeName, ext)
 	filePath := filepath.Join(dir, safeFilename)
 
-	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("create %s: %w", filePath, err)
 	}
@@ -113,7 +113,7 @@ func (s *Store) Save(requestID string, etype EvidenceType, filename string, cont
 	// Write metadata JSON alongside file
 	metaPath := filePath + ".meta.json"
 	metaJSON, _ := json.MarshalIndent(ev, "", "  ")
-	os.WriteFile(metaPath, metaJSON, 0644)
+	os.WriteFile(metaPath, metaJSON, 0600)
 
 	return ev, nil
 }
