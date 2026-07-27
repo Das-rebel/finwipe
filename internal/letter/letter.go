@@ -401,3 +401,264 @@ func AllDeletionCategories() []DeletionCategory {
 		CatAllNonEssential,
 	}
 }
+
+// GenerateDPBB creates a complaint letter for the Data Protection Board of India
+func (g *Generator) GenerateDPBB(entityName string, entity *nbfc.Entity, profile config.Profile, requestID string, timeline []string, outputPath string) error {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
+	pdf.AddPage()
+
+	// Header
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(0, 8, "DATA PROTECTION BOARD OF INDIA", "", 1, "C", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, "Government of India | MeitY", "", 1, "C", false, 0, "")
+	pdf.Ln(5)
+
+	// Title
+	pdf.SetFont("Arial", "B", 13)
+	pdf.CellFormat(0, 8, "COMPLAINT UNDER SECTION 27(3), DPDP ACT 2023", "", 1, "C", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, "Right to Erasure — Section 8(6)", "", 1, "C", false, 0, "")
+	pdf.Ln(5)
+
+	// Date
+	pdf.SetFont("Arial", "", 11)
+	pdf.CellFormat(0, 6, fmt.Sprintf("Date: %s", time.Now().Format("02 January 2006")), "", 1, "", false, 0, "")
+	pdf.Ln(3)
+
+	// To
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "To:", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, "The Secretary, Data Protection Board of India", "", 1, "", false, 0, "")
+	pdf.CellFormat(0, 5, "Electronics Niketan, 6, CGO Complex, Lodhi Road", "", 1, "", false, 0, "")
+	pdf.CellFormat(0, 5, "New Delhi - 110003", "", 1, "", false, 0, "")
+	pdf.Ln(3)
+
+	// Subject
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "Subject: Complaint against "+entityName+" for non-compliance with Section 8(6), DPDP Act 2023", "", 1, "", false, 0, "")
+	pdf.Ln(5)
+
+	// Section 1
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "1. PARTICULARS OF COMPLAINANT", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5, fmt.Sprintf("Name: %s\nEmail: %s\nPhone: %s\nAddress: %s",
+		profile.Name, profile.Email,
+		func() string { if profile.Phone != "" { return profile.Phone }; return "Not provided" }(),
+		func() string { if profile.Address != "" { return profile.Address }; return "Not provided" }()), "", "", false)
+	pdf.Ln(3)
+
+	// Section 2
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "2. PARTICULARS OF RESPONDENT", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5, fmt.Sprintf("Name: %s\nCategory: %s\nGrievance Email: %s",
+		entityName,
+		func() string { if entity != nil { return string(entity.Category) }; return "Not specified" }(),
+		func() string { if entity != nil && entity.GrievanceEmail != "" { return entity.GrievanceEmail }; return "Not available" }()), "", "", false)
+	pdf.Ln(3)
+
+	// Section 3 - Facts
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "3. FACTS OF THE COMPLAINT", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5,
+		fmt.Sprintf("I hereby file this complaint against %s under Section 27(3) of the Digital Personal Data Protection Act, 2023.\n\n"+"I submitted a data erasure request under Section 8(6) on "+time.Now().AddDate(0,0,-30).Format("02 January 2006")+
+			" (Ref: %s). Despite the statutory 30-day deadline having elapsed, the Respondent has failed to erase my personal data and has not provided any acknowledgment or response.\n\n"+"This constitutes a violation of Section 8(6) of the DPDP Act, 2023.", entityName, requestID), "", "", false)
+	pdf.Ln(3)
+
+	// Section 4 - Timeline
+	if len(timeline) > 0 {
+		pdf.SetFont("Arial", "B", 11)
+		pdf.CellFormat(0, 6, "4. TIMELINE", "", 1, "", false, 0, "")
+		pdf.SetFont("Arial", "", 10)
+		for _, t := range timeline {
+			if len(t) > 0 {
+				pdf.CellFormat(0, 5, "• "+t, "", 1, "", false, 0, "")
+			}
+		}
+		pdf.Ln(3)
+	}
+
+	// Section 5 - Relief
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "5. RELIEF SOUGHT", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5,
+		"(a) Direct the Respondent to immediately erase all my personal data;\n"+
+			"(b) Confirm the erasure of my data in writing;\n"+
+			"(c) Impose penalty as provided under Section 33 of the DPDP Act;\n"+
+			"(d) Pass such other orders as the Board deems fit.", "", "", false)
+	pdf.Ln(3)
+
+	// Verification
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "6. VERIFICATION", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(0, 5,
+		fmt.Sprintf("I, %s, verify that the above contents are true and correct.\n\nVerified at %s on %s.",
+			profile.Name,
+			time.Now().Format("02 January 2006"),
+			time.Now().Format("02 January 2006")), "", "", false)
+	pdf.Ln(8)
+
+	// Signature
+	pdf.CellFormat(0, 5, "Signature: _______________", "", 1, "", false, 0, "")
+	pdf.Ln(3)
+	pdf.CellFormat(0, 5, profile.Name, "", 1, "", false, 0, "")
+	pdf.CellFormat(0, 5, profile.Email, "", 1, "", false, 0, "")
+
+	// Footer
+	pdf.Ln(5)
+	pdf.SetFont("Arial", "I", 8)
+	pdf.CellFormat(0, 5, "Generated via FinWipe | DPDP Act 2023 Compliant", "", 1, "C", false, 0, "")
+
+	return pdf.OutputFileAndClose(outputPath)
+}
+
+// GeneratePortability creates a data portability request under Section 6(9)
+func (g *Generator) GeneratePortability(entity *nbfc.Entity, profile config.Profile, outputPath string) error {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
+	pdf.AddPage()
+
+	// Header
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(0, 8, "DATA PORTABILITY REQUEST", "", 1, "C", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, "Under Section 6(9), Digital Personal Data Protection Act, 2023", "", 1, "C", false, 0, "")
+
+	pdf.Ln(5)
+	pdf.SetDrawColor(200, 200, 200)
+	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
+	pdf.Ln(5)
+
+	// Date
+	pdf.SetFont("Arial", "", 11)
+	pdf.CellFormat(0, 6, fmt.Sprintf("Date: %s", time.Now().Format("02 January 2006")), "", 1, "", false, 0, "")
+	pdf.Ln(3)
+
+	// To
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "To:", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, entity.Name, "", 1, "", false, 0, "")
+	if entity.GrievanceEmail != "" {
+		pdf.CellFormat(0, 5, entity.GrievanceEmail, "", 1, "", false, 0, "")
+	}
+	pdf.Ln(5)
+
+	// Subject
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 6, "Subject: Data Portability Request under Section 6(9), DPDP Act 2023", "", 1, "", false, 0, "")
+	pdf.Ln(5)
+
+	// Body
+	pdf.SetFont("Arial", "", 11)
+	pdf.MultiCell(0, 6,
+		fmt.Sprintf("Dear %s,\n\nI am a digital resident of India and my personal data is processed by your organization. In accordance with Section 6(9) of the Digital Personal Data Protection Act, 2023 (DPDP Act), I hereby request that you provide me with all personal data you hold about me.\n\nSpecifically, I request:\n\n1. All personal data collected about me, including but not limited to:\n   - Identity information (name, address, phone, email, ID documents)\n   - Financial information (transactions, account history, KYC data)\n   - Usage data (app activity, login history, preferences)\n   - Any data shared with third parties\n\n2. The data should be provided in a commonly used, machine-readable format (JSON, CSV, or XML).\n\n3. This request must be fulfilled within 72 hours as mandated by the DPDP Act.\n\nPlease confirm receipt of this request and provide the timeline for fulfillment.\n\nIf you have collected data about me that you no longer retain or that has been deleted, please confirm this in writing.\n\nYours sincerely,\n\n%s\n%s\n%s", entity.Name, profile.Name, profile.Email,
+			func() string { if profile.Phone != "" { return profile.Phone }; return "" }()), "", "", false)
+
+	pdf.Ln(5)
+	pdf.SetFont("Arial", "I", 9)
+	pdf.CellFormat(0, 5, "Generated via FinWipe | DPDP Act 2023 Compliant", "", 1, "C", false, 0, "")
+
+	return pdf.OutputFileAndClose(outputPath)
+}
+
+// GenerateVerification creates a deletion verification request
+func (g *Generator) GenerateVerification(requestID, entityName string, entity *nbfc.Entity, profile config.Profile, method, outputPath string) error {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(20, 20, 20)
+	pdf.AddPage()
+
+	// Header
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(0, 8, "DATA DELETION VERIFICATION REQUEST", "", 1, "C", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, "Section 8(6), Digital Personal Data Protection Act, 2023", "", 1, "C", false, 0, "")
+
+	pdf.Ln(5)
+
+	// Reference
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 6, fmt.Sprintf("Ref: %s | Date: %s", requestID, time.Now().Format("02 January 2006")), "", 1, "R", false, 0, "")
+	pdf.Ln(5)
+
+	// To
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(0, 5, "To:", "", 1, "", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 5, entityName, "", 1, "", false, 0, "")
+	if entity != nil && entity.GrievanceEmail != "" {
+		pdf.CellFormat(0, 5, entity.GrievanceEmail, "", 1, "", false, 0, "")
+	}
+	pdf.Ln(5)
+
+	// Subject
+	pdf.SetFont("Arial", "B", 11)
+	if method == "certificate" {
+		pdf.CellFormat(0, 6, "Subject: Request for Data Deletion Certificate", "", 1, "", false, 0, "")
+	} else {
+		pdf.CellFormat(0, 6, "Subject: Confirmation of Data Deletion", "", 1, "", false, 0, "")
+	}
+	pdf.Ln(5)
+
+	// Body
+	pdf.SetFont("Arial", "", 11)
+	var body string
+	if method == "certificate" {
+		body = fmt.Sprintf(`Dear %s,
+
+I had previously submitted a data erasure request under Section 8(6), DPDP Act 2023 (Ref: %s) on %s.
+
+As per the statutory timeline, the erasure should have been completed by %s.
+
+I hereby request that you provide me with a written Data Deletion Certificate confirming:
+1. That all my personal data has been erased from your systems
+2. The date on which the deletion was completed
+3. That all third parties with whom my data was shared have also deleted it
+
+This certificate is necessary for my records and may be required for future disputes or regulatory purposes.
+
+Please provide this certificate within 72 hours.
+
+Yours sincerely,
+%s
+%s`, entityName, requestID,
+			time.Now().AddDate(0, 0, -35).Format("02 January 2006"),
+			time.Now().AddDate(0, 0, -5).Format("02 January 2006"),
+			profile.Name, profile.Email)
+	} else {
+		body = fmt.Sprintf(`Dear %s,
+
+I submitted a data erasure request (Ref: %s) and I wish to verify whether my personal data has been completely deleted from your systems.
+
+I request that you:
+1. Confirm in writing that all my personal data has been erased
+2. Confirm the date of deletion
+3. Confirm that all third parties have also deleted my data
+
+If deletion has not been completed, please provide:
+1. The current status of deletion
+2. The expected completion date
+3. Reason for delay
+
+Please respond within 72 hours.
+
+Yours sincerely,
+%s
+%s`, entityName, requestID, profile.Name, profile.Email)
+	}
+
+	pdf.MultiCell(0, 6, body, "", "", false)
+	pdf.Ln(5)
+
+	pdf.SetFont("Arial", "I", 9)
+	pdf.CellFormat(0, 5, "Generated via FinWipe | DPDP Act 2023 Compliant", "", 1, "C", false, 0, "")
+
+	return pdf.OutputFileAndClose(outputPath)
+}
