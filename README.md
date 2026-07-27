@@ -604,6 +604,17 @@ Parse a CIBIL report PDF to extract NBFC names.
 
 ---
 
+### `finwipe ask`
+Interactive consent withdrawal wizard — **works without `finwipe init`**.
+
+```bash
+./finwipe ask
+```
+
+Answers questions, generates Section 8(7) withdrawal email, shows where to send it.
+
+---
+
 ### `finwipe wizard`
 Interactive guided deletion request flow.
 
