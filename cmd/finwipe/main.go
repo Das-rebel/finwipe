@@ -62,6 +62,8 @@ func main() {
 	rootCmd.AddCommand(letterCmd)
 	rootCmd.AddCommand(cicCmd)
 	rootCmd.AddCommand(parseCmd)
+	rootCmd.AddCommand(scrapeCmd)           // Scrape privacy policy for grievance email
+	rootCmd.AddCommand(updateRegistryCmd)    // Update registry from awesome-fintech-india
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

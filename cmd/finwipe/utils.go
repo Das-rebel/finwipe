@@ -15,10 +15,23 @@ func truncate(s string, max int) string {
 
 // nbfcRegistryPath returns the path to the NBFC registry YAML
 func nbfcRegistryPath() string {
-	exePath, _ := os.Executable()
-	nbfcPath := filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
-	if _, err := os.Stat(nbfcPath); err != nil {
-		nbfcPath = "./data/nbfcs.yaml"
+	paths := []string{
+		// Built binary location
+		filepath.Join(filepath.Dir(os.Args[0]), "data", "nbfcs.yaml"),
+		// Relative to current working directory
+		"./data/nbfcs.yaml",
+		// Relative to repo root (for development)
+		"../data/nbfcs.yaml",
+		// Home directory
+		filepath.Join(os.Getenv("HOME"), "go", "src", "github.com", "das-rebel", "finwipe", "data", "nbfcs.yaml"),
+		// Absolute paths from common setups
+		"/Users/Subho/finwipe/data/nbfcs.yaml",
 	}
-	return nbfcPath
+	for _, p := range paths {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+	// Default to first path
+	return paths[0]
 }
