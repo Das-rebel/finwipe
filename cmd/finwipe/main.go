@@ -1,3 +1,4 @@
+import "github.com/das-rebel/finwipe/cmd/finwipe"
 package main
 
 import (
