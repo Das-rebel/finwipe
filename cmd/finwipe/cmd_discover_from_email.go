@@ -51,7 +51,6 @@ func init() {
 	emailDiscoveryCmd.Flags().StringVar(&emailFile, "file", "", "Path to email export (ZIP, mbox, CSV, or directory)")
 	emailDiscoveryCmd.Flags().StringVar(&emailFormat, "format", "auto",
 		"Format: auto, mbox, eml, csv, html")
-	rootCmd.AddCommand(emailDiscoveryCmd)
 }
 
 func runDiscoverFromEmail(cmd *cobra.Command, args []string) error {

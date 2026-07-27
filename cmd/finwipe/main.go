@@ -1,8 +1,9 @@
-import "github.com/das-rebel/finwipe/cmd/finwipe"
 package main
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -10,16 +11,16 @@ import (
 var (
 	cfgFile       string
 	dryRun        bool
-	ackRequestID  string // used by ack.go, escalate.go, close.go
+	ackRequestID  string
 	escRequestID  string
 	closeRequestID string
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "finwipe",
-	Short: "FinWipe — DIY NBFC data deletion tracker for India",
-	Long: `FinWipe tracks your DPDPA 2023 data deletion requests through their
-full lifecycle: send → acknowledge → follow-up → escalate → close.
+	Short: "FinWipe – DIY NBFC data deletion tracker for India",
+	Long: `FinWipe tracks your DPDPA 2023 data deletion requests through their full lifecycle:
+  send → acknowledge → follow-up → escalate → close.
 
 Every request gets a unique DPR-ID (DPR-2026-000001) for full auditability.
 
@@ -39,53 +40,77 @@ After the NBFC responds:
   finwipe close --request-id DPR-2026-000001  → Close the request with outcome
 
 Need help?  finwipe wizard  → Interactive step-by-step guide
-Full docs: https://github.com/das-rebel/finwipe
-`,
+Full docs: https://github.com/das-rebel/finwipe`,
 }
 
 func main() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
 		"config file (default: ~/.finwipe/config.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "n", false,
 		"preview what would happen without making changes")
 
-	// Core setup commands
 	rootCmd.AddCommand(initCmd)
-
-	// NBFC registry
 	rootCmd.AddCommand(listCmd)
-
-	// Request lifecycle commands
-	rootCmd.AddCommand(newCmd)     // Create new request
-	rootCmd.AddCommand(sendCmd)     // Dispatch request
-	rootCmd.AddCommand(trackCmd)    // Track request lifecycle + audit trail
-	rootCmd.AddCommand(ackCmd)      // Record NBFC acknowledgment
-	rootCmd.AddCommand(escalateCmd) // Escalate to RBI/DPDP/Consumer Forum
-	rootCmd.AddCommand(closeCmd)    // Close with outcome
-
-	// Automation
-	rootCmd.AddCommand(cronCmd) // Daily follow-up + escalation automation
-
-	// Dashboard
-	rootCmd.AddCommand(reportCmd) // Compliance dashboard and reporting
-
-	// Email forwarding discovery (CRED/Fold model)
-
-	// Interactive + Evidence
-	rootCmd.AddCommand(evidenceCmd)   // Evidence management
-
-	// Utility
+	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(sendCmd)
+	rootCmd.AddCommand(trackCmd)
+	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(letterCmd)
-	rootCmd.AddCommand(cicCmd)
+	rootCmd.AddCommand(forwardCmd)
+	rootCmd.AddCommand(checkInboxCmd)
+	rootCmd.AddCommand(syncCmd)
+	rootCmd.AddCommand(cloudCmd)
+	rootCmd.AddCommand(wizardCmd)
+	rootCmd.AddCommand(evidenceCmd)
+	rootCmd.AddCommand(ackCmd)
+	rootCmd.AddCommand(closeCmd)
+	rootCmd.AddCommand(cronCmd)
+	rootCmd.AddCommand(massCmd)
+	rootCmd.AddCommand(complianceCmd)
+	rootCmd.AddCommand(updateRegistryCmd)
+	rootCmd.AddCommand(scrapeCmd)
+	rootCmd.AddCommand(discoverCmd)
+	rootCmd.AddCommand(aaDiscoverCmd)
+	rootCmd.AddCommand(bankStatementCmd)
+	rootCmd.AddCommand(bureauCmd)
+	rootCmd.AddCommand(discoverCibilCmd)
+	rootCmd.AddCommand(emailDiscoveryCmd)
+	rootCmd.AddCommand(whatsappDiscoverCmd)
+	rootCmd.AddCommand(verifyCmd)
+	rootCmd.AddCommand(portabilityCmd)
 	rootCmd.AddCommand(parseCmd)
-
-	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	rootCmd.AddCommand(cicCmd)
 }
 
-// dbPath returns the SQLite history database path
 func dbPath() string {
+	dbPath, _ := os.UserHomeDir()
+	return filepath.Join(dbPath, ".finwipe", "finwipe.db")
+}
+
+func nbfcRegistryPath() string {
+	exePath, _ := os.Executable()
+	nbfcPath := filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
+	if _, err := os.Stat(nbfcPath); err != nil {
+		nbfcPath = "./data/nbfcs.yaml"
+	}
+	return nbfcPath
+}
+
+func dataDir() string {
 	home, _ := os.UserHomeDir()
-	return home + "/.finwipe/history.db"
+	return filepath.Join(home, ".finwipe")
+}
+
+func truncate(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max-3] + "..."
 }

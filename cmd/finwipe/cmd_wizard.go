@@ -45,7 +45,6 @@ func init() {
 	wizardCmd.Flags().BoolVar(&wizardDryRun, "dry-run", false, "Preview without sending")
 	wizardCmd.Flags().StringVar(&wizardCategory, "category", "",
 		"Pre-filter by category: fintech, nbfc, bank, hfc, lsp, dsp")
-	rootCmd.AddCommand(wizardCmd)
 }
 
 func runWizard(cmd *cobra.Command, args []string) error {
@@ -356,7 +355,7 @@ func buildDeletionEmail(reqID string, entity nbfc.Entity, profile config.Profile
 		"Subject: DPDPA Section 8(6) Data Deletion Request \u2014 %s\r\n"+
 		"Date: %s\r\n"+
 		"Content-Type: text/plain; charset=\"UTF-8\"\r\n"+
-		"Message-ID: <%s.finwipe>\r\n"+
+		"Message-ID: <finwipe-request>\r\n"+
 		"\r\n"+
 		"Dear Grievance Officer,\n\n"+
 		"I, %s, exercising my right to erasure under Section 8(6)\n"+

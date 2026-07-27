@@ -48,7 +48,6 @@ Usage:
 )
 
 func init() {
-	rootCmd.AddCommand(dpdBoardCmd)
 	dpdBoardCmd.Flags().StringVar(&dpdRequestID, "request-id", "",
 		"FinWipe request ID (e.g., DPR-2026-000001)")
 	dpdBoardCmd.Flags().StringVar(&dpdNBFCID, "nbfc-id", "",

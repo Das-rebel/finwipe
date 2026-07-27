@@ -53,7 +53,6 @@ func init() {
 		"Bank name: hdfc, icici, sbi, axis, kotak, or auto-detect")
 	bankStatementCmd.Flags().BoolVar(&statementDryRun, "dry-run", true,
 		"Preview only — don't create requests (default: true)")
-	rootCmd.AddCommand(bankStatementCmd)
 }
 
 func runDiscoverFromStatement(cmd *cobra.Command, args []string) error {

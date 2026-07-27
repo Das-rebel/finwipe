@@ -69,7 +69,6 @@ func init() {
 		"Submit anonymized compliance stats to community database")
 	complianceCmd.Flags().BoolVar(&complianceShame, "shame", false,
 		"Show NBFCs with worst compliance rates")
-	rootCmd.AddCommand(complianceCmd)
 }
 
 func runCompliance(cmd *cobra.Command, args []string) error {

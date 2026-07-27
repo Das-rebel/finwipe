@@ -75,7 +75,6 @@ func init() {
 	discoverCibilCmd.Flags().StringVar(&cibilName, "name", "",
 		"Your full name as per records (required for requests)")
 	discoverCibilCmd.MarkFlagRequired("file")
-	rootCmd.AddCommand(discoverCibilCmd)
 }
 
 func runDiscoverFromCibil(cmd *cobra.Command, args []string) error {

@@ -27,7 +27,6 @@ Shows:
 }
 
 func init() {
-	rootCmd.AddCommand(cloudCmd)
 }
 
 func runCloudStatus(cmd *cobra.Command, args []string) error {

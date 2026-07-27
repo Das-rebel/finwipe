@@ -47,7 +47,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(portabilityCmd)
 	portabilityCmd.Flags().StringVar(&portNBFCID, "nbfc-id", "",
 		"NBFC entity ID (from finwipe list)")
 	portabilityCmd.Flags().BoolVar(&portSend, "send", false,

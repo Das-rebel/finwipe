@@ -45,7 +45,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(whatsappDiscoverCmd)
 	whatsappDiscoverCmd.Flags().StringVar(&whatsappPath, "path", "",
 		"Path to WhatsApp chat export (.txt, .json, or directory)")
 

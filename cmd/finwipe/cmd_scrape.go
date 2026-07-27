@@ -41,7 +41,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(scrapeCmd)
 	scrapeCmd.Flags().BoolVar(&scrapeCreateRequest, "create-request",
 		false, "Create deletion request after scraping")
 	scrapeCmd.Flags().StringVar(&scrapeOutputDir, "output", "",

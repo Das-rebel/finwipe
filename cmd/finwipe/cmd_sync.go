@@ -44,7 +44,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(syncCmd)
 	syncCmd.Flags().BoolVar(&syncAuto, "auto", false,
 		"Automatically create deletion requests for new FIs")
 	syncCmd.Flags().StringVar(&syncCloudURL, "cloud", "https://fw.finwipe.in",

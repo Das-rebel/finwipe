@@ -45,7 +45,6 @@ var (
 func init() {
 	bureauCmd.Flags().StringVar(&bureauFile, "file", "", "Path to bureau report (PDF or text)")
 	bureauCmd.MarkFlagRequired("file")
-	rootCmd.AddCommand(bureauCmd)
 }
 
 func runDiscoverFromBureau(cmd *cobra.Command, args []string) error {

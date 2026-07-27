@@ -46,7 +46,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(massCmd)
 	massCmd.Flags().StringVar(&massCategory, "category", "",
 		"Category: bank, fintech, nbfc, hfc, all")
 	massCmd.Flags().StringVar(&massExclude, "exclude", "",

@@ -43,7 +43,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(aaDiscoverCmd)
 	aaDiscoverCmd.Flags().StringVar(&aaProvider, "provider", "auto",
 		"AA provider: nadl, cams, saafe, finvu, or auto-detect")
 	aaDiscoverCmd.Flags().BoolVar(&aaAutoCreate, "auto", false,

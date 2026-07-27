@@ -60,7 +60,6 @@ func init() {
 		"Don't save results (default: true for safety)")
 	discoverCmd.Flags().BoolVar(&discoverAdd, "add", false,
 		"Add discovered NBFCs to registry (requires --dry-run=false)")
-	rootCmd.AddCommand(discoverCmd)
 }
 
 func runDiscover(cmd *cobra.Command, args []string) error {

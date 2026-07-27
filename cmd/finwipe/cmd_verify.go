@@ -45,7 +45,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(verifyCmd)
 	verifyCmd.Flags().StringVar(&verifyMethod, "method", "email",
 		"Verification method: email, login, consent, certificate")
 	verifyCmd.Flags().BoolVar(&verifyCertificate, "certificate", false,

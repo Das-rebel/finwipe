@@ -88,7 +88,6 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(updateRegistryCmd)
 	updateRegistryCmd.Flags().BoolVar(&updateScrape, "scrape",
 		false, "Scrape privacy policies for grievance emails (slow)")
 	updateRegistryCmd.Flags().BoolVar(&updateDryRun, "dry-run",
