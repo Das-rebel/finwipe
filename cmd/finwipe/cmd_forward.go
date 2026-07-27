@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/sha256"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -429,11 +429,15 @@ func parseEmailsOffline(emails []string, entities []nbfc.Entity) []offlineMatch 
 	return results
 }
 
-// generateInboxID creates a privacy-preserving inbox ID from email
+// generateInboxID generates a random inbox ID using crypto/rand.
 func generateInboxID(email string) string {
-	h := sha256.Sum256([]byte(email + "finwipe-salt-v1"))
-	hash := hex.EncodeToString(h[:8])
-	// Human-readable prefix
+	// Generate 8 random bytes
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback (should not happen)
+		return "u" + hex.EncodeToString(b)[:10]
+	}
+	// Human-readable prefix from email
 	parts := strings.Split(email, "@")
 	prefix := "u"
 	if len(parts) > 0 && len(parts[0]) > 2 {
@@ -443,11 +447,15 @@ func generateInboxID(email string) string {
 			}
 		}
 	}
-	return prefix + hash[:10]
+	return prefix + hex.EncodeToString(b)[:10]
 }
 
-// generateAPIKey creates an API key for cloud access
+// generateAPIKey creates a cryptographically random API key using crypto/rand.
 func generateAPIKey(email string) string {
-	h := sha256.Sum256([]byte(email + "finwipe-api-key-salt-v1"))
-	return hex.EncodeToString(h[:16])
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback (should not happen)
+		return hex.EncodeToString(b)
+	}
+	return hex.EncodeToString(b)
 }

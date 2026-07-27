@@ -11,8 +11,9 @@ import (
 )
 
 var trackCmd = &cobra.Command{
-	Use:   "track",
-	Short: "Track deletion request lifecycle and audit trail",
+	Use:     "track",
+	Aliases: []string{"status"},
+	Short:   "Track deletion request lifecycle and audit trail",
 	RunE:  runTrack,
 }
 

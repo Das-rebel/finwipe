@@ -20,7 +20,22 @@ var rootCmd = &cobra.Command{
 	Long: `FinWipe tracks your DPDPA 2023 data deletion requests through their
 full lifecycle: send → acknowledge → follow-up → escalate → close.
 
-Every request gets a unique DPR-ID (DPR-2026-000001) for full auditability.`,
+Every request gets a unique DPR-ID (DPR-2026-000001) for full auditability.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 GETTING STARTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. finwipe init              → Set up your profile (name, email, phone, SMTP)
+  2. finwipe list --search cred  → Find an NBFC in the registry
+  3. finwipe new --nbfc cred    → Create a deletion request (get DPR-ID)
+  4. finwipe send --dry-run      → Preview the email before sending
+  5. finwipe send                → Send the deletion request
+  6. finwipe track --request-id DPR-2026-000001  → Track progress
+
+Need help?  finwipe wizard        → Interactive step-by-step guide
+Full docs: https://github.com/das-rebel/finwipe
+`,
 }
 
 func main() {
@@ -50,10 +65,6 @@ func main() {
 	rootCmd.AddCommand(reportCmd) // Compliance dashboard and reporting
 
 	// Email forwarding discovery (CRED/Fold model)
-	rootCmd.AddCommand(forwardCmd)
-	rootCmd.AddCommand(checkInboxCmd)
-	rootCmd.AddCommand(syncCmd)       // Cloud sync + auto-create
-	rootCmd.AddCommand(cloudCmd)      // Cloud status check
 
 	// Interactive + Evidence
 	rootCmd.AddCommand(evidenceCmd)   // Evidence management
@@ -62,8 +73,6 @@ func main() {
 	rootCmd.AddCommand(letterCmd)
 	rootCmd.AddCommand(cicCmd)
 	rootCmd.AddCommand(parseCmd)
-	rootCmd.AddCommand(scrapeCmd)           // Scrape privacy policy for grievance email
-	rootCmd.AddCommand(updateRegistryCmd)    // Update registry from awesome-fintech-india
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

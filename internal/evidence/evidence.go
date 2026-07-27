@@ -46,7 +46,7 @@ type Evidence struct {
 
 // New creates a new evidence store at the given base path
 func New(basePath string) (*Store, error) {
-	if err := os.MkdirAll(basePath, 0755); err != nil {
+	if err := os.MkdirAll(basePath, 0700); err != nil {
 		return nil, fmt.Errorf("mkdir evidence base: %w", err)
 	}
 	return &Store{BasePath: basePath}, nil
@@ -60,7 +60,7 @@ func (s *Store) Path(requestID string) string {
 // EnsureDir creates the evidence subdirectory for a request if it doesn't exist
 func (s *Store) EnsureDir(requestID string) (string, error) {
 	dir := s.Path(requestID)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return "", fmt.Errorf("mkdir %s: %w", dir, err)
 	}
 	return dir, nil

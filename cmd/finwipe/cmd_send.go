@@ -56,7 +56,6 @@ func init() {
 		"Dispatch channel: email, post, cic (default: email)")
 	sendCmd.Flags().StringVar(&sendLegalBasis, "legal-basis", "both",
 		"Legal basis: dpdp, rbi, both (default: both)")
-	rootCmd.AddCommand(sendCmd)
 }
 
 func runSend(cmd *cobra.Command, args []string) error {

@@ -4,12 +4,32 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/das-rebel/finwipe/internal/config"
 	"github.com/das-rebel/finwipe/internal/nbfc"
 )
+
+// sanitizeHeader strips \r, \n, and null bytes from strings used in SMTP headers.
+// This prevents CRLF injection attacks where an attacker could inject
+// arbitrary headers (e.g., Bcc:) by including \r\n in user-controlled fields.
+func sanitizeHeader(s string) string {
+	s = strings.ReplaceAll(s, "\r", "")
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\x00", "")
+	return strings.TrimSpace(s)
+}
+
+// sanitizeBody strips trailing whitespace and normalized multiple spaces in email body.
+// CRLF in body is allowed but we clean it up for readability.
+func sanitizeBody(s string) string {
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\r", "\n")
+	s = regexp.MustCompile(`\n{3,}`).ReplaceAllString(s, "\n\n")
+	return strings.TrimSpace(s)
+}
 
 type Sender struct {
 	cfg  *config.SMTP
@@ -38,15 +58,11 @@ func (s *Sender) Send(n nbfc.Entity, profile config.Profile, templateBody string
 	var conn *tls.Conn
 	var err error
 
-	if s.cfg.UseTLS {
-		tlsCfg := &tls.Config{ServerName: s.cfg.Host}
-		conn, err = tls.Dial("tcp", addr, tlsCfg)
-	} else {
-		conn, err = tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true})
-	}
+	// Always use TLS with proper verification
+	tlsCfg := &tls.Config{ServerName: s.cfg.Host}
+	conn, err = tls.Dial("tcp", addr, tlsCfg)
 	if err != nil {
-		err = smtp.SendMail(addr, auth, s.from, []string{n.GrievanceEmail}, []byte(msg))
-		return err
+		return fmt.Errorf("TLS connection failed to %s: %w (hint: check SMTP host/port and network)", addr, err)
 	}
 	defer conn.Close()
 
@@ -110,12 +126,27 @@ func (s *Sender) SendFollowup(reqID, grievanceEmail string, p config.Profile, bo
 		return "", fmt.Errorf("SMTP not configured")
 	}
 
+	// CRITICAL: Sanitize all user-controlled fields to prevent CRLF header injection
+	cleanSubject := sanitizeHeader(subject)
+	cleanBody := sanitizeBody(body)
+
+	// Sanitize entity name if used in subject (buildFollowupSubject uses req.NBFCName)
+	// and in body (nbfcName is passed separately)
+
+	// Verify sanitization worked
+	if cleanSubject != subject || cleanBody != body {
+		// Log sanitization for debugging (does not log content)
+		fmt.Printf("[FinWipe] Sanitized %d bytes from subject and %d bytes from body\n",
+			len(subject)-len(cleanSubject), len(body)-len(cleanBody))
+	}
+
 	addr := fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port)
 	var auth smtp.Auth
 	if s.cfg.Username != "" {
 		auth = smtp.PlainAuth("", s.cfg.Username, s.cfg.Password, s.cfg.Host)
 	}
 
+	// Build email with sanitized headers and body
 	msg := fmt.Sprintf(
 		"From: %s\r\n"+
 			"To: %s\r\n"+
@@ -123,25 +154,29 @@ func (s *Sender) SendFollowup(reqID, grievanceEmail string, p config.Profile, bo
 			"Date: %s\r\n"+
 			"Content-Type: text/plain; charset=\"UTF-8\"\r\n"+
 			"Message-ID: <%s.%s@finwipe>\r\n"+
+			"Auto-Submitted: auto-generated\r\n"+
 			"\r\n"+
 			"%s\r\n",
-		s.from, grievanceEmail, subject,
+		sanitizeHeader(s.from),
+		sanitizeHeader(grievanceEmail),
+		cleanSubject,
 		time.Now().Format(time.RFC1123Z),
-		reqID, time.Now().Format("20060102T150405"),
-		body,
+		sanitizeHeader(reqID),
+		time.Now().Format("20060102T150405"),
+		cleanBody,
 	)
 
+	// Always use TLS with proper verification
 	tlsCfg := &tls.Config{ServerName: s.cfg.Host}
 	conn, err := tls.Dial("tcp", addr, tlsCfg)
 	if err != nil {
-		err = smtp.SendMail(addr, auth, s.from, []string{grievanceEmail}, []byte(msg))
-		return "", err
+		return "", fmt.Errorf("TLS connection failed to %s: %w (hint: check SMTP host/port)", addr, err)
 	}
 	defer conn.Close()
 
 	client, err := smtp.NewClient(conn, s.cfg.Host)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("create SMTP client: %w", err)
 	}
 	defer client.Close()
 
@@ -150,61 +185,69 @@ func (s *Sender) SendFollowup(reqID, grievanceEmail string, p config.Profile, bo
 			return "", fmt.Errorf("SMTP auth: %w", err)
 		}
 	}
-	if err = client.Mail(s.from); err != nil {
-		return "", err
+	if err = client.Mail(sanitizeHeader(s.from)); err != nil {
+		return "", fmt.Errorf("SMTP from: %w", err)
 	}
-	if err = client.Rcpt(grievanceEmail); err != nil {
-		return "", err
+	if err = client.Rcpt(sanitizeHeader(grievanceEmail)); err != nil {
+		return "", fmt.Errorf("SMTP to: %w", err)
 	}
 	w, err := client.Data()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("SMTP data: %w", err)
 	}
 	_, err = w.Write([]byte(msg))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("SMTP write: %w", err)
 	}
 	w.Close()
 
-	msgID := fmt.Sprintf("<%s.%s@finwipe>", reqID, time.Now().Format("20060102T150405"))
+	msgID := fmt.Sprintf("<%s.%s@finwipe>", sanitizeHeader(reqID), time.Now().Format("20060102T150405"))
 	return msgID, client.Quit()
 }
 
+// buildMessage creates an email message with sanitized headers.
 func buildMessage(n nbfc.Entity, p config.Profile, body, from string) string {
-	return fmt.Sprintf(
+	// Sanitize user fields that appear in headers
+	safeName := sanitizeHeader(p.Name)
+	safeFrom := sanitizeHeader(from)
+
+	msg := fmt.Sprintf(
 		"From: %s\r\n"+
 			"To: %s\r\n"+
 			"Subject: DPDPA Section 8(6) Data Deletion Request — %s\r\n"+
 			"Date: %s\r\n"+
 			"Content-Type: text/plain; charset=\"UTF-8\"\r\n"+
+			"Auto-Submitted: auto-generated\r\n"+
 			"\r\n"+
 			"%s\r\n",
-		from,
-		n.GrievanceEmail,
-		p.Name,
+		safeFrom,
+		sanitizeHeader(n.GrievanceEmail),
+		safeName,
 		time.Now().Format(time.RFC1123Z),
 		buildBody(n, p, body),
 	)
+	return msg
 }
 
+// buildBody replaces template placeholders with sanitized profile data.
 func buildBody(n nbfc.Entity, p config.Profile, template string) string {
 	if template == "" {
 		template = DefaultTemplate
 	}
 
 	s := template
-	s = strings.ReplaceAll(s, "{{.NBFCName}}", n.Name)
-	s = strings.ReplaceAll(s, "{{.FullName}}", p.Name)
-	s = strings.ReplaceAll(s, "{{.Email}}", p.Email)
-	s = strings.ReplaceAll(s, "{{.Phone}}", p.Phone)
-	s = strings.ReplaceAll(s, "{{.Address}}", p.Address)
+	s = strings.ReplaceAll(s, "{{.NBFCName}}", sanitizeHeader(n.Name))
+	s = strings.ReplaceAll(s, "{{.FullName}}", sanitizeHeader(p.Name))
+	s = strings.ReplaceAll(s, "{{.Email}}", sanitizeHeader(p.Email))
+	s = strings.ReplaceAll(s, "{{.Phone}}", sanitizeHeader(p.Phone))
+	s = strings.ReplaceAll(s, "{{.Address}}", sanitizeHeader(p.Address))
 	s = strings.ReplaceAll(s, "{{.Date}}", time.Now().Format("02 January 2006"))
 	return s
 }
 
 var DefaultTemplate = `Dear Grievance Officer,
 
-I, {{.FullName}}, residing at {{.Address}}, am exercising my right to erasure under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act) and Rule 8 of the DPDP Rules, 2025.
+I, {{.FullName}}, residing at {{.Address}}, am exercising my right to erasure under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act).
 
 The purpose for which my personal data was collected by {{.NBFCName}} is no longer being served. I hereby request deletion of the following categories of personal data held by {{.NBFCName}}:
 
@@ -214,7 +257,7 @@ The purpose for which my personal data was collected by {{.NBFCName}} is no long
 □ Pre-approved loan profiles
 □ Call recordings and customer service interaction logs
 
-I request acknowledgment of this request within 48 hours as mandated by Rule 8(3) of the DPDP Rules, 2025, and completion of deletion within 30 days.
+I request acknowledgment of this request within 48 hours as mandated by Section 8(6) of the DPDP Act, and completion of deletion within 30 days.
 
 This request does not extend to personal data whose retention is required by or under any law for the time being in force, including but not limited to the RBI Act, Companies Act, and Income Tax Act, including KYC documents, transaction records, and active loan account data.
 
@@ -241,15 +284,22 @@ func GenerateFollowupBody(reqID, nbfcName string, profile config.Profile, dayNum
 		preamble = fmt.Sprintf("This is a follow-up (#%d) regarding my data deletion request.", dayNum/7)
 	}
 
-	return fmt.Sprintf(`Subject: DPDPA Data Deletion Request — FOLLOW-UP #%d — Ref: %s
+	// Sanitize all user fields
+	safeNBFCName := sanitizeHeader(nbfcName)
+	safeEmail := sanitizeHeader(profile.Email)
+	safePhone := sanitizeHeader(profile.Phone)
+	safeName := sanitizeHeader(profile.Name)
+	safeAddress := sanitizeHeader(profile.Address)
+
+	body := fmt.Sprintf(`Subject: DPDPA Data Deletion Request — FOLLOW-UP #%d — Ref: %s
 
 Dear Grievance Officer,
 
 %s
 
-I submitted a formal data deletion request to %s on %s (Ref: %s) under Section 8(6) of the Digital Personal Data Protection Act, 2023 and Rule 8 of the DPDP Rules, 2025.
+I submitted a formal data deletion request to %s on %s (Ref: %s) under Section 8(6) of the Digital Personal Data Protection Act, 2023.
 
-To date, I have received no acknowledgment of this request. This is a violation of Rule 8(3) which mandates acknowledgment within 48 hours.
+To date, I have received no acknowledgment of this request. This is a violation of Section 8(6) which mandates acknowledgment within 48 hours.
 
 My original request specifically sought deletion of:
   □ Marketing and promotional data
@@ -281,5 +331,11 @@ Phone: %s
 Regards,
 %s
 %s
-`, dayNum/7, reqID, preamble, nbfcName, time.Now().AddDate(0, 0, -dayNum).Format("02 January 2006"), reqID, reqID, reqID, time.Now().AddDate(0, 0, -dayNum).Format("02 January 2006"), profile.Email, profile.Phone, profile.Name, profile.Address)
+`, dayNum/7, sanitizeHeader(reqID), preamble, safeNBFCName,
+		time.Now().AddDate(0, 0, -dayNum).Format("02 January 2006"),
+		sanitizeHeader(reqID), sanitizeHeader(reqID), sanitizeHeader(reqID),
+		time.Now().AddDate(0, 0, -dayNum).Format("02 January 2006"),
+		safeEmail, safePhone, safeName, safeAddress)
+
+	return body
 }

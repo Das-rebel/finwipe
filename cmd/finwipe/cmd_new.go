@@ -64,7 +64,6 @@ func init() {
 		"Legal basis: dpdp (DPDP Act only), rbi (RBI DLG only), both (recommended)")
 	newCmd.Flags().BoolVar(&newDryRun, "dry-run", false,
 		"Preview requests without creating")
-	rootCmd.AddCommand(newCmd)
 }
 
 func runNew(cmd *cobra.Command, args []string) error {
