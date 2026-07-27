@@ -84,6 +84,7 @@ func init() {
 	rootCmd.AddCommand(emailDiscoveryCmd)
 	rootCmd.AddCommand(whatsappDiscoverCmd)
 	rootCmd.AddCommand(verifyCmd)
+	rootCmd.AddCommand(askCmd)
 	rootCmd.AddCommand(portabilityCmd)
 	rootCmd.AddCommand(parseCmd)
 	rootCmd.AddCommand(cicCmd)
