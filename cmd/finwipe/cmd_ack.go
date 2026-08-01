@@ -79,7 +79,7 @@ func runAck(cmd *cobra.Command, args []string) error {
 	fmt.Printf("  NBFC:      %s\n", req.NBFCName)
 	fmt.Printf("  Ref:       %s\n", req.ExternalRef)
 	fmt.Printf("  Acked at:  %s\n", req.AckReceivedAt.Format("02 Jan 2006 15:04 MST"))
-	fmt.Printf("  New deadline: %s (30 days from ack)\n", req.ResponseDeadlineAt.Format("02 Jan 2006"))
+	fmt.Printf("  New deadline: %s (as soon as reasonable per DPDP Act — no statutory period)\n", req.ResponseDeadlineAt.Format("02 Jan 2006"))
 	fmt.Println()
 
 	return nil

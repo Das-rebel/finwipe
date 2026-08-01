@@ -291,7 +291,7 @@ The purpose for which my personal data was collected by {{.NBFCName}} is no long
 □ Pre-approved loan profiles
 □ Call recordings and customer service interaction logs
 
-I request acknowledgment of this request within 48 hours as mandated by Section 8(6) of the DPDP Act, and completion of deletion within 30 days.
+I request acknowledgment of this request as soon as reasonably practicable, and completion of erasure where applicable, in accordance with Section 8(6) of the DPDP Act, 2023.
 
 This request does not extend to personal data whose retention is required by or under any law for the time being in force, including but not limited to the RBI Act, Companies Act, and Income Tax Act, including KYC documents, transaction records, and active loan account data.
 
@@ -333,7 +333,7 @@ Dear Grievance Officer,
 
 I submitted a formal data deletion request to %s on %s (Ref: %s) under Section 8(6) of the Digital Personal Data Protection Act, 2023.
 
-To date, I have received no acknowledgment of this request. This is a violation of Section 8(6) which mandates acknowledgment within 48 hours.
+To date, I have received no acknowledgment of this request. This is a violation of Section 8(6) which requires acknowledgment as soon as reasonable.
 
 My original request specifically sought deletion of:
   □ Marketing and promotional data
@@ -345,7 +345,7 @@ My original request specifically sought deletion of:
 Please:
   1. Acknowledge this request immediately
   2. Confirm the categories of data that will be deleted
-  3. Complete deletion within the remaining time available under the 30-day window
+  3. Complete deletion as soon as reasonably practicable
 
 This request does not extend to data whose retention is required by law (KYC, transaction records, active loan accounts).
 

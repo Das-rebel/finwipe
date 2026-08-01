@@ -70,7 +70,7 @@ func runCIC(cmd *cobra.Command, args []string) error {
 	fmt.Println("   4. Upload this form as supporting document")
 	fmt.Println("   5. Note your dispute reference number")
 	fmt.Println()
-	fmt.Println("Timeline: 30 days for resolution")
+	fmt.Println("Timeline: As soon as reasonable per Section 8(6), DPDP Act 2023")
 	fmt.Println("Updates: You'll receive email/SMS every 7 days")
 	fmt.Println()
 

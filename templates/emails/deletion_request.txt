@@ -23,9 +23,9 @@ Specifically, I request deletion of:
 {{range .Categories}}- {{.}}
 {{end}}
 
-This request is made under Section 8(6) of the DPDP Act, 2023 and Rule 8 of the DPDP Rules, 2025.
+This request is made under Section 8(6) of the DPDP Act, 2023.
 
-Please confirm receipt of this request within 48 hours as mandated under Rule 8(1) and proceed with the erasure within 30 days of this request.
+Please confirm receipt of this request as soon as reasonably practicable and proceed with erasure where applicable under Section 8(6) of the DPDP Act, 2023.
 
 If you fail to comply with this request within the stipulated timeframe, I reserve the right to escalate this matter to the Data Protection Board of India under Section 27(3) of the DPDP Act, 2023.
 

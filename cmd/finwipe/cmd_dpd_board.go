@@ -125,9 +125,9 @@ func runDPDBoard(cmd *cobra.Command, args []string) error {
 	if len(timeline) == 0 {
 		timeline = []string{
 			"Day 0: Data erasure request submitted to " + entityName,
-			"Day 1-2: Statutory acknowledgment deadline (DPDP Rule 8)",
-			"Day 30: Statutory completion deadline (Section 8(6), DPDP Act)",
-			fmt.Sprintf("Day %d+: Filing this complaint (no compliance received)",
+			"Day 1-2: Acknowledge as soon as reasonable (Section 8(6), DPDP Act 2023)",
+			"Day 30: Processing window complete — escalate to DPBI if no response",
+			fmt.Sprintf("Day %d+: Filing this complaint to DPBI (no compliance received)",
 				int(time.Since(time.Now().AddDate(0, 0, -35)).Hours()/24)),
 		}
 	}

@@ -11,7 +11,7 @@ Request Details:
 - Request ID: {{.RequestID}}
 - Original Request Date: {{.RequestDate}}
 - Categories Requested for Deletion: {{range .Categories}} {{.}} {{end}}
-- Nature of Non-Compliance: No acknowledgment within 48 hours under Rule 8(1), no deletion within 30 days under Rule 8(2)
+- Nature of Non-Compliance: Failure to acknowledge and erase as soon as reasonably practicable under Section 8(6), DPDP Act 2023
 
 I request your immediate intervention to ensure compliance with Section 8(6) of the DPDP Act, 2023.
 

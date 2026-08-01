@@ -97,7 +97,7 @@ UNFREEZE WHEN YOU NEED CREDIT:
 1. Go to: https://consumer.cibil.com → CIBIL Watch
 2. Click: "Unfreeze Report"
 3. Enter your freeze PIN
-4. Apply for credit within your chosen window (usually 7-30 days)
+4. Apply for credit within your chosen window (typically 7-30 days — no statutory period under DPDP Act)
 5. Refreeze after credit is approved
 
 ─────────────────────────────────────────

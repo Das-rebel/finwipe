@@ -231,8 +231,8 @@ func guidedConsentJourney() error {
 	}
 	fmt.Println()
 	fmt.Println("3. EXPECTED RESPONSE:")
-	fmt.Println("   - Within 48 hours: Acknowledgment")
-	fmt.Println("   - Within 30 days: Confirmation of data deletion")
+	fmt.Println("   - As soon as reasonable: Acknowledgment (Section 8(6), DPDP Act 2023)")
+	fmt.Println("   - As soon as reasonable: Erasure where applicable of data deletion")
 	fmt.Println()
 	fmt.Println("4. IF NO RESPONSE AFTER 30 DAYS:")
 	fmt.Println("   - Escalate to Data Protection Board of India (DPBB)")

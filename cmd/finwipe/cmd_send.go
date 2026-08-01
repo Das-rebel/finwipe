@@ -247,12 +247,12 @@ func runSend(cmd *cobra.Command, args []string) error {
 	}
 
 	if sent > 0 && !dryRun {
-		fmt.Println("\nTimeline expectations (per DPDPA Rule 8):")
-		fmt.Println("  • NBFC must acknowledge within 48 hours")
-		fmt.Println("  • NBFC must complete deletion within 30 days")
+		fmt.Println("\nTimeline (per DPDP Act — no statutory timelines yet):")
+		fmt.Println("  • Acknowledge: as soon as reasonable (Section 8(6), DPDP Act 2023)")
+		fmt.Println("  • Erasure: as soon as reasonable (no prescribed period)")
 		fmt.Println()
 		fmt.Println("  finwipe track --all       # Monitor acknowledgments")
-		fmt.Println("  finwipe cron --followup    # Auto-follow-up after 48h")
+		fmt.Println("  finwipe cron --followup    # Auto-follow-up after reasonable period")
 		fmt.Println("  finwipe report            # Compliance dashboard")
 	}
 

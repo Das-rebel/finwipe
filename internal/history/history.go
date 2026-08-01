@@ -431,7 +431,7 @@ func (h *DB) TransitionState(reqID string, from, to State, actor, detail string)
 // Dispatch marks a request as DISPATCHED (email sent or letter generated)
 func (h *DB) Dispatch(reqID, letterPath, messageID, actor string) error {
 	now := time.Now()
-	respDeadline := now.Add(30 * 24 * time.Hour) // 30 days from dispatch
+	respDeadline := now.Add(30 * 24 * time.Hour) // 30-day processing window (no statutory period in DPDP Act) // 30-day processing window (industry standard, not statutory — DPDP Act has no prescribed period)
 
 	tx, err := h.db.Begin()
 	if err != nil {
@@ -899,7 +899,7 @@ func (h *DB) GetAuditTrail(reqID string) ([]AuditEntry, error) {
 
 func (h *DB) CreateEscalation(reqID, channel, summary string) (*Escalation, error) {
 	now := time.Now()
-	ackDeadline := now.Add(30 * 24 * time.Hour) // RBI/DPDP: 30-day acknowledgment
+	ackDeadline := now.Add(30 * 24 * time.Hour) // 30-day processing window (industry standard, not statutory)
 
 	res, err := h.db.Exec(`
 		INSERT INTO escalations (request_id, channel, status, summary, filed_at, ack_deadline_at, created_at)

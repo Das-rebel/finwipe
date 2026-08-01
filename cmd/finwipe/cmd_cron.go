@@ -290,7 +290,7 @@ func buildFollowupBody(req history.Request, fuType string, profile config.Profil
 		tone = "This is a formal reminder that our data deletion request remains pending."
 		actionReq = "Please process the deletion request within the regulatory timeframe."
 	case "DEADLINE_WARNING":
-		tone = "FINAL NOTICE — Our 30-day response deadline is imminent or exceeded."
+		tone = "FINAL NOTICE — Our 30-day processing window is imminent or exceeded."
 		actionReq = "Please act immediately to avoid escalation to regulatory authorities."
 	case "ESCALATION_NOTICE":
 		tone = "NOTICE OF ESCALATION — We are filing a formal complaint with RBI/DPDP Board."
@@ -311,7 +311,7 @@ Organization: %s
 %s
 
 This follow-up is sent automatically under FinWipe (github.com/das-rebel/finwipe)
-in accordance with Section 8(6) of the DPDP Act 2023 and Rule 8 of the DPDP Rules 2025.
+in accordance with Section 8(6) of the DPDP Act 2023.
 
 Regards,
 %s

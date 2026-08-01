@@ -100,9 +100,9 @@ Step 3: Select the entries listed above as "Disputed"
 Step 4: Attach this completed form as proof
 Step 5: Submit and note the reference number
 
-Timeline: %s will process your dispute within 30 days.
+Timeline: %s should process as soon as reasonable (Section 8(6), DPDP Act 2023.
 You will receive email updates every 7 days.
-If unresolved after 30 days, escalate to:
+If unresolved, escalate to:
   - RBI Integrated Ombudsman Scheme (RB-IOS): rbi.org.in
   - Data Protection Board of India
   - Consumer Forum under CPA 2019`, bureau, bureau)

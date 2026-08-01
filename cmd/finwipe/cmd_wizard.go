@@ -367,8 +367,8 @@ func buildDeletionEmail(reqID string, entity nbfc.Entity, profile config.Profile
 		"  \u25a1 Behavioral/usage data through your app/website\n"+
 		"  \u25a1 Pre-approved loan offer profiles\n"+
 		"  \u25a1 Call recordings and customer service interaction logs\n\n"+
-		"I request acknowledgment within 48 hours and completion of\n"+
-		"deletion within 30 days of this notice.\n\n"+
+		"I request acknowledgment as soon as reasonably practicable and completion of\n"+
+		"deletion no statutory timeline per DPDP Act of this notice.\n\n"+
 		"This request does not extend to KYC documents, transaction\n"+
 		"records, or data required by law.\n\n"+
 		"Request Reference: %s\n\n"+

@@ -19,7 +19,7 @@ var cibilErasureCmd = &cobra.Command{
 	Short: "Send DPDPA Section 8(6) erasure request to CIBIL",
 	Long: `Send a formal DPDPA 2023 Section 8(6) data erasure request to CIBIL.
 
-CIBIL must respond within 48 hours and complete deletion within 30 days.
+CIBIL should respond as soon as reasonable (Section 8(6), DPDP Act 2023).
 
 This sends an email to CIBIL's grievance officer and creates a PDF letter.
 
@@ -99,8 +99,8 @@ func runCibilErasure(cmd *cobra.Command, args []string) error {
 
 	fmt.Print(`
 📋 Next Steps:
-  1. CIBIL must acknowledge within 48 hours
-  2. CIBIL must complete deletion within 30 days
+  1. CIBIL should acknowledge "as soon as reasonable" (Section 8(6), DPDP Act 2023)
+  2. CIBIL should complete erasure "as soon as reasonable" — no statutory period
   3. Track: https://consumer.cibil.com
   4. No response? Escalate to MeitY: dpdo@meity.gov.in
 `)
@@ -124,7 +124,7 @@ Subject: Request for Erasure of Personal Data under Section 8(6) of the Digital 
 
 Dear Grievance Officer,
 
-I, %s, exercising my rights under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act), and Rule 8 of the DPDP Rules, 2025.
+I, %s, exercising my rights under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act).
 
 My Details:
 - Full Name: %s
@@ -147,11 +147,11 @@ Grounds:
 
 Under Section 8(6) of the DPDP Act, 2023, I have the right to demand erasure of personal data that is no longer necessary. Continued retention and sharing without free, informed, specific consent violates Section 8(6).
 
-Please confirm receipt within 48 hours (Rule 8, DPDP Rules, 2025) and complete action within 30 days.
+Please confirm receipt of this request as soon as reasonably practicable, and complete erasure of personal data that is no longer necessary for its original purpose.
 
-If no satisfactory response, I will escalate to:
-- MeitY Data Protection Officer: dpdo@meity.gov.in
-- RBI CIC Division: cic@rbi.org.in
+If no satisfactory response, I reserve the right to escalate to the Data Protection Board of India (DPBI), the enforcement authority under the DPDP Act, 2023.
+
+For inaccuracies in credit information, I also invoke my rights under Section 17 of the Credit Information Companies (Regulation) Act, 2005, and the RBI Master Direction on Credit Information.
 
 I reserve all rights under the DPDP Act, 2023, including compensation under Section 32.
 
