@@ -2,13 +2,12 @@ class Finwipe < Formula
   desc "DIY Financial Data Deletion tool for India under DPDP Act 2023"
   homepage "https://github.com/Das-rebel/finwipe"
   license "MIT"
-  head "https://github.com/Das-rebel/finwipe.git", branch: "main"
+  version "0.1.4"
 
   on_macos do
     on_intel do
       url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.4/finwipe-darwin-amd64"
-      sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      version "0.1.4"
+      sha256 "91bd820ce525e1c4f8810f4fd3112a25cfa620b938caee228fe5d7e0f8e661ad"
       def install
         bin.install "finwipe-darwin-amd64" => "finwipe"
       end
@@ -16,8 +15,7 @@ class Finwipe < Formula
 
     on_arm do
       url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.4/finwipe-darwin-arm64"
-      sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      version "0.1.4"
+      sha256 "991ca0703f5be8b100db57d1bb92927fdd65c01ae959912ea03cb94111f4684e"
       def install
         bin.install "finwipe-darwin-arm64" => "finwipe"
       end
@@ -26,8 +24,7 @@ class Finwipe < Formula
 
   on_linux do
     url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.4/finwipe-linux-amd64"
-    sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    version "0.1.4"
+    sha256 "4a8e75a4ceadfef617d60f2b7498d005a4783a972079003a4b04c005d826cbc5"
     def install
       bin.install "finwipe-linux-amd64" => "finwipe"
     end
@@ -35,11 +32,9 @@ class Finwipe < Formula
 
   def post_install
     require "fileutils"
-    dest = File.join(ENV["HOME"], ".finwipe", "nbfcs.yaml")
-    return if File.exist?(dest)
-    FileUtils.mkdir_p(File.dirname(dest))
-    # Create placeholder - user should run: finwipe update-registry
-    FileUtils.touch(dest)
+    dest_dir = File.join(ENV["HOME"], ".finwipe")
+    FileUtils.mkdir_p(dest_dir)
+    puts "FinWipe installed! Run: finwipe init"
   end
 
   test do
