@@ -106,7 +106,9 @@ func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Printf("   1. Go to myaccount.google.com/apppasswords\n")
 	fmt.Printf("   2. Select Mail → your device\n")
 	fmt.Printf("   3. Copy the 16-character password\n")
-	fmt.Printf("   4. Edit %s and replace smtp.password with the app password\n\n", cfgPath)
+	fmt.Printf("   4. Edit %s and replace smtp.password with the app password\n", cfgPath)
+	fmt.Printf("\n📖 Full Gmail setup guide: https://github.com/Das-rebel/finwipe/blob/main/docs/GMAIL_SETUP.md\n")
+	fmt.Printf("   Covers: SMTP sending, Gmail forwarding rules, alternatives (Outlook, iCloud, ProtonMail)\n\n")
 
 	return nil
 }

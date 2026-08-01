@@ -385,6 +385,16 @@ PRs welcome — especially:
 
 ---
 
+## 📖 Documentation
+
+| Guide | Description |
+|-------|-------------|
+| **[Gmail Setup Guide](docs/GMAIL_SETUP.md)** | SMTP sending (Gmail), receiving replies via forwarding rules, alternatives (Outlook, iCloud, ProtonMail) |
+| **[Regulatory Framework](docs/REGULATORY_FRAMEWORK.md)** | DPDPA 2023, RBI Guidelines, SEBI Circulars, CIC Dispute forms |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | How to contribute, add new NBFCs, submit pull requests |
+
+---
+
 ## License
 
 MIT — Use it. Modify it. Distribute it. Delete your data.
