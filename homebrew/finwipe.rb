@@ -2,20 +2,20 @@ class Finwipe < Formula
   desc "DIY Financial Data Deletion tool for India under DPDP Act 2023"
   homepage "https://github.com/Das-rebel/finwipe"
   license "MIT"
-  version "0.1.4"
+  version "0.1.6"
 
   on_macos do
     on_intel do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.4/finwipe-darwin-amd64"
-      sha256 "91bd820ce525e1c4f8810f4fd3112a25cfa620b938caee228fe5d7e0f8e661ad"
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-darwin-amd64"
+      sha256 "00d7901a6023aa9e17d78bf1ca10f3cf9c070b330c9aab079a20315cf47763e4"
       def install
         bin.install "finwipe-darwin-amd64" => "finwipe"
       end
     end
 
     on_arm do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.4/finwipe-darwin-arm64"
-      sha256 "991ca0703f5be8b100db57d1bb92927fdd65c01ae959912ea03cb94111f4684e"
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-darwin-arm64"
+      sha256 "f0a296d9be212b8811726150e70dae324871bce64670b323c866aa433ef198ec"
       def install
         bin.install "finwipe-darwin-arm64" => "finwipe"
       end
@@ -23,18 +23,25 @@ class Finwipe < Formula
   end
 
   on_linux do
-    url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.4/finwipe-linux-amd64"
-    sha256 "4a8e75a4ceadfef617d60f2b7498d005a4783a972079003a4b04c005d826cbc5"
-    def install
-      bin.install "finwipe-linux-amd64" => "finwipe"
+    on_intel do
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-linux-amd64"
+      sha256 "018f1e678d28ae5f62c0ee91c1da9662a693af9301fd4709985d89a9f3bb9f70"
+      def install
+        bin.install "finwipe-linux-amd64" => "finwipe"
+      end
+    end
+
+    on_arm do
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-linux-arm64"
+      sha256 "425abc6598330ceb18a8b9d1c862495c27856146d8c92dd4790ce5300161595f"
+      def install
+        bin.install "finwipe-linux-arm64" => "finwipe"
+      end
     end
   end
 
   def post_install
-    require "fileutils"
-    dest_dir = File.join(ENV["HOME"], ".finwipe")
-    FileUtils.mkdir_p(dest_dir)
-    puts "FinWipe installed! Run: finwipe init"
+    puts "FinWipe v#{version} installed! Run: finwipe init"
   end
 
   test do

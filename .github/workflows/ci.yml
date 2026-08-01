@@ -40,6 +40,7 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -o finwipe-darwin-amd64 ./cmd/finwipe
           GOOS=darwin GOARCH=arm64 go build -o finwipe-darwin-arm64 ./cmd/finwipe
           GOOS=linux GOARCH=amd64 go build -o finwipe-linux-amd64 ./cmd/finwipe
+          GOOS=linux GOARCH=arm64 go build -o finwipe-linux-arm64 ./cmd/finwipe
           GOOS=windows GOARCH=amd64 go build -o finwipe-windows-amd64.exe ./cmd/finwipe
 
       - name: Create Release
@@ -49,6 +50,7 @@ jobs:
             finwipe-darwin-amd64
             finwipe-darwin-arm64
             finwipe-linux-amd64
+            finwipe-linux-arm64
             finwipe-windows-amd64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -23,9 +23,24 @@ brew install finwipe
 
 **Option 3 — Direct binary (no package manager):**
 ```bash
-# macOS (Apple Silicon)
+# macOS (Apple Silicon / M1-M3)
 curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-darwin-arm64 -o finwipe
+
+# macOS (Intel)
+curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-darwin-amd64 -o finwipe
+
+# Linux (AMD64)
+curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-linux-amd64 -o finwipe
+
+# Linux (ARM64 / Raspberry Pi)
+curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-linux-arm64 -o finwipe
+
+# Windows
+curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-windows-amd64.exe -o finwipe.exe
+
 chmod +x finwipe && sudo mv finwipe /usr/local/bin/
+
+# Windows: save as finwipe.exe and run from Command Prompt or PowerShell
 ```
 
 **Option 4 — Build from source:**
@@ -361,7 +376,11 @@ PRs welcome — especially:
 |----------|---------------|
 | **npm** | `npm install -g finwipe` |
 | **Homebrew** | `brew tap das-rebel/finwipe && brew install finwipe` |
-| **GitHub Releases** | [latest](https://github.com/Das-rebel/finwipe/releases/latest) |
+| **macOS ARM64** | [finwipe-darwin-arm64](https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-darwin-arm64) |
+| **macOS AMD64** | [finwipe-darwin-amd64](https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-darwin-amd64) |
+| **Linux AMD64** | [finwipe-linux-amd64](https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-linux-amd64) |
+| **Linux ARM64** | [finwipe-linux-arm64](https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-linux-arm64) |
+| **Windows** | [finwipe-windows-amd64.exe](https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-windows-amd64.exe) |
 | **Source** | `git clone https://github.com/das-rebel/finwipe` |
 
 ---
