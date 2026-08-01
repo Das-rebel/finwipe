@@ -44,7 +44,7 @@ jobs:
 
       - name: Build
         run: |
-          go build -o finwipe ./cmd/finwipe
+          go build -buildvcs=false -o finwipe ./cmd/finwipe
 
       - name: Create config directory
         run: mkdir -p ~/.finwipe
