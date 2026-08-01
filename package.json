@@ -1,16 +1,15 @@
 {
   "name": "finwipe",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DIY Financial Data Deletion tool for India under DPDP Act 2023. Exercise your right to erasure against NBFCs, banks, and fintechs.",
   "main": "index.js",
   "bin": {
     "finwipe": "./finwipe"
   },
   "scripts": {
-    "build": "go build -o finwipe ./cmd/finwipe",
     "test": "go test ./...",
-    "install": "go build -o finwipe ./cmd/finwipe",
-    "prepublishOnly": "npm run build"
+    "postinstall": "echo 'Using pre-built finwipe binary'",
+    "prepublishOnly": "echo 'Binary already built'"
   },
   "keywords": [
     "finwipe",
