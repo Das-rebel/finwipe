@@ -266,6 +266,15 @@ nbfcs:
     notes: Credit card rewards + D2C lending
     active: true
 
+  - id: prefer
+    name: Prefr (by CreditVidya)
+    short_name: Prefr
+    category: fintech
+    grievance_email: wecare@prefr.com
+    website: https://www.prefr.com
+    notes: Lending arm of CreditVidya, acquired by CRED
+    active: true
+
   - id: lazypay
     name: PayU Finance India Pvt Ltd (LazyPay)
     short_name: LazyPay
