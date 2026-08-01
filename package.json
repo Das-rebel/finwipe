@@ -1,6 +1,6 @@
 {
   "name": "finwipe",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "DIY Financial Data Deletion tool for India under DPDP Act 2023. Exercise your right to erasure against NBFCs, banks, and fintechs.",
   "main": "index.js",
   "bin": {
