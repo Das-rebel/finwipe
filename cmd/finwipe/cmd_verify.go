@@ -148,7 +148,7 @@ func runVerify(cmd *cobra.Command, args []string) error {
 			}
 			return "their grievance email"
 		}())
-		fmt.Println("     2. Wait for their response (72 hours)")
+		fmt.Println("     2. Wait for their response (as soon as reasonably practicable)")
 		fmt.Println("     3. If they send a certificate → SAVE IT as proof")
 		fmt.Println("     4. If they don't respond → evidence for DPBB complaint")
 		fmt.Println()

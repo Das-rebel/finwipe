@@ -22,7 +22,7 @@ This is DIFFERENT from deletion:
   - Portability: "Give me ALL data you have about me"
 
 Why it matters:
-  - Company must respond within 72 hours
+  - Company must respond within as soon as reasonably practicable
   - You can verify what they actually deleted
   - You know what data was collected (often more than you knew)
   - Proves compliance or non-compliance
@@ -103,7 +103,7 @@ func runPortability(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 	fmt.Printf("  📜 Requesting: ALL data %s holds about you\n", entity.Name)
 	fmt.Printf("  📧 To: %s\n", entity.GrievanceEmail)
-	fmt.Printf("  ⏰ Must respond within: 72 hours (Section 6(9), DPDP Act)\n")
+	fmt.Printf("  ⏰ Must respond within: as soon as reasonably practicable (Section 6(9), DPDP Act)\n")
 	fmt.Println()
 	fmt.Println("  📋 NEXT STEPS:")
 	fmt.Println()
@@ -113,7 +113,7 @@ func runPortability(cmd *cobra.Command, args []string) error {
 		fmt.Printf("     Subject: DPDPA Section 6(9) — Data Portability Request\n")
 	}
 	fmt.Println()
-	fmt.Println("  2. Wait 72 hours for response")
+	fmt.Println("  2. Wait as soon as reasonably practicable for response")
 	fmt.Println()
 	fmt.Println("  3. Track their response:")
 	fmt.Printf("     finwipe new --nbfc-id %s --category portability\n", entity.ID)

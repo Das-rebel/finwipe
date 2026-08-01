@@ -777,7 +777,7 @@ func (g *Generator) GeneratePortability(entity *nbfc.Entity, profile config.Prof
 	// Body
 	pdf.SetFont("Arial", "", 11)
 	pdf.MultiCell(0, 6,
-		fmt.Sprintf("Dear %s,\n\nI am a digital resident of India and my personal data is processed by your organization. In accordance with Section 6(9) of the Digital Personal Data Protection Act, 2023 (DPDP Act), I hereby request that you provide me with all personal data you hold about me.\n\nSpecifically, I request:\n\n1. All personal data collected about me, including but not limited to:\n   - Identity information (name, address, phone, email, ID documents)\n   - Financial information (transactions, account history, KYC data)\n   - Usage data (app activity, login history, preferences)\n   - Any data shared with third parties\n\n2. The data should be provided in a commonly used, machine-readable format (JSON, CSV, or XML).\n\n3. This request must be fulfilled within 72 hours as mandated by the DPDP Act.\n\nPlease confirm receipt of this request and provide the timeline for fulfillment.\n\nIf you have collected data about me that you no longer retain or that has been deleted, please confirm this in writing.\n\nYours sincerely,\n\n%s\n%s\n%s", entity.Name, profile.Name, profile.Email,
+		fmt.Sprintf("Dear %v,\n\nI am a digital resident of India and my personal data is processed by your organization. In accordance with Section 6(9) of the Digital Personal Data Protection Act, 2023 (DPDP Act), I hereby request that you provide me with all personal data you hold about me.\n\nSpecifically, I request:\n\n1. All personal data collected about me, including but not limited to:\n   - Identity information (name, address, phone, email, ID documents)\n   - Financial information (transactions, account history, KYC data)\n   - Usage data (app activity, login history, preferences)\n   - Any data shared with third parties\n\n2. The data should be provided in a commonly used, machine-readable format (JSON, CSV, or XML).\n\n3. This request should be fulfilled as soon as reasonably practicable (Section 6(9), DPDP Act 2023).\n\nPlease confirm receipt of this request and provide the timeline for fulfillment.\n\nIf you have collected data about me that you no longer retain or that has been deleted, please confirm this in writing.\n\nYours sincerely,\n\n%v\n%v\n%v", entity.Name, profile.Name, profile.Email,
 			func() string { if profile.Phone != "" { return profile.Phone }; return "" }()), "", "", false)
 
 	pdf.Ln(5)
@@ -842,11 +842,11 @@ I hereby request that you provide me with a written Data Deletion Certificate co
 
 This certificate is necessary for my records and may be required for future disputes or regulatory purposes.
 
-Please provide this certificate within 72 hours.
+Please provide this certificate within 30 days (reasonable period).
 
 Yours sincerely,
-%s
-%s`, entityName, requestID,
+%v
+%v`, entityName, requestID,
 			time.Now().AddDate(0, 0, -35).Format("02 January 2006"),
 			time.Now().AddDate(0, 0, -5).Format("02 January 2006"),
 			profile.Name, profile.Email)
@@ -865,11 +865,11 @@ If deletion has not been completed, please provide:
 2. The expected completion date
 3. Reason for delay
 
-Please respond within 72 hours.
+Please respond within 30 days (reasonable period).
 
 Yours sincerely,
-%s
-%s`, entityName, requestID, profile.Name, profile.Email)
+%v
+%v`, entityName, requestID, profile.Name, profile.Email)
 	}
 
 	pdf.MultiCell(0, 6, body, "", "", false)
