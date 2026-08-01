@@ -18,7 +18,7 @@ jobs:
           go-version: '1.21'
 
       - name: Build
-        run: go build -o finwipe ./cmd/finwipe
+        run: go build -buildvcs=false -o finwipe ./cmd/finwipe
 
       - name: Run tests
         run: go test ./...
@@ -67,7 +67,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Build Go binary
-        run: go build -o finwipe ./cmd/finwipe
+        run: go build -buildvcs=false -o finwipe ./cmd/finwipe
 
       - name: Publish to npm
         run: npm publish
