@@ -175,13 +175,27 @@ func runSend(cmd *cobra.Command, args []string) error {
 
 		if sendChannel == "email" || req.Channel == history.ChannelEmail {
 			emailBody := letter.GenerateEmailBody(req.RequestID, nbfcEntity.Name, profile, categories, legalBasis)
-			err = sender.Send(nbfcEntity, profile, "")
 
-			if err != nil {
+			// Retry with exponential backoff: 0s, 5s, 15s
+			var sendErr error
+			for attempt := 0; attempt < 3; attempt++ {
+				if attempt > 0 {
+					delay := []time.Duration{5, 15}[attempt-1] * time.Second
+					fmt.Printf("  🔄 %s → retry %d/%d in %v...\n", req.RequestID, attempt+1, 3, delay)
+					time.Sleep(delay)
+				}
+				sendErr = sender.Send(nbfcEntity, profile, emailBody)
+				if sendErr == nil {
+					break
+				}
+				fmt.Printf("  ⚠️  %s → attempt %d failed: %v\n", req.RequestID, attempt+1, sendErr)
+			}
+
+			if sendErr != nil {
 				hist.TransitionState(req.RequestID, req.LifecycleState,
 					history.StateDeliveryFailed, "SYSTEM",
-					fmt.Sprintf("email send failed: %v", err))
-				fmt.Printf("  ❌ %s → %s: %v\n", req.RequestID, req.NBFCName, err)
+					fmt.Sprintf("email send failed after 3 attempts: %v", sendErr))
+				fmt.Printf("  ❌ %s → %s: %v\n", req.RequestID, req.NBFCName, sendErr)
 				failed++
 			} else {
 				if evStore != nil {
