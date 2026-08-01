@@ -390,6 +390,7 @@ PRs welcome — especially:
 | Guide | Description |
 |-------|-------------|
 | **[Gmail Setup Guide](docs/GMAIL_SETUP.md)** | SMTP sending (Gmail), receiving replies via forwarding rules, alternatives (Outlook, iCloud, ProtonMail) |
+| **[CIBIL Guide](docs/CIBIL_GUIDE.md)** | Stop CIBIL sharing data, freeze credit report, DPDPA erasure request to CIBIL |
 | **[Regulatory Framework](docs/REGULATORY_FRAMEWORK.md)** | DPDPA 2023, RBI Guidelines, SEBI Circulars, CIC Dispute forms |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)** | How to contribute, add new NBFCs, submit pull requests |
 

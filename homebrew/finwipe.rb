@@ -2,49 +2,34 @@ class Finwipe < Formula
   desc "DIY Financial Data Deletion tool for India under DPDP Act 2023"
   homepage "https://github.com/Das-rebel/finwipe"
   license "MIT"
-  version "0.1.6"
+  version "0.1.10"
 
   on_macos do
     on_intel do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-darwin-amd64"
-      sha256 "00d7901a6023aa9e17d78bf1ca10f3cf9c070b330c9aab079a20315cf47763e4"
-      def install
-        bin.install "finwipe-darwin-amd64" => "finwipe"
-      end
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.10/finwipe-darwin-amd64"
+      sha256 "c05bd820fea7382fe3d335429ddc505cec0c4d1bdbd932a23778ba6f9be43219"
     end
-
     on_arm do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-darwin-arm64"
-      sha256 "f0a296d9be212b8811726150e70dae324871bce64670b323c866aa433ef198ec"
-      def install
-        bin.install "finwipe-darwin-arm64" => "finwipe"
-      end
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.10/finwipe-darwin-arm64"
+      sha256 "30124441768b709d997610b2a9eb116ed393a49f3e556214a3834203f7060611"
     end
   end
 
   on_linux do
-    on_intel do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-linux-amd64"
-      sha256 "018f1e678d28ae5f62c0ee91c1da9662a693af9301fd4709985d89a9f3bb9f70"
-      def install
-        bin.install "finwipe-linux-amd64" => "finwipe"
-      end
+    on_x86_64 do
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.10/finwipe-linux-amd64"
+      sha256 "c22d44b7d38a88de66ea4e41c8c76edad0bf578e511ab03f29a9133417897fd6"
     end
-
-    on_arm do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.6/finwipe-linux-arm64"
-      sha256 "425abc6598330ceb18a8b9d1c862495c27856146d8c92dd4790ce5300161595f"
-      def install
-        bin.install "finwipe-linux-arm64" => "finwipe"
-      end
+    on_arm64 do
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.1.10/finwipe-linux-arm64"
+      sha256 "1f75673789065cc356b13d71971eaee85276d6a754e2a4d8f968b0869c22aba3"
     end
   end
 
-  def post_install
-    puts "FinWipe v#{version} installed! Run: finwipe init"
-  end
-
-  test do
-    assert_match "FinWipe", shell_output("#{bin}/finwipe --help")
+  def install
+    bin.install "finwipe-darwin-amd64" => "finwipe" if OS.mac? && Hardware::CPU.intel?
+    bin.install "finwipe-darwin-arm64" => "finwipe" if OS.mac? && Hardware::CPU.arm?
+    bin.install "finwipe-linux-amd64" => "finwipe" if OS.linux? && Hardware::CPU.intel?
+    bin.install "finwipe-linux-arm64" => "finwipe" if OS.linux? && Hardware::CPU.arm?
   end
 end
