@@ -1,0 +1,19 @@
+Subject: Follow-up: Erasure of Personal Data — {{.RequestID}} — No Response Received
+
+Dear Grievance Officer / Data Protection Officer,
+
+I am writing to follow up on my earlier request (Reference: {{.RequestID}}) dated {{.RequestDate}} for erasure of my personal data under Section 8(6) of the Digital Personal Data Protection Act, 2023.
+
+As of today, I have not received:
+1. An acknowledgment of my deletion request, or
+2. Confirmation of data erasure
+
+This is a second follow-up. If I do not receive a response within 7 days, I will escalate this matter to the Data Protection Board of India under Section 27(3) of the DPDP Act, 2023.
+
+My original request reference: {{.RequestID}}
+
+Please treat this as urgent.
+
+Yours faithfully,
+{{.FullName}}
+{{.Email}}

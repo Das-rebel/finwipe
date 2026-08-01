@@ -1,0 +1,43 @@
+Subject: Request for Erasure of Personal Data under Section 8(6), DPDP Act 2023 — {{.NBFCName}}
+
+To,
+The Grievance Officer / Data Protection Officer
+{{.NBFCName}}
+{{.NBFCCategory}}
+
+Subject: Request for Erasure of Personal Data under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act)
+
+Dear Sir/Madam,
+
+I, {{.FullName}}, residing at {{.Address}}, am writing to exercise my right to erasure of personal data as provided under Section 8(6) of the Digital Personal Data Protection Act, 2023 (DPDP Act).
+
+My details:
+- Name: {{.FullName}}
+- Email: {{.Email}}
+- Phone: {{.Phone}}
+- Request Reference: {{.RequestID}}
+
+I request that {{.NBFCName}} erase all personal data held by your organization relating to me, except such data as may be necessary to retain under any law for the time being in force.
+
+Specifically, I request deletion of:
+{{range .Categories}}- {{.}}
+{{end}}
+
+This request is made under Section 8(6) of the DPDP Act, 2023 and Rule 8 of the DPDP Rules, 2025.
+
+Please confirm receipt of this request within 48 hours as mandated under Rule 8(1) and proceed with the erasure within 30 days of this request.
+
+If you fail to comply with this request within the stipulated timeframe, I reserve the right to escalate this matter to the Data Protection Board of India under Section 27(3) of the DPDP Act, 2023.
+
+Please direct all future correspondence regarding this matter to:
+- Email: {{.Email}}
+- Address: {{.Address}}
+
+Yours faithfully,
+{{.FullName}}
+{{.Email}}
+{{.Phone}}
+
+---
+Request ID: {{.RequestID}}
+Date: {{.Date}}

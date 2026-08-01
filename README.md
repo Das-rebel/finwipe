@@ -10,18 +10,17 @@ Every request gets a unique **DPR-ID** (e.g., `DPR-2026-000001`) for full audita
 
 | Metric | Value |
 |--------|------:|
-| **npm downloads** | **0** |
+| **npm downloads** | **TBD** (just published) |
 | GitHub stars | ⭐0 |
+| Version | 0.1.4 |
 | Registry | 91 entities (12 banks, 18 NBFCs, 59 fintechs, 2 HFCs) |
-| Monthly requests | 5,000+ (estimated) |
-| Success rate | 38% avg (shame list varies) |
 | Legal basis | DPDP Act 2023 + RBI DLG |
 
-## 🚨 Status: **Not published yet**
+## 🚀 Status: **Published!**
 
-FinWipe is **not available on npm** (e.g., `npm install finwipe` returns package not found).
-
-**However:** The repository is ready for publishing once all components are completed and tested.
+- **npm**: ✅ Published at [npmjs.com/package/finwipe](https://www.npmjs.com/package/finwipe) (v0.1.4)
+- **GitHub**: ✅ [Das-rebel/finwipe](https://github.com/Das-rebel/finwipe)
+- **Homebrew**: ✅ Formula at `homebrew/finwipe.rb`
 
 ## Key Features
 
@@ -35,13 +34,19 @@ FinWipe is **not available on npm** (e.g., `npm install finwipe` returns package
 ## Installation
 
 ```bash
-# Quick install from this repo
-cd finwipe
-go build -o finwipe ./cmd/finwipe
-
-# Future (after publishing to npm)
+# Option 1: npm (recommended)
 npm install -g finwipe
 finwipe init
+
+# Option 2: Homebrew (macOS/Linux)
+brew tap das-rebel/finwipe
+brew install finwipe
+finwipe init
+
+# Option 3: Direct binary
+curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-darwin-arm64 -o finwipe
+chmod +x finwipe
+./finwipe init
 ```
 
 ## Commands

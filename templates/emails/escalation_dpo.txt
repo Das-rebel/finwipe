@@ -1,0 +1,23 @@
+Subject: Escalation to Data Protection Officer — {{.RequestID}} — No Response to Deletion Request
+
+To: The Data Protection Officer
+{{.NBFCName}}
+
+Dear DPO,
+
+I am escalating my data deletion request (Reference: {{.RequestID}}) as I have not received any acknowledgment or response from {{.NBFCName}} despite multiple follow-ups.
+
+Request Details:
+- Request ID: {{.RequestID}}
+- Original Request Date: {{.RequestDate}}
+- Categories Requested for Deletion: {{range .Categories}} {{.}} {{end}}
+- Nature of Non-Compliance: No acknowledgment within 48 hours under Rule 8(1), no deletion within 30 days under Rule 8(2)
+
+I request your immediate intervention to ensure compliance with Section 8(6) of the DPDP Act, 2023.
+
+I reserve the right to escalate to the Data Protection Board of India if this matter is not resolved within 7 days.
+
+Yours faithfully,
+{{.FullName}}
+{{.Email}}
+{{.Phone}}
