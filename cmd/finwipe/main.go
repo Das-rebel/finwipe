@@ -16,6 +16,8 @@ var (
 	closeRequestID string
 )
 
+var version = "0.1.7"
+
 var rootCmd = &cobra.Command{
 	Use:   "finwipe",
 	Short: "FinWipe – DIY NBFC data deletion tracker for India",
@@ -44,6 +46,11 @@ Full docs: https://github.com/das-rebel/finwipe`,
 }
 
 func main() {
+	args := os.Args[1:]
+	if len(args) > 0 && (args[0] == "--version" || args[0] == "-v") {
+		fmt.Printf("finwipe %s\n", version)
+		return
+	}
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)

@@ -158,6 +158,44 @@ func runCron(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// ── 2b. Process scheduled follow-ups that are now due ─────────────
+	if cronMode == "full" || cronMode == "followup" {
+		// Find all pending followups due between yesterday and now
+		yesterday := now.AddDate(0, 0, -1)
+		dueFollowups, err := hist.GetDueFollowups(yesterday, now)
+		if err != nil {
+			fmt.Printf("  ⚠️ GetDueFollowups: %v\n", err)
+		} else {
+			fmt.Printf("\n📬 Processing %d due follow-up(s)...\n", len(dueFollowups))
+			for _, fu := range dueFollowups {
+				if fu.DeliveryStatus == "sent" || fu.DeliveryStatus == "failed" {
+					continue // already processed
+				}
+				req, err := hist.GetByRequestID(fu.RequestID)
+				if err != nil {
+					fmt.Printf("  ⚠️ Followup %d: request %s not found\n", fu.ID, fu.RequestID)
+					hist.MarkFollowupFailed(fu.ID)
+					continue
+				}
+				fmt.Printf("  📧 %s [%s]: ", fu.RequestID, fu.Type)
+
+				if cronDryRun {
+					fmt.Printf("DRY RUN — would send %s\n", fu.Type)
+					continue
+				}
+
+				msgID, err := sendFollowup(hist, sender, fu.ID, fu.Type, *req, cfg.Profile)
+				if err != nil {
+					hist.MarkFollowupFailed(fu.ID)
+					fmt.Printf("❌ failed: %v\n", err)
+				} else {
+					hist.MarkFollowupSent(fu.ID, msgID)
+					fmt.Printf("✅ sent (msgID: %s)\n", msgID)
+				}
+			}
+		}
+	}
+
 	// ── 3. Auto-escalation ──────────────────────────────────────────
 	if cronMode == "full" || cronMode == "escalate" {
 		pendingAck, _ := hist.GetPendingAck()
