@@ -3,6 +3,7 @@ package email
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/smtp"
 	"regexp"
 	"strings"
@@ -41,6 +42,58 @@ func New(cfg *config.SMTP) *Sender {
 	return &Sender{cfg: cfg, from: cfg.From, Cfg: cfg}
 }
 
+// dialSMTP connects to the SMTP server.
+// For port 465, uses implicit SSL/TLS (tls.Dial).
+// For port 587, uses STARTTLS upgrade on plain TCP connection.
+func (s *Sender) dialSMTP(addr string) (*smtp.Client, error) {
+	tlsCfg := &tls.Config{ServerName: s.cfg.Host}
+
+	if s.cfg.Port == 465 {
+		// Port 465: implicit SSL/TLS — wrap connection in TLS from the start
+		conn, err := tls.Dial("tcp", addr, tlsCfg)
+		if err != nil {
+			return nil, fmt.Errorf("SSL connect failed to %s: %w (hint: try port 587 for STARTTLS)", addr, err)
+		}
+		client, err := smtp.NewClient(conn, s.cfg.Host)
+		if err != nil {
+			conn.Close()
+			return nil, fmt.Errorf("create SMTP client: %w", err)
+		}
+		return client, nil
+	}
+
+	// Port 587 (or other): plain TCP, then upgrade via STARTTLS
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return nil, fmt.Errorf("connect to %s: %w", addr, err)
+	}
+
+	client, err := smtp.NewClient(conn, s.cfg.Host)
+	if err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("create SMTP client: %w", err)
+	}
+
+	// Send EHLO
+	if err := client.Hello("localhost"); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("EHLO: %w", err)
+	}
+
+	// Upgrade to TLS if supported
+	if ok, _ := client.Extension("STARTTLS"); ok {
+		if err := client.StartTLS(tlsCfg); err != nil {
+			client.Close()
+			return nil, fmt.Errorf("STARTTLS failed: %w (hint: try port 465 for SSL)", err)
+		}
+	} else {
+		client.Close()
+		return nil, fmt.Errorf("STARTTLS not supported by %s on port %d", s.cfg.Host, s.cfg.Port)
+	}
+
+	return client, nil
+}
+
 func (s *Sender) Send(n nbfc.Entity, profile config.Profile, templateBody string) error {
 	if s.cfg.Host == "" {
 		return fmt.Errorf("SMTP not configured")
@@ -55,20 +108,9 @@ func (s *Sender) Send(n nbfc.Entity, profile config.Profile, templateBody string
 
 	msg := buildMessage(n, profile, templateBody, s.from)
 
-	var conn *tls.Conn
-	var err error
-
-	// Always use TLS with proper verification
-	tlsCfg := &tls.Config{ServerName: s.cfg.Host}
-	conn, err = tls.Dial("tcp", addr, tlsCfg)
+	client, err := s.dialSMTP(addr)
 	if err != nil {
-		return fmt.Errorf("TLS connection failed to %s: %w (hint: check SMTP host/port and network)", addr, err)
-	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, s.cfg.Host)
-	if err != nil {
-		return fmt.Errorf("create SMTP client: %w", err)
+		return err
 	}
 	defer client.Close()
 
@@ -166,17 +208,9 @@ func (s *Sender) SendFollowup(reqID, grievanceEmail string, p config.Profile, bo
 		cleanBody,
 	)
 
-	// Always use TLS with proper verification
-	tlsCfg := &tls.Config{ServerName: s.cfg.Host}
-	conn, err := tls.Dial("tcp", addr, tlsCfg)
+	client, err := s.dialSMTP(addr)
 	if err != nil {
-		return "", fmt.Errorf("TLS connection failed to %s: %w (hint: check SMTP host/port)", addr, err)
-	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, s.cfg.Host)
-	if err != nil {
-		return "", fmt.Errorf("create SMTP client: %w", err)
+		return "", err
 	}
 	defer client.Close()
 
