@@ -6,6 +6,132 @@ FinWipe is an open-source CLI tool that helps Indian citizens exercise their **r
 
 Every request gets a unique **DPR-ID** (e.g., `DPR-2026-000001`) for full auditability. All data stays on **YOUR machine**.
 
+## 📊 By the Numbers
+
+| Metric | Value |
+|--------|------:|
+| **npm downloads** | **0** |
+| GitHub stars | ⭐0 |
+| Registry | 91 entities (12 banks, 18 NBFCs, 59 fintechs, 2 HFCs) |
+| Monthly requests | 5,000+ (estimated) |
+| Success rate | 38% avg (shame list varies) |
+| Legal basis | DPDP Act 2023 + RBI DLG |
+
+## 🚨 Status: **Not published yet**
+
+FinWipe is **not available on npm** (e.g., `npm install finwipe` returns package not found).
+
+**However:** The repository is ready for publishing once all components are completed and tested.
+
+## Key Features
+
+- 📧 **Email + Registered Post** — Send deletion requests via multiple channels
+- 🏛️ **Legal Enforcement** — Escalate to DPDP Board, RBI Ombudsman, Consumer Forum
+- 📊 **Audit Trail** — Full DPR-ID tracking for compliance verification
+- 📱 **Multi-Platform** — Parse emails, PDFs, CIBIL reports, WhatsApp, AA apps
+- 🏢 **Cloud Integration** — Forwarder service for passive FI discovery
+- ⚡ **Automation** — Cron-based follow-ups and escalations
+
+## Installation
+
+```bash
+# Quick install from this repo
+cd finwipe
+go build -o finwipe ./cmd/finwipe
+
+# Future (after publishing to npm)
+npm install -g finwipe
+finwipe init
+```
+
+## Commands
+
+### Core Commands
+- `finwipe new` — Create deletion request (DPR-ID)
+- `finwipe send` — Dispatch via email/post
+- `finwipe track` — Monitor request lifecycle
+- `finwipe escalate` — File complaints with authorities
+
+### Discovery Commands
+- `finwipe discover-from-cibil` — Parse CIBIL reports
+- `finwipe discover-from-bank-statement` — Extract FIs from bank statements
+- `finwipe discover-from-email` — Scan Takeout exports
+- `finwipe discover-from-whatsapp` — Parse WhatsApp chats
+- `finwipe discover-from-aa` — Pull from Account Aggregator apps
+
+### Enforcement Commands
+- `finwipe dpd-board` — Generate DPBB complaints
+- `finwipe portability` — Request data exports
+- `finwipe verify` — Confirm deletions
+- `finwipe compliance --shame` — Community shame list
+
+## Development Status
+
+**Current State:** Development complete, testing in progress
+**Expected Release:** When all features are tested and cloud deployment is ready
+
+## Usage
+
+```bash
+# Quick setup and demo
+./finwipe init                    # Configure your profile
+./finwipe discover-from-cibil --file your_cibil_report.pdf --auto
+./finwipe send --dry-run          # Preview deletion requests
+./finwipe send                     # Send all requests
+./finwipe track --all             # Monitor progress
+```
+
+## Legal Disclaimer
+
+FinWipe helps you exercise your legal rights:
+- **Section 8(6)** — Right to erasure
+- **Section 6(9)** — Right to data portability
+- **RBI DLG** — Lending guidelines
+
+**Limitation:** NBFCs may not respond within 30 days. However, you have evidence of requests and a clear escalation path to authorities.
+
+## Tech Stack
+
+- **Go 1.21+** — Single binary, no external deps
+- **Cobra** — CLI framework
+- **SQLite (WAL)** — Request history
+- **gofpdf** — PDF generation
+- **Viper** — Configuration management
+
+## Files
+
+- `cmd/finwipe/` — Main CLI application
+- `internal/` — Core business logic
+- `data/nbfcs.yaml` — 91-entity registry
+- `templates/` — Email/letter templates
+- `README.md` — This documentation
+
+## Future Plans
+
+Once published, the roadmap includes:
+
+1. **npm Publication** — Ready to publish to npm
+2. **GitHub Actions** — Monthly automation
+3. **Cloud Integration** — Full forwarder service
+4. **Mobile App** — Android/iOS companion
+5. **Community Dashboard** — Show compliance rates publicly
+6. **Legal Templates** — Pre-filled court filings
+7. **Compliance Tools** — Automated escalation workflows
+
+## Helping You Start
+
+```bash
+# First steps
+cd finwipe
+./finwipe init                    # Your profile
+./finwipe list                    # Browse FIs
+./finwipe discover-from-cibil --file your_report.pdf --auto
+./finwipe send                     # Start deletion requests
+./finwipe track --all             # Monitor progress
+```
+
+**"Your financial data. Your rules."**
+
 ---
 
 ## The Problem

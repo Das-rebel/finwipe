@@ -1,0 +1,44 @@
+{
+  "name": "finwipe",
+  "version": "0.1.0",
+  "description": "DIY Financial Data Deletion tool for India under DPDP Act 2023. Exercise your right to erasure against NBFCs, banks, and fintechs.",
+  "main": "index.js",
+  "bin": {
+    "finwipe": "./finwipe"
+  },
+  "scripts": {
+    "build": "go build -o finwipe ./cmd/finwipe",
+    "test": "go test ./...",
+    "install": "go build -o finwipe ./cmd/finwipe",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "finwipe",
+    "dpdp-act",
+    "data-deletion",
+    "financial-privacy",
+    "india",
+    "right-to-erasure",
+    "nbfc",
+    "dpdp-board"
+  ],
+  "author": "Das-rebel <sdas22@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Das-rebel/finwipe.git"
+  },
+  "homepage": "https://github.com/Das-rebel/finwipe",
+  "bugs": {
+    "url": "https://github.com/Das-rebel/finwipe/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "os": ["darwin", "linux", "win32"],
+  "files": [
+    "finwipe",
+    "README.md",
+    "LICENSE"
+  ]
+}
