@@ -41,14 +41,7 @@ func runLetter(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("profile not configured. Run: finwipe init")
 	}
 
-	// Load NBFCs
-	exePath, _ := os.Executable()
-	nbfcPath := filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
-	if _, err := os.Stat(nbfcPath); err != nil {
-		nbfcPath = "./data/nbfcs.yaml"
-	}
-
-	allNBFCs, err := nbfc.Load(nbfcPath)
+	allNBFCs, err := nbfc.Load("")
 	if err != nil {
 		return fmt.Errorf("load NBFCs: %w", err)
 	}

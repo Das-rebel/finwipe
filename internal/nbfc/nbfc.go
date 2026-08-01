@@ -1,11 +1,5 @@
 package nbfc
 
-import (
-	"os"
-
-	"gopkg.in/yaml.v3"
-)
-
 type Category string
 
 const (
@@ -33,27 +27,6 @@ type Entity struct {
 
 type Registry struct {
 	Entities []Entity `yaml:"nbfcs"`
-}
-
-func Load(path string) ([]Entity, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var reg Registry
-	if err := yaml.Unmarshal(data, &reg); err != nil {
-		return nil, err
-	}
-
-	var active []Entity
-	for _, n := range reg.Entities {
-		if n.Active {
-			active = append(active, n)
-		}
-	}
-
-	return active, nil
 }
 
 func FilterByCategory(entities []Entity, cats []Category) []Entity {

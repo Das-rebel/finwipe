@@ -294,19 +294,7 @@ func guidedConsentJourney() error {
 
 // getGrievanceEmail tries to find the grievance officer email for a company
 func getGrievanceEmail(companyName string) string {
-	// Try to load NBFC registry and find matching company
-	exePath, _ := os.Executable()
-	nbfcPath := filepath.Join(filepath.Dir(exePath), "..", "..", "data", "nbfcs.yaml")
-
-	// Try relative to current working directory
-	if _, err := os.Stat(nbfcPath); err != nil {
-		nbfcPath = "./data/nbfcs.yaml"
-	}
-	if _, err := os.Stat(nbfcPath); err != nil {
-		nbfcPath = filepath.Join(os.Getenv("HOME"), "finwipe", "data", "nbfcs.yaml")
-	}
-
-	if entities, err := nbfc.Load(nbfcPath); err == nil {
+	if entities, err := nbfc.Load(""); err == nil {
 		lower := strings.ToLower(companyName)
 		for _, e := range entities {
 			if strings.Contains(strings.ToLower(e.Name), lower) ||

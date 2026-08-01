@@ -102,9 +102,7 @@ func runEscalate(cmd *cobra.Command, args []string) error {
 			history.EscalationLevelLabel(escLevel))
 	}
 
-	// Load NBFC entity
-	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
-	entities, err := nbfc.Load(nbfcPath)
+	entities, err := nbfc.Load("")
 	if err != nil {
 		return fmt.Errorf("load registry: %w", err)
 	}

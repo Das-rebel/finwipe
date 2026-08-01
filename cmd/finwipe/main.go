@@ -96,12 +96,9 @@ func dbPath() string {
 }
 
 func nbfcRegistryPath() string {
-	exePath, _ := os.Executable()
-	nbfcPath := filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
-	if _, err := os.Stat(nbfcPath); err != nil {
-		nbfcPath = "./data/nbfcs.yaml"
-	}
-	return nbfcPath
+	// Return empty string — Load() uses embedded data as fallback.
+	// Commands can pass an explicit path to override.
+	return ""
 }
 
 func dataDir() string {

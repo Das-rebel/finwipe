@@ -265,14 +265,7 @@ func runDiscoverFile(filePath string) error {
 
 	if emailCount > 0 && !discoverDryRun && discoverAdd {
 		fmt.Println("  💾 Adding to registry...")
-		// Load existing registry, add new entries, save
-		exePath, _ := os.Executable()
-		nbfcPath := filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
-		if _, err := os.Stat(nbfcPath); err != nil {
-			nbfcPath = "./data/nbfcs.yaml"
-		}
-
-		entities, err := nbfc.Load(nbfcPath)
+		entities, err := nbfc.Load("")
 		if err != nil {
 			fmt.Printf("  ❌ Load registry: %v\n", err)
 			return nil

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -29,14 +27,7 @@ func init() {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	nbfcDataDir := dataDir()
-	nbfcPath := filepath.Join(nbfcDataDir, "nbfcs.yaml")
-	if _, err := os.Stat(nbfcPath); err != nil {
-		exePath, _ := os.Executable()
-		nbfcPath = filepath.Join(filepath.Dir(exePath), "data", "nbfcs.yaml")
-	}
-
-	nbfcs, err := nbfc.Load(nbfcPath)
+	nbfcs, err := nbfc.Load("")
 	if err != nil {
 		return fmt.Errorf("load NBFCs: %w", err)
 	}

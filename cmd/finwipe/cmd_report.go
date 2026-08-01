@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -50,9 +49,7 @@ func runReport(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	// Load NBFCs for category breakdown
-	nbfcPath := filepath.Join(dataDir(), "nbfcs.yaml")
-	allNBFCs, _ := nbfc.Load(nbfcPath)
+	allNBFCs, _ := nbfc.Load("")
 	nbfcMap := make(map[string]nbfc.Entity)
 	for _, e := range allNBFCs {
 		nbfcMap[e.ID] = e
