@@ -13,7 +13,7 @@ func TestGenerateFollowupBody(t *testing.T) {
 	profile := config.Profile{
 		Name:    "Test User",
 		Email:   "test@example.com",
-		Phone:   "7977110915",
+		Phone:   "9876543210",
 		Address: "123 Test Street, Bengaluru",
 	}
 

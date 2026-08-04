@@ -236,6 +236,6 @@ NBFC ──reply──►  Filter Rule ──forward──►  FinWipe Cloud    
                     smtp.gmail.com          inbox.finwipe.in        │
                          │                                          │
                     DPR Email ──────►  NBFC Grievance Officer       │
-                    (sdas22@gmail.com → gro@nbfc.com)              │
+                    (your-email@gmail.com → gro@nbfc.com)              │
                     └─────────────────────────────────────────────┘
 ```
