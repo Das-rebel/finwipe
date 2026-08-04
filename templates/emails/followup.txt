@@ -1,19 +1,33 @@
-Subject: Follow-up: Erasure of Personal Data — {{.RequestID}} — No Response Received
+Subject: Follow-up: Data Deletion Request — RBI Digital Lending Guidelines — {{.NBFCName}} — {{.RequestID}}
 
-Dear Grievance Officer / Data Protection Officer,
+Dear Grievance Officer / Nodal Officer,
 
-I am writing to follow up on my earlier request (Reference: {{.RequestID}}) dated {{.RequestDate}} for erasure of my personal data under Section 8(6) of the Digital Personal Data Protection Act, 2023.
+I am writing to follow up on my earlier data deletion request (Reference: {{.RequestID}}) dated {{.RequestDate}} under **RBI Master Direction on Digital Lending**.
 
 As of today, I have not received:
 1. An acknowledgment of my deletion request, or
 2. Confirmation of data erasure
 
-This is a second follow-up. If I do not receive a response within 7 days, I will escalate this matter to the Data Protection Board of India under Section 27(3) of the DPDP Act, 2023.
+This is a follow-up reminder. If I do not receive a response within 7 days, I will escalate this matter to the Data Protection Officer and subsequently to RBI Ombudsman.
 
 My original request reference: {{.RequestID}}
 
-Please treat this as urgent.
+As per **RBI Master Direction on Digital Lending (updated August 2025)**, you are required to acknowledge deletion requests within 48 hours and complete deletion within 7 days.
+
+Please treat this as urgent and provide:
+1. Receipt acknowledgment
+2. Confirmation of data deletion or timeline
+
+Contact:
+- Email: {{.Email}}
+- Phone: {{.Phone}}
 
 Yours faithfully,
 {{.FullName}}
 {{.Email}}
+{{.Phone}}
+
+---
+Request ID: {{.RequestID}}
+Original Request Date: {{.RequestDate}}
+Legal Basis: RBI Master Direction on Digital Lending (updated August 2025)

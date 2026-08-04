@@ -5,19 +5,30 @@ To: The Data Protection Officer
 
 Dear DPO,
 
-I am escalating my data deletion request (Reference: {{.RequestID}}) as I have not received any acknowledgment or response from {{.NBFCName}} despite multiple follow-ups.
+I am escalating my data deletion request (Reference: {{.RequestID}}) as I have not received any acknowledgment or response from {{.NBFCName}} despite follow-ups.
+
+This request is made under **RBI Master Direction on Digital Lending (updated August 2025)** which mandates data deletion compliance.
 
 Request Details:
 - Request ID: {{.RequestID}}
 - Original Request Date: {{.RequestDate}}
 - Categories Requested for Deletion: {{range .Categories}} {{.}} {{end}}
-- Nature of Non-Compliance: Failure to acknowledge and erase as soon as reasonably practicable under Section 8(6), DPDP Act 2023
+- Nature of Non-Compliance: Failure to acknowledge and erase as per RBI DLG
 
-I request your immediate intervention to ensure compliance with Section 8(6) of the DPDP Act, 2023.
+I request your immediate intervention to ensure compliance with RBI Master Direction on Digital Lending.
 
-I reserve the right to escalate to the Data Protection Board of India if this matter is not resolved within 7 days.
+I reserve the right to escalate to RBI Ombudsman and Consumer Forum if this matter is not resolved within 7 days.
+
+Contact:
+- Email: {{.Email}}
+- Phone: {{.Phone}}
 
 Yours faithfully,
 {{.FullName}}
 {{.Email}}
 {{.Phone}}
+
+---
+Request ID: {{.RequestID}}
+Original Request Date: {{.RequestDate}}
+Legal Basis: RBI Master Direction on Digital Lending (updated August 2025)

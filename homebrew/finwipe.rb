@@ -2,27 +2,27 @@ class Finwipe < Formula
   desc "DIY Financial Data Deletion tool for India under DPDP Act 2023"
   homepage "https://github.com/Das-rebel/finwipe"
   license "MIT"
-  version "0.2.3"
+  version "0.2.4"
 
   on_macos do
     on_intel do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.3/finwipe-darwin-amd64"
-      sha256 "9109f767f7908b6547c9c3c699361689c539cc0403ba28ebebc3893cdef113c3"
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.4/finwipe-darwin-amd64"
+      sha256 "9f96120a7b6ef7f352269415ecf69f72724351390cc8fd1f33ed228e6baa56dc"
     end
     on_arm do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.3/finwipe-darwin-arm64"
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.4/finwipe-darwin-arm64"
       sha256 "8a42772de09badbfcfe9c5762ee86eaa73a82556ce6dc8e6a5a7dc3f35d2cd25"
     end
   end
 
   on_linux do
     on_x86_64 do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.3/finwipe-linux-amd64"
-      sha256 "3b245c43d8f68968d81b87bfd062d8c7fb2cb7127c1de8d23af4af34c4b10256"
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.4/finwipe-linux-amd64"
+      sha256 "7079ff8b9389f92e05688d303541b89e26ec08ac8794714188e04b1458c13f9b"
     end
     on_arm64 do
-      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.3/finwipe-linux-arm64"
-      sha256 "aa65c24fe5f65997a3dc73c10e155f47e9bc5338ee61b256fdc425deaa7b353f"
+      url "https://github.com/Das-rebel/finwipe/releases/download/v0.2.4/finwipe-linux-arm64"
+      sha256 "e3b7d1ea1c0752b5e8e1dbe8c50cd4078a2ffcbeb1f47390f26d706625d40ff7"
     end
   end
 

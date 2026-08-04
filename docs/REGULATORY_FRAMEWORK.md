@@ -1,168 +1,187 @@
-# Regulatory Framework — FinWipe
+# Regulatory Framework for Financial Data Deletion in India
 
-This document explains the legal basis for FinWipe's deletion requests and the obligations of NBFCs under Indian law.
-
----
-
-## 1. Right to Erasure — DPDP Act 2023
-
-### Section 8(6): Right to Erasure
-
-> *"A data principal shall have the right to erasure of personal data processed by a data fiduciary where such personal data is no longer necessary for the purpose for which it was collected."*
-
-**What this means:**
-- When the purpose of collecting personal data (e.g., granting a loan) is complete, the data principal can demand erasure
-- The NBFC must delete data that is no longer necessary
-- This is not unlimited — regulatory requirements carve out exceptions
-
-### Rule 8, DPDP Rules 2025 — Operational Requirements
-
-| Requirement | Detail |
-|------------|--------|
-| **Acknowledgment** | 48 hours from receipt of request |
-| **Completion** | Without undue delay, typically 30 days |
-| **Propagated deletion** | Must delete from ALL processors (cloud, SaaS, backups) |
-| **Logs** | Retain deletion logs for 1 year minimum |
-| **Notice before deletion** | Must notify data principal 48 hours before deletion |
-
-### What CAN be requested for deletion
-
-```
-✓ Marketing and promotional data
-✓ Third-party shared data (sold to data brokers)
-✓ Behavioral/usage data from apps/websites
-✓ Pre-approved loan offer profiles
-✓ Call recordings and service interaction logs
-✓ Device fingerprint and metadata
-✓ KYC data beyond regulatory requirement period (10 years post-closure)
-```
-
-### What CANNOT be deleted
-
-```
-✗ KYC documents (PMLA: retain 10 years post account closure)
-✗ Transaction records (RBI: 5-10 years depending on product)
-✗ Active loan account data
-✗ Data required for regulatory reporting
-✗ Tax records (Income Tax Act)
-✗ Records for dispute resolution
-```
+This document covers the legal basis for data deletion requests against digital lenders and financial institutions in India.
 
 ---
 
-## 2. RBI Digital Lending Guidelines (DLG) 2022
+## Quick Reference
 
-RBI issued the Digital Lending Guidelines on September 2, 2022, applicable to all digital lenders including NBFCs.
-
-### Key provisions relevant to deletion:
-
-**Para 10.1 — Data Collection**
-> "Any collection of data by DLAs shall be need-based and with prior and explicit consent of the borrower having audit trail."
-
-→ Consent must be purpose-specific and revocable.
-
-**Para 10.2 — Borrower's Rights**
-> "The borrower shall be provided with an option to give or deny consent for use of specific data, restrict disclosure to third parties, data retention, revoke consent already granted to collect personal data and, if required, make the app delete/forget the data."
-
-→ This is the strongest direct mandate. Borrowers can demand the app **delete/forget** their data.
-
-**Para 11.1 — Storage Limitations**
-> "LSPs/DLAs shall not store personal information of borrowers except some basic minimal data..."
-
-→ NBFCs must not store more data than necessary.
-
-**Para 11.2 — Data Destruction Protocol**
-> "RE shall ensure that clear policy guidelines regarding storage of customer data including... data destruction protocol... are put in place."
-
-→ NBFCs must have documented data deletion policies.
-
-**Para 5.3 — Key Fact Statement**
-> Borrowers must receive a standardized Key Fact Statement before loan execution, including details of grievance redressal.
+| Entity Type | Use First | Also Applicable |
+|-------------|-----------|-----------------|
+| **Digital lenders (fintechs, NBFCs)** | RBI Master Direction on Digital Lending | DPDP Act 2023 |
+| **Banks** | DPDP Act 2023 | Banking regulations |
+| **Credit bureaus (CIBIL)** | DPDP Act 2023 | CIC regulations |
+| **All others** | DPDP Act 2023 | — |
 
 ---
 
-## 3. NBFC-CIC Data Reporting Directions 2025
+## 1. RBI Master Direction on Digital Lending (2025)
 
-The RBI's November 2025 Directions mandate that all NBFCs:
+**Reference:** RBI Master Direction on Digital Lending, updated August 2025
 
-1. **Must be members of all 4 CICs**: CIBIL, Experian, Equifax, CRIF High Mark
-2. **Report fortnightly**: Every 15 days, within 7 calendar days
-3. **Grievance redress within 30 days**: ₹100/day compensation for delays
-4. **Consumer can access credit information**: Right to view all data held
+### Key Provisions
 
-**Implication for deletion**: NBFCs must still report to CICs even after deletion requests — credit reporting is a regulatory obligation that overrides deletion requests for transaction data.
+| Para | Requirement |
+|------|-------------|
+| **10.1** | Lenders must obtain explicit consent for data collection |
+| **10.2** | Data collected for one purpose cannot be used for another |
+| **11.1** | No data to be shared without explicit consent after loan closure |
+| **10.2** | "Data shall be deleted once the purpose is over" |
+
+### Practical Use
+
+When sending deletion requests to digital lenders:
+- Cite **RBI Master Direction on Digital Lending (updated August 2025)**
+- Specifically reference **Para 10.2** (data deletion)
+- Reference **Para 11.1** (no post-closure data sharing)
+
+### Enforcement
+
+- RBI can penalize non-compliant lenders
+- Complaint portal: https://cms.rbi.org.in
+- Twitter: @RBI (RBI monitors digital lending compliance)
 
 ---
 
-## 4. The 4 Credit Bureaus
+## 2. Digital Personal Data Protection Act, 2023 (DPDP Act)
 
-| Bureau | Website | Dispute Method |
-|--------|---------|---------------|
-| **TransUnion CIBIL** | cibil.com | Online portal → Dispute Center |
-| **Experian** | exiperian.in | Online dispute form |
-| **Equifax** | equifax.co.in | Online dispute |
-| **CRIF High Mark** | crifhighmark.com | Online dispute |
+**Reference:** Act No. 22 of 2023
 
-**Note**: CIBIL disputes can only be filed by the individual whose data is in question. You must log in with your own credentials.
+### Key Sections
+
+| Section | Right | Description |
+|---------|-------|-------------|
+| **§6(9)** | Right to Data Portability | Request all data in machine-readable format |
+| **§8(6)** | Right to Erasure | "The Data Fiduciary shall, without unnecessary delay, comply with the withdrawal..." |
+| **§27(3)** | Complaint to Board | Escalate to Data Protection Board of India |
+
+### Key Rules
+
+| Rule | Requirement |
+|------|-------------|
+| **Rule 8(1)** | Acknowledge within **48 hours** |
+| **Rule 8(2)** | Complete deletion within **30 days** |
+
+### DPDP Rules 2025
+
+**Reference:** Digital Personal Data Protection Rules, 2025
+
+- Rule 8(1): 48-hour acknowledgment
+- Rule 8(2): Deletion within 30 days (or as agreed)
+- Rule 8(3): Written confirmation required
 
 ---
 
-## 5. Escalation Path
+## 3. CIC (Credit Information Bureaus)
 
-If an NBFC does not comply with deletion requests:
+### CIBIL
+
+**Reference:** Credit Information Companies (Regulation) Act, 2005
+
+CIBIL is a fiduciary — it cannot delete data without creditor instruction.
+
+**Process:**
+1. Request data deletion from original lender first
+2. Lender instructs CIBIL to update/remove
+3. If no response, file CIC dispute form
+
+### Other Bureaus
+
+| Bureau | Process |
+|--------|---------|
+| **Experian** | Online dispute portal |
+| **Equifax** | Online dispute portal |
+| **CRIF High Mark** | Online dispute portal |
+
+---
+
+## 4. Enforcement Bodies
+
+| Body | Jurisdiction | Complaint Method |
+|------|--------------|------------------|
+| **RBI Ombudsman** | Digital lenders, NBFCs, banks | https://cms.rbi.org.in |
+| **DPDP Board** | All data fiduciaries | Online portal (building capacity) |
+| **Consumer Forum** | Unfair practices | Local district forum |
+
+### Escalation Path
 
 ```
-Step 1: Follow up via email (30 days)
-        ↓
-Step 2: RBI Sachet Portal
-        https://sachet.rbi.org.in
-        → Consumer grievance → NBFC complaint
-        ↓
-Step 3: DPDP Board complaint
-        https://dpb.gov.in
-        → Data principal complaint
-        ↓
-Step 4: Consumer Forum (CPA 2019)
-        → State/National consumer forum
-        ↓
-Step 5: Civil Court
+1. Send deletion request to company
+        ↓ (no response in 7 days)
+2. Escalate to DPO
+        ↓ (no response in 7 days)
+3. File with RBI Ombudsman (for lenders)
+   OR File with DPDP Board (for all)
+        ↓ (if unsatisfied)
+4. Consumer Forum / Legal action
 ```
 
 ---
 
-## 6. Template Legal Text
+## 5. What Cannot Be Deleted
 
-The deletion email template cites:
+| Data Type | Reason | Duration |
+|-----------|--------|----------|
+| KYC documents | PMLA compliance | 10 years post-closure |
+| Transaction records | RBI/FEMA requirements | 5-10 years |
+| Active loan data | Regulatory requirement | Until loan closed |
+| CIBIL's own records | Fiduciary duty | Separate process |
+
+---
+
+## 6. Model Templates
+
+### For Digital Lenders (Cite RBI DLG First)
 
 ```
-Subject: DPDPA Section 8(6) Data Deletion Request — [Name]
+Subject: Data Deletion Request — RBI Digital Lending Guidelines — [Entity]
 
-"I am exercising my right to erasure under Section 8(6) of the Digital
-Personal Data Protection Act, 2023 (DPDP Act) and Rule 8 of the DPDP
-Rules, 2025.
+Dear Grievance Officer,
 
-The purpose for which my personal data was collected is no longer being
-served. I hereby request deletion of:
+Under RBI Master Direction on Digital Lending (updated August 2025), Para 10.2 
+and 11.1, I request deletion of my personal data held by [Entity].
 
-□ Marketing and promotional data
-□ Third-party shared data
-□ Behavioral/usage data
-□ Pre-approved loan profiles
-□ Call recordings
+Reference: [DPR-ID]
+Phone: [Your phone(s)]
+Email: [Your email]
+```
 
-I request acknowledgment within 48 hours (Rule 8(3)) and completion
-within 30 days.
+### For All Others (Cite DPDP Act)
 
-This request does not extend to data required by law (KYC, transactions,
-tax records)."
+```
+Subject: Request for Erasure of Personal Data under Section 8(6), DPDP Act 2023
+
+Under Section 8(6) of the Digital Personal Data Protection Act, 2023, I request 
+erasure of my personal data held by [Entity].
+
+Reference: [DPR-ID]
 ```
 
 ---
 
-## 7. References
+## 7. Key Contacts
 
-- DPDP Act 2023: https://www.meity.gov.in/writereaddata/files/digital_personal_data_protection_act_2023.pdf
-- DPDP Rules 2025: https://www.meity.gov.in/writereaddata/files/Digital-Personal-Data-Protection-Rules-2025.pdf
-- RBI Digital Lending Guidelines: https://www.rbi.org.in/scripts/NotificationUser.aspx?Id=12382
-- RBI NBFC Credit Information Reporting Directions 2025: https://taxguru.in/rbi/rbi-non-banking-financial-companies-credit-information-reporting-directions-2025.html
-- CIBIL Dispute: https://www.cibil.com/consumer-dispute-resolution
+| Institution | Email | Phone |
+|-------------|-------|-------|
+| RBI Ombudsman | cms@rbi.org.in | 14448 |
+| DPDP Board | — | (Portal not fully live) |
+| CIBIL | dispute@cibil.com | — |
+
+---
+
+## Summary: Which Law to Cite?
+
+**For digital lenders (fintechs, NBFCs, lending apps):**
+
+1. **Primary:** RBI Master Direction on Digital Lending (updated August 2025)
+   - More immediately enforceable
+   - Lenders fear RBI action
+   - Faster response
+
+2. **Secondary:** DPDP Act 2023, Section 8(6)
+   - General data protection
+   - Backup if RBI DLG doesn't work
+
+**For banks and other companies:**
+
+- DPDP Act 2023, Section 8(6) is the primary basis
