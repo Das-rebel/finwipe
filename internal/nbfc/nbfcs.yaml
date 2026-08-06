@@ -1438,3 +1438,220 @@ nbfcs:
   website: https://www.getuni.com
   notes: BNPL, credit card, Uni Cards
   active: true
+- id: fusion-microfinance
+  name: Fusion Microfinance
+  category: mfi
+  grievance_email: customercare@fusionmicrofinance.com
+  website: https://www.fusionmicrofinance.com
+  notes: Microfinance, women SHG lending
+  active: true
+- id: annapurna-microfinance
+  name: Annapurna Microfinance
+  category: mfi
+  grievance_email: customercare@annapurnamicrofinance.com
+  website: https://www.annapurnamicrofinance.com
+  notes: Microfinance, women borrowers
+  active: true
+- id: asirvad-microfinance
+  name: Asirvad Microfinance
+  category: mfi
+  grievance_email: customercare@asirvadmicrofinance.com
+  website: https://www.asirvadmicrofinance.com
+  notes: Microfinance, Manappuram group
+  active: true
+- id: satya-microfinance
+  name: Satya Microfinance
+  category: mfi
+  grievance_email: customercare@satyamicro.com
+  website: https://www.satyamicro.com
+  notes: Microfinance, women SHG
+  active: true
+- id: fincare
+  name: Fincare Small Finance Bank
+  category: mfi
+  grievance_email: customercare@fincare.co.in
+  website: https://www.fincare.com
+  notes: Small finance bank, former SFB converted from microfinance
+  active: true
+- id: auxo
+  name: Auxo Finance
+  category: mfi
+  grievance_email: grievance@auxomoney.com
+  website: https://www.auxomoney.com
+  notes: Microfinance, women-focused lending
+  active: true
+- id: bharat-finance
+  name: Bharat Finance (Burlington)
+  category: mfi
+  grievance_email: support@bharatfinance.com
+  website: https://www.bharatfinance.com
+  notes: Microfinance, secured business loans
+  active: true
+- id: oml
+  name: OML (Open Market Lending)
+  category: p2p
+  grievance_email: support@omlp2p.com
+  website: https://www.omlp2p.com
+  notes: P2P lending platform
+  active: true
+- id: protonde
+  name: Protonde
+  category: p2p
+  grievance_email: support@protonde.com
+  website: https://www.protonde.com
+  notes: P2P lending, alternative investments
+  active: true
+- id: lendd
+  name: LendD
+  category: p2p
+  grievance_email: support@lendd.in
+  website: https://www.lendd.in
+  notes: P2P lending platform
+  active: true
+- id: ventiple
+  name: Ventiple
+  category: fintech
+  grievance_email: support@ventiple.com
+  website: https://www.ventiple.com
+  notes: Invoice discounting, vendor finance
+  active: true
+- id: kashki
+  name: Kashki
+  category: fintech
+  grievance_email: support@kashki.in
+  website: https://www.kashki.in
+  notes: Invoice discounting, MSME financing
+  active: true
+- id: m1tap
+  name: M1 Tap
+  category: fintech
+  grievance_email: support@m1tap.com
+  website: https://www.m1tap.com
+  notes: Supply chain finance, vendor payments
+  active: true
+- id: kovan
+  name: Kovan (Fincare)
+  category: fintech
+  grievance_email: support@kovan.in
+  website: https://www.kovan.in
+  notes: Business loans, digital lending for SMEs
+  active: true
+- id: fluent
+  name: Fluent Money
+  category: fintech
+  grievance_email: customercare@fluentmoney.in
+  website: https://www.fluentmoney.in
+  notes: Personal loans, home loans, loan against property
+  active: true
+- id: payins
+  name: PayIns
+  category: fintech
+  grievance_email: support@payins.in
+  website: https://www.payins.in
+  notes: Digital lending, personal loans
+  active: true
+- id: rupeek-capital
+  name: Rupeek Capital
+  category: fintech
+  grievance_email: support@rupeek.com
+  website: https://www.rupeek.com
+  notes: Gold loans, digital lending
+  active: true
+- id: kaxi
+  name: Kaxi
+  category: fintech
+  grievance_email: support@kaxi.in
+  website: https://www.kaxi.in
+  notes: Personal loans, salary advance
+  active: true
+- id: moneymaxi
+  name: MoneyMaxi
+  category: fintech
+  grievance_email: support@moneymaxi.com
+  website: https://www.moneymaxi.com
+  notes: Personal loans, digital lending
+  active: true
+- id: credbee
+  name: Credbee
+  category: fintech
+  grievance_email: support@credbee.com
+  website: https://www.credbee.com
+  notes: Loan marketplace, financial product comparison
+  active: true
+- id: delta
+  name: Delta (ex-Delta) Financial
+  category: fintech
+  grievance_email: support@delta.in
+  website: https://www.delta.in
+  notes: Neobanking, business banking
+  active: true
+- id: salaryloop
+  name: Salary Loop
+  category: fintech
+  grievance_email: support@salaryloop.in
+  website: https://www.salaryloop.in
+  notes: Salary advance, earned wage access
+  active: true
+- id: paysack
+  name: Paysack
+  category: fintech
+  grievance_email: support@paysack.in
+  website: https://www.paysack.in
+  notes: Salary advance, payroll benefits
+  active: true
+- id: wagon
+  name: Wagon
+  category: fintech
+  grievance_email: support@wagon.in
+  website: https://www.wagon.in
+  notes: Salary advance, earned wage access
+  active: true
+- id: insurancedekho
+  name: InsuranceDekho
+  category: insurtech
+  grievance_email: support@insurancedekho.com
+  website: https://www.insurancedekho.com
+  notes: Insurance aggregator, policy comparison
+  active: true
+- id: ditto
+  name: Ditto Insurance
+  category: insurtech
+  grievance_email: support@getditto.com
+  website: https://www.getditto.com
+  notes: Insurance broker, term life insurance
+  active: true
+- id: policyboss
+  name: PolicyBoss
+  category: insurtech
+  grievance_email: grievance@policyboss.com
+  website: https://www.policyboss.com
+  notes: Insurance aggregator, motor and health insurance
+  active: true
+- id: etmoney
+  name: ETMoney
+  category: wealthtech
+  grievance_email: support@etmoney.com
+  website: https://www.etmoney.com
+  notes: Mutual funds, investment, insurance
+  active: true
+- id: fisdom
+  name: Fisdom
+  category: wealthtech
+  grievance_email: support@fisdom.com
+  website: https://www.fisdom.com
+  notes: Wealth management, mutual funds
+  active: true
+- id: homevista
+  name: HomeVista (Piramal)
+  category: hfc
+  grievance_email: grievance@hvf.in
+  website: https://www.homevista.in
+  notes: Housing finance, home loans
+  active: true
+- id: a/art
+  name: Avense
+  category: agritech
+  grievance_email: support@avense.in
+  website: https://www.avense.in
+  notes: Agricultural lending, farmer finance
+  active: true
