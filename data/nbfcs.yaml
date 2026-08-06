@@ -1809,3 +1809,87 @@ nbfcs:
   website: https://www.homevista.in
   notes: Housing finance, home loans
   active: true
+- id: muthoot-microfinance
+  name: Muthoot Microfinance
+  category: mfi
+  grievance_email: customercare@muthootmicrofinance.com
+  website: https://www.muthootmicrofinance.com
+  notes: Microfinance, Muthoot group
+  active: true
+- id: spandana
+  name: Spandana Sphoorty Financial
+  category: mfi
+  grievance_email: customercare@spandana.com
+  website: https://www.spandana.com
+  notes: Microfinance, Kunal Shah founded
+  active: true
+- id: chaitanya
+  name: Chaitanya India Fin Credit
+  category: mfi
+  grievance_email: customercare@chaitanyaindia.com
+  website: https://www.chaitanyaindia.com
+  notes: Microfinance, Bihar/Jharkhand
+  active: true
+- id: bhandar
+  name: Bhandar
+  category: mfi
+  grievance_email: info@bhandar.co.in
+  website: https://www.bhandar.co.in
+  notes: Microfinance institution
+  active: true
+- id: srv
+  name: SRV Microfinance
+  category: mfi
+  grievance_email: customercare@srv.co.in
+  website: https://www.srv.co.in
+  notes: Microfinance, women borrowers
+  active: true
+- id: bima
+  name: Bima Jyoti Microfinance
+  category: mfi
+  grievance_email: info@bimajyoti.com
+  website: https://www.bimajyoti.com
+  notes: Microfinance, NE India focus
+  active: true
+- id: fibe
+  name: Fibe (Formerly EarlySalary)
+  category: fintech
+  grievance_email: support@fibe.in
+  website: https://www.fibe.in
+  notes: Personal loans, salary advance, FDR-based
+  active: true
+- id: plas
+  name: Plasmasi
+  category: p2p
+  grievance_email: support@plas.co.id
+  website: https://www.plas.co.id
+  notes: 'P2P lending (note: Indonesia)'
+  active: true
+- id: capitalfloat-new
+  name: Capital Float
+  category: nbfc
+  grievance_email: support@capitalfloat.com
+  website: https://www.capitalfloat.com
+  notes: Business loans, working capital, AWS group
+  active: true
+- id: hdb-financial
+  name: HDB Financial Services
+  category: nbfc
+  grievance_email: customercare@hdbfs.com
+  website: https://www.hdbfs.com
+  notes: HDB Bank subsidiary, loans, NBFC
+  active: true
+- id: lazy-pay
+  name: LazyPay (PayU)
+  category: nbfc
+  grievance_email: grievance.officer@payufinance.com
+  website: https://www.lazypay.in
+  notes: BNPL, RBI regulated, PayU Finance
+  active: true
+- id: GIB
+  name: Good伞 Insurance Broker
+  category: insurtech
+  grievance_email: support@goodins.in
+  website: https://www.goodins.in
+  notes: Insurance broker, online platform
+  active: true
