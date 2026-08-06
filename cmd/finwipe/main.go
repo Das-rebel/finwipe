@@ -16,7 +16,7 @@ var (
 	closeRequestID string
 )
 
-var version = "0.1.7"
+var version = "0.2.9"
 
 var rootCmd = &cobra.Command{
 	Use:   "finwipe",
