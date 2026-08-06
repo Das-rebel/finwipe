@@ -1893,3 +1893,143 @@ nbfcs:
   website: https://www.goodins.in
   notes: Insurance broker, online platform
   active: true
+- id: k女性
+  name: K女性 Finance
+  category: mfi
+  grievance_email: support@kmfinance.in
+  website: https://www.kmfinance.in
+  notes: Microfinance, Kerala focus
+  active: true
+- id: 穗
+  name: 穗 Microfinance
+  category: mfi
+  grievance_email: info@suimicro.com
+  website: https://www.suimicro.com
+  notes: Microfinance, women borrowers
+  active: true
+- id: browse
+  name: Browse
+  category: mfi
+  grievance_email: support@browse.finance
+  website: https://www.browse.finance
+  notes: Digital lending, personal loans
+  active: true
+- id: finova
+  name: Finova Capital
+  category: mfi
+  grievance_email: support@finova.in
+  website: https://www.finova.in
+  notes: Microfinance, business loans
+  active: true
+- id: i2ifunding-p2p
+  name: i2iFunding RNVP
+  category: p2p
+  grievance_email: loan@i2ifunding.com
+  website: https://www.i2ifunding.com
+  notes: P2P lending, invoice financing
+  active: true
+- id: cashkumar-p2p
+  name: Cashkumar
+  category: p2p
+  grievance_email: support@cashkumar.com
+  website: https://www.cashkumar.com
+  notes: P2P lending, personal loans
+  active: true
+- id: rupaiya-p2p
+  name: Rupaiya P2P
+  category: p2p
+  grievance_email: info@rupaiya.com
+  website: https://www.rupaiya.com
+  notes: P2P lending platform
+  active: true
+- id: dcb-bank
+  name: DCB Bank
+  category: bank
+  grievance_email: customer.service@dcbbank.com
+  website: https://www.dcbbank.com
+  notes: Scheduled bank, digital services
+  active: true
+- id: rbl-bank
+  name: RBL Bank
+  category: bank
+  grievance_email: customer.service@rblbank.com
+  website: https://www.rblbank.com
+  notes: Scheduled bank, credit cards focus
+  active: true
+- id: dbs-bank-india
+  name: DBS Bank India
+  category: bank
+  grievance_email: indiareachus@dbs.com
+  website: https://www.dbsbank.in
+  notes: Digital bank from Singapore digibank
+  active: true
+- id: citibank-india
+  name: Citibank India
+  category: bank
+  grievance_email: india.citi@gmail.com
+  website: https://www.citibank.co.in
+  notes: Citi India consumer banking
+  active: true
+- id: hsbc-india
+  name: HSBC India
+  category: bank
+  grievance_email: india@hsbc.co.in
+  website: https://www.hsbc.co.in
+  notes: HSBC India consumer commercial
+  active: true
+- id: mbl-wealth
+  name: MBL Wealth
+  category: fintech
+  grievance_email: support@mblwealth.com
+  website: https://www.mblwealth.com
+  notes: Gold loans, wealth management
+  active: true
+- id: rupeek-gold-loans
+  name: Rupeek Gold Loans
+  category: fintech
+  grievance_email: support@rupeek.com
+  website: https://www.rupeek.com
+  notes: Gold loans, digital lending
+  active: true
+- id: muthoot-gold-loans
+  name: Muthoot Finance Gold Loans
+  category: nbfc
+  grievance_email: customercare@muthoot.com
+  website: https://www.muthoot.com
+  notes: Gold loans, Muthoot group, largest gold loan NBFC
+  active: true
+- id: manappuram-gold
+  name: Manappuram Gold Loan
+  category: nbfc
+  grievance_email: customercare@manappuram.com
+  website: https://www.manappuram.com
+  notes: Gold loans, Kerala NBFC
+  active: true
+- id: forex-services
+  name: Forex Services
+  category: fintech
+  grievance_email: support@forex.in
+  website: https://www.forex.in
+  notes: Forex services, international transfers
+  active: true
+- id: aavas-hfc
+  name: Aavas Financiers
+  category: hfc
+  grievance_email: customercare@aavas.com
+  website: https://www.aavas.com
+  notes: Affordable housing finance, Rajasthan
+  active: true
+- id: home-credit-india
+  name: Home Credit India
+  category: nbfc
+  grievance_email: grievanceofficer@homecredit.co.in
+  website: https://www.homecredit.co.in
+  notes: Consumer lending, digital loans
+  active: true
+- id: ahom-finance
+  name: AHom Finance
+  category: fintech
+  grievance_email: support@ahom.com
+  website: https://www.ahom.com
+  notes: Business loans, SME lending
+  active: true
