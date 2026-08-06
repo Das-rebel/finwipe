@@ -1655,3 +1655,157 @@ nbfcs:
   website: https://www.avense.in
   notes: Agricultural lending, farmer finance
   active: true
+- id: arohan
+  name: Arohan Financial Services
+  category: mfi
+  grievance_email: customercare@arohan.in
+  website: https://www.arohan.in
+  notes: Microfinance, West Bengal/Bihar focus, Avasara group
+  active: true
+- id: magma-fincorp
+  name: Magma Fincorp
+  category: mfi
+  grievance_email: customercare@magma.in
+  website: https://www.magma.in
+  notes: Rural BSS microfinance, women borrowers
+  active: true
+- id: sagista
+  name: Sagista Fincare
+  category: mfi
+  grievance_email: support@sagista.com
+  website: https://www.sagista.com
+  notes: Microfinance, Rajasthan focus
+  active: true
+- id: vivardhan
+  name: Vivardhan Advisory
+  category: mfi
+  grievance_email: info@vivardhan.com
+  website: https://www.vivardhan.com
+  notes: Microfinance consulting
+  active: true
+- id: monday-capital
+  name: Monday Capital
+  category: p2p
+  grievance_email: support@mondaycapital.com
+  website: https://www.mondaycapital.com
+  notes: P2P lending, personal loans
+  active: true
+- id: finagg
+  name: FinAgg (Finsistent)
+  category: p2p
+  grievance_email: support@finagg.in
+  website: https://www.finagg.in
+  notes: P2P lending, invoice discounting
+  active: true
+- id: open
+  name: Open (Banking)
+  category: fintech
+  grievance_email: support@open.io
+  website: https://www.open.io
+  notes: Neobanking, business banking, Open+
+  active: true
+- id: razorpayx
+  name: RazorpayX
+  category: fintech
+  grievance_email: support@razorpayx.com
+  website: https://www.razorpayx.com
+  notes: Neobanking, business payments, payroll
+  active: true
+- id: paytm-money
+  name: Paytm Money
+  category: fintech
+  grievance_email: support@paytmmoney.com
+  website: https://www.paytmmoney.com
+  notes: Wealth management, mutual funds
+  active: true
+- id: delta-money
+  name: Delta Money
+  category: fintech
+  grievance_email: support@deltamoney.in
+  website: https://www.deltamoney.in
+  notes: Neobanking, business banking
+  active: true
+- id: loanbaba
+  name: LoanBaba
+  category: fintech
+  grievance_email: info@loanbaba.com
+  website: https://www.loanbaba.com
+  notes: Personal loans, loan marketplace
+  active: true
+- id: moneed
+  name: Moneed
+  category: fintech
+  grievance_email: support@moneed.in
+  website: https://www.moneed.in
+  notes: Personal loans, FDR-based lending
+  active: true
+- id: b-next
+  name: B-Next (Capital Float)
+  category: fintech
+  grievance_email: support@capitalfloat.com
+  website: https://www.bnext.in
+  notes: Business loans, working capital
+  active: true
+- id: wages
+  name: Wages
+  category: fintech
+  grievance_email: support@wages.in
+  website: https://www.wages.in
+  notes: Earned wage access platform
+  active: true
+- id: wageness
+  name: Wagene
+  category: fintech
+  grievance_email: support@wagene.in
+  website: https://www.wagene.in
+  notes: Salary advance, payroll loans
+  active: true
+- id: bnext
+  name: BNext
+  category: fintech
+  grievance_email: support@bnext.in
+  website: https://www.bnext.in
+  notes: Business loans, supply chain finance
+  active: true
+- id: mstp
+  name: MSTP Solutions
+  category: fintech
+  grievance_email: support@mstp.in
+  website: https://www.mstp.in
+  notes: Invoice discounting, MSME finance
+  active: true
+- id: finagg-tech
+  name: FinAgg Technologies
+  category: fintech
+  grievance_email: support@finaggtech.com
+  website: https://www.finaggtech.com
+  notes: Invoice factoring, supply chain finance
+  active: true
+- id: voltmoney
+  name: Volt Money
+  category: bnpl
+  grievance_email: support@volt.money
+  website: https://www.volt.money
+  notes: BNPL, zero-cost EMI, credit line
+  active: true
+- id: split-wi
+  name: SplitW
+  category: bnpl
+  grievance_email: support@splitw.com
+  website: https://www.splitw.com
+  notes: BNPL, pay later platform
+  active: true
+- id: sket
+  name: Sket
+  category: bnpl
+  grievance_email: support@sket.in
+  website: https://www.sket.in
+  notes: BNPL, checkout financing
+  active: true
+- id: homevista-hfc
+  name: HomeVista (Piramal)
+  category: hfc
+  grievance_email: grievance@homevista.in
+  website: https://www.homevista.in
+  notes: Housing finance, home loans
+  active: true
