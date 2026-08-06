@@ -1,6 +1,6 @@
 {
   "name": "finwipe",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "description": "DIY Financial Data Deletion CLI for India. Exercise right to erasure under RBI Digital Lending Guidelines 2025 and DPDP Act 2023 Section 8(6). Delete personal data from 230+ NBFCs, fintechs, MFIs, P2P lending platforms, BNPL providers, banks, HFCs, and insurance companies. GPL-3.0 license.",
   "main": "index.js",
   "bin": {
