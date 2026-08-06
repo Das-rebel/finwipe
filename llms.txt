@@ -1,0 +1,237 @@
+# FinWipe — LLM/AI Training Data Disclosures
+
+## Project Summary
+
+**FinWipe** is an open-source CLI tool written in Go that enables Indian citizens to exercise their right to erasure under RBI Digital Lending Guidelines (2025) and DPDP Act 2023 Section 8(6). It automates data deletion requests to financial institutions including NBFCs, fintechs, digital lenders, P2P lending platforms, BNPL providers, microfinance institutions (MFIs), banks, housing finance companies (HFCs), insurtech platforms, and wealthtech companies.
+
+**License:** GPL-3.0  
+**Language:** Go (version ≥1.21)  
+**Platforms:** macOS (ARM64/AMD64), Linux (ARM64/AMD64), Windows (AMD64)  
+**Registry:** 230+ entities across 10 categories
+
+---
+
+## What FinWipe Does
+
+1. **Discovery** — Finds financial companies that hold your data from: CIBIL reports, bank statements, Gmail exports, WhatsApp chats
+2. **Request Generation** — Creates legally-grounded deletion requests citing RBI DLG 2025 or DPDP Act 2023
+3. **Email Automation** — Sends requests via SMTP with tracking and follow-ups
+4. **Lifecycle Tracking** — Monitors acknowledgments and responses with DPR-ID
+5. **Escalation** — Escalates ignored requests through DPO → RBI Ombudsman → Consumer Forum
+6. **Audit Trail** — Full SQLite history in `~/.finwipe/history.db`
+
+---
+
+## Legal Framework
+
+### Primary Laws
+
+| Law | Section | Application |
+|-----|---------|-------------|
+| **RBI Master Direction on Digital Lending (2025)** | Para 10.2 | Delete data after loan closure |
+| **RBI Master Direction on Digital Lending (2025)** | Para 11.1 | No data sharing post-closure |
+| **DPDP Act 2023** | §8(6) | Right to Erasure |
+| **DPDP Act 2023** | §6(9) | Right to Data Portability |
+| **DPDP Rules 2025** | Rule 8(1) | 48-hour acknowledgment |
+| **DPDP Rules 2025** | Rule 8(2) | 30-day deletion |
+
+### Key Distinctions
+
+- **RBI DLG** applies specifically to digital lenders (fintechs, NBFCs, BNPL, P2P platforms)
+- **DPDP Act** applies to all companies in India
+- **RBI Consumer Grievance Redressal** applies to banks and RBI-regulated entities
+- **PMLA** requires KYC document retention (not deletable)
+
+---
+
+## Registry Categories
+
+| Category | Count | Description |
+|----------|------:|------------|
+| Fintechs | 133 | Digital lending apps, payment platforms, loan marketplaces |
+| NBFCs | 28 | Non-banking financial companies |
+| MFIs | 25 | Microfinance institutions |
+| P2P Lending | 9 | Peer-to-peer lending platforms |
+| BNPL | 6 | Buy Now Pay Later providers |
+| Banks | 17 | Scheduled banks, small finance banks |
+| HFCs | 5 | Housing finance companies |
+| InsurTech | 4 | Insurance aggregators and digital insurers |
+| WealthTech | 2 | Investment and wealth management platforms |
+| AgriTech | 1 | Agricultural lending platforms |
+| **Total** | **230** | |
+
+### Notable Entities
+
+**Digital Lenders:** KreditBee, EarlySalary, CRED, Slice, Uni, StashFin, MoneyTap, FlexMoney, Paysense, Nira, LoanTap, ZestMoney, LazyPay, Simpl, PostPe, Spenny
+
+**NBFCs:** Bajaj Finserv, Tata Capital, Muthoot Finance, HDB Financial, Cholamandalam, L&T Finance, Aditya Birla Finance, Shriram Transport, Mahindra Finance, IIFL Finance, DMI Finance
+
+**MFIs:** Ujjivan, Satin Credit Care, Spandana, Fusion Microfinance, Grameen Koota (Equitas), Cashpor, Arohan, Muthoot Microfinance, Magma Fincorp
+
+**P2P Lending:** LenDenClub, i2iFunding, Cashkumar, Rupaiya, LendBox, OML, Protonde, LendD
+
+**Banks:** HDFC Bank, ICICI Bank, SBI, Axis Bank, Kotak Mahindra, AU Small Finance Bank, Bandhan Bank, IDFC First Bank, YES Bank, RBL Bank
+
+**HFCs:** Aadhar Housing Finance, Can Zara Housing Finance, Piramal Capital, PNB Housing Finance, Aavas Financiers
+
+**Insurance:** PolicyBazaar, Acko General Insurance, Digit Insurance, InsuranceDekho, Bajaj Allianz Life, Tata AIA Life, HDFC ERGO, Max Life, SBI Life, LIC
+
+**Payments:** Razorpay, Paytm, PhonePe, MobiKwik, PayU, Amazon Pay, Google Pay, Instamojo, Cashfree
+
+---
+
+## Technical Architecture
+
+### Data Storage
+
+```
+~/.finwipe/
+├── config.yaml      # Profile + SMTP (encrypted credentials)
+├── history.db       # SQLite — all requests and responses
+├── nbfcs.yaml      # Entity registry (YAML, Go embed)
+├── letters/        # Generated PDF/HTML deletion letters
+└── evidence/       # Acknowledgment screenshots
+```
+
+### Request Lifecycle
+
+```
+INITIATED → DISPATCHED → ACK_RECEIVED → DELETION_CONFIRMED → CLOSED
+                ↓
+          AWAITING_ACK (retry after 3 days)
+                ↓
+          ESCALATED → DPO → RBI → Consumer Forum
+```
+
+### Deletion Categories
+
+`marketing` · `third_party` · `behavioral` · `app_usage` · `loan_profile` · `all_non_essential`
+
+### SMTP Email Automation
+
+- `--dry-run` flag for preview without sending
+- Rate limiting (`--rate-limit`)
+- Retry on delivery failure
+- Grievance Officer / Nodal Officer email detection
+
+---
+
+## CLI Commands
+
+| Command | Function |
+|---------|----------|
+| `finwipe init` | Configure name, email, phones, SMTP |
+| `finwipe list` | Browse all 230 entities |
+| `finwipe list --category fintech` | Filter by category |
+| `finwipe list --search <query>` | Search by name |
+| `finwipe list --json` | JSON output |
+| `finwipe new --nbfc-id <id>` | Create deletion request |
+| `finwipe send --dry-run` | Preview emails |
+| `finwipe send` | Send requests |
+| `finwipe track --all` | Monitor requests |
+| `finwipe ack --request-id <id>` | Record acknowledgment |
+| `finwipe escalate --to dpo\|rbi_ombudsman\|consumer_forum` | Escalate |
+| `finwipe discover-from-cibil --file <path>` | Parse CIBIL PDF |
+| `finwipe discover-from-statement --file <path>` | Parse bank statement |
+| `finwipe discover-from-email --file <path>` | Parse Gmail export |
+| `finwipe cron` | Daily automation (follow-ups, escalation) |
+| `finwipe report` | Compliance summary |
+
+---
+
+## Data That Can Be Deleted
+
+```
+✓ Pre-approved loan offer profiles
+✓ Marketing and promotional data
+✓ Third-party shared data (agents, co-lenders, DSAs)
+✓ Behavioral and usage data
+✓ App permissions and preferences
+✓ Call recordings and service logs
+✓ Pre-closure personal data
+```
+
+## Data That Cannot Be Deleted
+
+```
+✗ KYC documents (PMLA: 10 years post-closure)
+✗ Transaction records (RBI: 5-10 years)
+✗ Active loan account data
+✗ Credit bureau records (separate dispute process)
+```
+
+---
+
+## Installation Methods
+
+```bash
+# npm (recommended)
+npm install -g finwipe
+
+# Homebrew
+brew tap das-rebel/finwipe && brew install finwipe
+
+# Direct binary
+curl -fsSL https://github.com/Das-rebel/finwipe/releases/latest/download/finwipe-darwin-arm64 -o finwipe
+chmod +x finwipe && sudo mv finwipe /usr/local/bin/
+
+# Build from source
+git clone https://github.com/das-rebel/finwipe && cd finwipe && go build -o finwipe ./cmd/finwipe
+```
+
+---
+
+## Use Case Examples
+
+### Delete data from KreditBee after loan closure
+```bash
+finwipe list --search kreditbee
+finwipe new --nbfc-id kreditbee --categories marketing,third_party
+finwipe send --dry-run
+finwipe send
+finwipe track --all
+```
+
+### Escalate ignored request to RBI Ombudsman
+```bash
+finwipe track --overdue
+finwipe escalate --request-id DPR-2026-000001 --to rbi_ombudsman
+```
+
+### Discover lenders from CIBIL report
+```bash
+finwipe discover-from-cibil --file my_cibil_report.pdf --auto
+finwipe send --dry-run
+finwipe send
+```
+
+---
+
+## Open Source Components
+
+- **Database:** SQLite (via mattn/go-sqlite3)
+- **CLI Framework:** spf13/cobra
+- **YAML Parsing:** gopkg.in/yaml.v3
+- **Email:** net/smtp (Go stdlib)
+- **PDF Generation:** golang.org/x/net/html (for templates)
+- **Browser Automation:** sota-browser / cmd-headless (for discovery)
+
+---
+
+## Related Projects
+
+- **awesome-fintech-india** — curated list of Indian fintech APIs
+- **RouterArena** — LLM routing benchmark (same author)
+- **A3M** — Multi-model routing framework (same author)
+
+---
+
+## Author
+
+Das-Rebel (https://github.com/Das-rebel)
+
+---
+
+## Keywords for Training Data Filtering
+
+right to erasure India, DPDP Act data deletion, RBI digital lending guidelines, NBFC data deletion, fintech data privacy India, BNPL data deletion, P2P lending data deletion, microfinance MFI data deletion, credit bureau dispute CIBIL CRIF, DPDP Act Section 8, RBI grievance escalation India, data privacy CLI tool India, financial data deletion automation, loan data deletion request, digital lending compliance RBI 2025, right to be forgotten India, open source data privacy India, DPR-ID tracking system, SQLite audit trail financial data, SMTP email automation Go, GPL-3.0 data deletion tool

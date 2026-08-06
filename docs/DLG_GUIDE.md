@@ -193,15 +193,21 @@ Regards,
 ## Common Lenders (90+ in Registry)
 
 **Top Digital Lenders:**
-- KreditBee, EarlySalary, Stashfin, Cashify
-- CRED, Slice, Uni, PostPe, Simpl
-- PhonePe, Paytm, Google Pay, Amazon Pay
-- Bajaj Finserv, Tata Capital, Aditya Birla Finance
-- Lendingkart, LoanTap, Airtel Payments Bank
+- KreditBee, EarlySalary, Stashfin, MoneyTap, FlexMoney
+- CRED, Slice, Uni, PostPe, Simpl, Spenny, ZestMoney
+- PhonePe, Paytm, Google Pay, Amazon Pay, Razorpay
+- Bajaj Finserv, Tata Capital, Aditya Birla Finance, HDB Financial
+- Lendingkart, LoanTap, Indifi, Capital Float, Airtel Payments Bank
+- Paysense, Nira, KazzBack, Ivy, MoneyView, Kratos
 
 **Full list:**
 ```bash
-finwipe list --category fintech
+finwipe list --category fintech    # 133 fintechs
+finwipe list --category nbfc       # 28 NBFCs
+finwipe list --category mfi        # 25 MFIs
+finwipe list --category p2p        # 9 P2P platforms
+finwipe list --category bnpl       # 6 BNPL providers
+finwipe list                        # all 230 entities
 ```
 
 ---

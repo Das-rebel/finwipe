@@ -1,7 +1,7 @@
 {
   "name": "finwipe",
-  "version": "0.2.16",
-  "description": "DIY Financial Data Deletion tool for India. Exercise your right to erasure under RBI Digital Lending Guidelines and DPDP Act 2023. Delete data held by NBFCs, fintechs, banks, and digital lenders.",
+  "version": "0.2.23",
+  "description": "DIY Financial Data Deletion CLI for India. Exercise right to erasure under RBI Digital Lending Guidelines 2025 and DPDP Act 2023 Section 8(6). Delete personal data from 230+ NBFCs, fintechs, MFIs, P2P lending platforms, BNPL providers, banks, HFCs, and insurance companies. GPL-3.0 license.",
   "main": "index.js",
   "bin": {
     "finwipe": "./finwipe"
@@ -13,16 +13,33 @@
   },
   "keywords": [
     "finwipe",
-    "dpdp-act",
     "data-deletion",
-    "financial-privacy",
-    "india",
     "right-to-erasure",
-    "nbfc",
-    "dpdp-board"
+    "right-to-be-forgotten",
+    "dpdp-act",
+    "dpdp-act-2023",
+    "rbi-digital-lending",
+    "rbi-dlg-2025",
+    "financial-privacy",
+    "india-data-privacy",
+    "nbfc-data-deletion",
+    "fintech-privacy",
+    "bnpl-data-deletion",
+    "p2p-lending-privacy",
+    "microfinance-mfi",
+    "cibil-dispute",
+    "credit-bureau-india",
+    "dpr-id",
+    "data-erasure-india",
+    "dpo-escalation",
+    "rbi-grievance-redressal",
+    "consumer-forum",
+    "digital-lending-compliance",
+    "smtp-email-automation",
+    "sqlite-audit-trail"
   ],
   "author": "FinWipe Community <hello@finwipe.in>",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Das-rebel/finwipe.git"
@@ -42,6 +59,7 @@
   "files": [
     "finwipe",
     "README.md",
+    "llms.txt",
     "LICENSE",
     "data/",
     "templates/",
