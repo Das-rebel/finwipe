@@ -3,6 +3,7 @@ package email
 import (
 	"crypto/tls"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/smtp"
 	"regexp"
@@ -12,6 +13,63 @@ import (
 	"github.com/das-rebel/finwipe/internal/config"
 	"github.com/das-rebel/finwipe/internal/nbfc"
 )
+
+// RetryConfig controls transient-error retry behavior.
+type RetryConfig struct {
+	MaxRetries int           // maximum retry attempts (default 3)
+	BaseDelay  time.Duration // base delay before first retry (default 1s)
+	MaxDelay   time.Duration // cap on any single delay (default 30s)
+}
+
+var DefaultRetry = RetryConfig{
+	MaxRetries: 3,
+	BaseDelay:  1 * time.Second,
+	MaxDelay:   30 * time.Second,
+}
+
+// isRetryable returns true if the error is transient and worth retrying.
+func isRetryable(err error) bool {
+	if err == nil {
+		return false
+	}
+	s := err.Error()
+	// Network-level transients
+	retryable := []string{
+		"connection refused", "connection reset", "connection timed out",
+		"no such host", "timeout", "temporary failure",
+		"i/o timeout", "server misbehaving",
+		"TLS handshake", "SSL or TLS",
+	}
+	for _, t := range retryable {
+		if strings.Contains(strings.ToLower(s), strings.ToLower(t)) {
+			return true
+		}
+	}
+	// SMTP 4xx codes are retryable
+	smtpRetryable := []string{"421", "450", "451", "452", "420", "430", "440", "441", "442", "443", "444", "445", "446", "447", "448", "449"}
+	for _, c := range smtpRetryable {
+		if strings.HasPrefix(s, c) || strings.Contains(s, "SMTP "+c) {
+			return true
+		}
+	}
+	return false
+}
+
+// retryBackoff computes exponential backoff with jitter: base*2^attempt + random_jitter.
+func retryBackoff(cfg RetryConfig, attempt int) time.Duration {
+	delay := cfg.BaseDelay * time.Duration(1<<attempt) // 1s, 2s, 4s, ...
+	if delay > cfg.MaxDelay {
+		delay = cfg.MaxDelay
+	}
+	// ±25% jitter
+	jitter := time.Duration(rand.Int63n(int64(delay / 2)))
+	if rand.Intn(2) == 0 {
+		delay += jitter
+	} else {
+		delay -= jitter / 2
+	}
+	return delay
+}
 
 // sanitizeHeader strips \r, \n, and null bytes from strings used in SMTP headers.
 // This prevents CRLF injection attacks where an attacker could inject
@@ -95,51 +153,104 @@ func (s *Sender) dialSMTP(addr string) (*smtp.Client, error) {
 }
 
 func (s *Sender) Send(n nbfc.Entity, profile config.Profile, templateBody string) error {
+	return s.SendWithRetry(n, profile, templateBody, DefaultRetry)
+}
+
+// SendWithRetry calls Send with exponential-backoff retry for transient errors.
+func (s *Sender) SendWithRetry(n nbfc.Entity, profile config.Profile, templateBody string, cfg RetryConfig) error {
 	if s.cfg.Host == "" {
 		return fmt.Errorf("SMTP not configured")
 	}
 
 	addr := fmt.Sprintf("%s:%d", s.cfg.Host, s.cfg.Port)
-
 	var auth smtp.Auth
 	if s.cfg.Username != "" {
 		auth = smtp.PlainAuth("", s.cfg.Username, s.cfg.Password, s.cfg.Host)
 	}
-
 	msg := buildMessage(n, profile, templateBody, s.from)
 
-	client, err := s.dialSMTP(addr)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	if auth != nil {
-		if err = client.Auth(auth); err != nil {
-			return fmt.Errorf("SMTP auth: %w", err)
+	var lastErr error
+	for attempt := 0; attempt <= cfg.MaxRetries; attempt++ {
+		if attempt > 0 {
+			delay := retryBackoff(cfg, attempt-1)
+			fmt.Printf("[FinWipe] Retry %d/%d for %s after %v (%v)\n",
+				attempt, cfg.MaxRetries, n.ID, delay.Round(100*time.Millisecond), lastErr)
+			time.Sleep(delay)
 		}
+
+		client, err := s.dialSMTP(addr)
+		if err != nil {
+			lastErr = err
+			if !isRetryable(err) || attempt == cfg.MaxRetries {
+				return fmt.Errorf("SMTP dial (non-retryable or exhausted): %w", err)
+			}
+			continue
+		}
+
+		if auth != nil {
+			if err = client.Auth(auth); err != nil {
+				client.Close()
+				lastErr = err
+				if !isRetryable(err) || attempt == cfg.MaxRetries {
+					return fmt.Errorf("SMTP auth: %w", err)
+				}
+				continue
+			}
+		}
+
+		if err = client.Mail(s.from); err != nil {
+			client.Close()
+			lastErr = err
+			if !isRetryable(err) || attempt == cfg.MaxRetries {
+				return fmt.Errorf("SMTP from: %w", err)
+			}
+			continue
+		}
+		if err = client.Rcpt(n.GrievanceEmail); err != nil {
+			client.Close()
+			lastErr = err
+			if !isRetryable(err) || attempt == cfg.MaxRetries {
+				return fmt.Errorf("SMTP to: %w", err)
+			}
+			continue
+		}
+
+		w, err := client.Data()
+		if err != nil {
+			client.Close()
+			lastErr = err
+			if !isRetryable(err) || attempt == cfg.MaxRetries {
+				return fmt.Errorf("SMTP data: %w", err)
+			}
+			continue
+		}
+		_, err = w.Write([]byte(msg))
+		if err != nil {
+			w.Close()
+			client.Close()
+			lastErr = err
+			if !isRetryable(err) || attempt == cfg.MaxRetries {
+				return fmt.Errorf("SMTP write: %w", err)
+			}
+			continue
+		}
+		if err = w.Close(); err != nil {
+			client.Close()
+			lastErr = err
+			if !isRetryable(err) || attempt == cfg.MaxRetries {
+				return fmt.Errorf("SMTP close: %w", err)
+			}
+			continue
+		}
+
+		if err = client.Quit(); err != nil {
+			// Quit errors are non-fatal (server may have already accepted the message)
+			fmt.Printf("[FinWipe] Quit warning for %s: %v\n", n.ID, err)
+		}
+		return nil // success
 	}
 
-	if err = client.Mail(s.from); err != nil {
-		return fmt.Errorf("SMTP from: %w", err)
-	}
-	if err = client.Rcpt(n.GrievanceEmail); err != nil {
-		return fmt.Errorf("SMTP to: %w", err)
-	}
-
-	w, err := client.Data()
-	if err != nil {
-		return fmt.Errorf("SMTP data: %w", err)
-	}
-	_, err = w.Write([]byte(msg))
-	if err != nil {
-		return fmt.Errorf("SMTP write: %w", err)
-	}
-	if err = w.Close(); err != nil {
-		return fmt.Errorf("SMTP close: %w", err)
-	}
-
-	return client.Quit()
+	return fmt.Errorf("Send exhausted (%d attempts): %w", cfg.MaxRetries+1, lastErr)
 }
 
 func (s *Sender) SendBatch(nbfcs []nbfc.Entity, profile config.Profile, templateBody string, rateLimitMs int) (sent int, failed []string) {
