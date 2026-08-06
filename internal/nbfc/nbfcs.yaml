@@ -1062,3 +1062,132 @@ nbfcs:
     website: https://www.epifi.in
     notes: Neobank
     active: true
+
+  # ──────────────────────────────────────────────────────────────────
+  # USER-REQUESTED ADDITIONS
+  # ──────────────────────────────────────────────────────────────────
+
+  - id: poonawalla-fincorp
+    name: Poonawalla Fincorp Ltd
+    short_name: Poonawalla
+    category: nbfc
+    grievance_email: customercare@poonawallafincorp.com
+    grievance_phone: "1800-266-3201"
+    address: "Unit No.2401, 24th Floor, Altimus, Dr G.M. Bhosale Marg, Worli, Mumbai 400018"
+    dla_app: Poonawalla Fincorp app
+    website: https://www.poonawallafincorp.com
+    notes: Housing finance + personal loans, RBI regulated
+    active: true
+
+  - id: protium
+    name: Protium Finance Ltd
+    short_name: Protium
+    category: fintech
+    grievance_email: gro@protium.co.in
+    grievance_phone: "8828820004"
+    address: "Nirlon Knowledge Park, B2, 7th Floor, Pahadi Village, Goregaon East, Mumbai 400063"
+    dla_app: Protium app
+    website: https://protium.co.in
+    notes: Digital lending platform, RBI registered
+    active: true
+
+  - id: cashe
+    name: CASHe (Bhanix Finance Pvt Ltd)
+    short_name: CASHe
+    category: fintech
+    grievance_email: grievance@cashe.co.in
+    grievance_phone: "022-46047350"
+    address: "5th Floor, Paville House, Twin Towers Lane, Off Veer Savarkar Marg, Prabhadevi, Mumbai 400025"
+    dla_app: CASHe app
+    website: https://www.cashe.co.in
+    notes: Digital lending app, instant personal loans
+    active: true
+
+  - id: home-credit
+    name: Home Credit India Finance Pvt Ltd
+    short_name: HomeCredit
+    category: nbfc
+    grievance_email: grievanceofficer@homecredit.co.in
+    grievance_phone: "0124-6628713"
+    address: "DLF Infinity Tower C, 3rd Floor, DLF Cyber City Phase II, Gurgaon 122002"
+    dla_app: Home Credit app
+    website: https://www.homecredit.co.in
+    notes: Large NBFC, consumer lending
+    active: true
+
+  - id: incred-financial
+    name: InCred Financial Services Ltd
+    short_name: InCred
+    category: nbfc
+    grievance_email: incred.grievance@incred.com
+    grievance_phone: "18001022192"
+    address: "1203, 12th Floor, B Wing, The Capital, Bandra Kurla Complex, Mumbai 400051"
+    dla_app: InCred app
+    website: https://incred.com
+    notes: MSME lending, retail finance
+    active: true
+
+  - id: paisabazaar
+    name: Paisabazaar Marketing & Consulting Pvt Ltd
+    short_name: Paisabazaar
+    category: fintech
+    grievance_email: grievance@paisabazaar.com
+    address: "Paisabazaar, Gurugram, Haryana"
+    dla_app: Paisabazaar app
+    website: https://www.paisabazaar.com
+    notes: Loan marketplace + lending
+    active: true
+
+  - id: prefr
+    name: Prefr (by CreditVidya)
+    short_name: Prefr
+    category: fintech
+    grievance_email: wecare@prefr.com
+    grievance_phone: "040-48521334"
+    address: "Prefr, Mumbai, Maharashtra"
+    dla_app: Prefr app
+    website: https://prefr.com
+    notes: Digital lending, credit marketplace
+    active: true
+
+  - id: social-worth
+    name: Social Worth Technologies Pvt Ltd
+    short_name: SocialWorth
+    category: fintech
+    grievance_email: grievance@socialworth.in
+    address: "Social Worth, Mumbai, Maharashtra"
+    dla_app: Social Worth app
+    website: https://socialworth.in
+    notes: Digital lending platform
+    active: true
+
+  - id: credenc-web
+    name: Credenc Web Technologies Pvt Ltd
+    short_name: Credenc
+    category: fintech
+    grievance_email: support@credenc.com
+    address: "Credenc, Gurugram, Haryana"
+    dla_app: Credenc app
+    website: https://credenc.com
+    notes: Education loan marketplace
+    active: true
+
+  - id: credit-mantri
+    name: Credit Mantri Finserve Pvt Ltd
+    short_name: CreditMantri
+    category: fintech
+    grievance_email: grievance@creditmantri.com
+    address: "Credit Mantri, Chennai, Tamil Nadu"
+    website: https://www.creditmantri.com
+    notes: Credit marketplace, loan aggregation
+    active: true
+
+  - id: km-global-credit
+    name: K.M. Global Credit Pvt Ltd
+    short_name: KMGlobal
+    category: fintech
+    grievance_email: grievance@kmglobalcredit.com
+    address: "K.M. Global Credit, Mumbai, Maharashtra"
+    dla_app: KM Global Credit app
+    notes: Global credit services
+    active: true
