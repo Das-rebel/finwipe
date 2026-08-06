@@ -1263,3 +1263,178 @@ nbfcs:
   website: https://www.canzara.com
   notes: Housing finance, affordable home loans
   active: true
+- id: cashkumar
+  name: Cashkumar
+  category: p2p
+  grievance_email: support@cashkumar.com
+  website: https://www.cashkumar.com
+  notes: P2P lending for small businesses
+  active: true
+- id: rupaiya
+  name: Rupaiya
+  category: p2p
+  grievance_email: info@rupaiya.com
+  website: https://www.rupaiya.com
+  notes: P2P lending platform
+  active: true
+- id: ujjivan
+  name: Ujjivan Small Finance Bank
+  category: mfi
+  grievance_email: customer.service@ujjivan.com
+  website: https://www.ujjivan.com
+  notes: Small finance bank, microfinance, women-focused
+  active: true
+- id: satin
+  name: Satin Credit Care Network
+  category: mfi
+  grievance_email: customercare@satin.in
+  website: https://www.satin.in
+  notes: Microfinance institution, joint liability groups
+  active: true
+- id: cashpor
+  name: Cashpor Micro Credit
+  category: mfi
+  grievance_email: info@cashpor.com
+  website: https://www.cashpor.in
+  notes: Microfinance institution, Bihar/Jharkhand focus
+  active: true
+- id: grameen-koota
+  name: Grameen Koota (Equitas)
+  category: mfi
+  grievance_email: customercare@equitas.in
+  website: https://www.equitas.in
+  notes: Microfinance, joint liability groups, women borrowers
+  active: true
+- id: kredx
+  name: KredX (Minions Ventures)
+  category: fintech
+  grievance_email: anupama@Kredx.com
+  website: https://www.kredx.com
+  notes: Invoice discounting, supply chain finance, TReDS platform
+  active: true
+- id: aurus
+  name: Aurus
+  category: fintech
+  grievance_email: support@aurus.in
+  website: https://www.aurus.in
+  notes: Invoice financing, vendor payables finance
+  active: true
+- id: paymees
+  name: PayMees
+  category: fintech
+  grievance_email: support@paymees.in
+  website: https://www.paymees.in
+  notes: Invoice discounting, MSME financing
+  active: true
+- id: ola-postpaid
+  name: Ola Postpaid (Ola Financial)
+  category: bnpl
+  grievance_email: support@ola.com
+  website: https://www.ola.life
+  notes: BNPL, Ola money, buy now pay later
+  active: true
+- id: ivy
+  name: Ivy (Fincare)
+  category: fintech
+  grievance_email: support@ivy.finance
+  website: https://www.ivy.finance
+  notes: Digital banking, savings account, loans
+  active: true
+- id: moneyview
+  name: MoneyView
+  category: fintech
+  grievance_email: care@moneyview.in
+  website: https://www.moneyview.in
+  notes: Personal loans, credit line, insurance, savings
+  active: true
+- id: nira
+  name: Nira
+  category: fintech
+  grievance_email: support@nira.in
+  website: https://www.nira.in
+  notes: Personal loans for salaried employees
+  active: true
+- id: paysense
+  name: Paysense (SVB)
+  category: fintech
+  grievance_email: support@paysense.com
+  website: https://www.paysense.com
+  notes: Personal loans, credit line, salary advance
+  active: true
+- id: kazzback
+  name: KazzBack
+  category: fintech
+  grievance_email: support@kazzback.com
+  website: https://www.kazzback.com
+  notes: Personal loans, digital lending
+  active: true
+- id: spenny
+  name: Spenny
+  category: bnpl
+  grievance_email: support@spenny.app
+  website: https://www.spenny.app
+  notes: BNPL, pay later platform
+  active: true
+- id: lenderz
+  name: Lenderz
+  category: fintech
+  grievance_email: support@lenderz.in
+  website: https://www.lenderz.in
+  notes: Personal loans, loan marketplace
+  active: true
+- id: loanudaya
+  name: LoanUdaya
+  category: fintech
+  grievance_email: support@loanudaya.com
+  website: https://www.loanudaya.com
+  notes: Personal loans, digital lending
+  active: true
+- id: rutu
+  name: Rutu (SME Digital)
+  category: fintech
+  grievance_email: info@rutu.in
+  website: https://www.rutu.in
+  notes: Micro loans for women, rural finance
+  active: true
+- id: avail
+  name: Avail Finance
+  category: fintech
+  grievance_email: support@availfinance.in
+  website: https://www.availfinance.in
+  notes: Digital loans for gig workers, microfinance
+  active: true
+- id: kisaan
+  name: Kisaan
+  category: fintech
+  grievance_email: info@kisaan.io
+  website: https://www.kisaan.io
+  notes: Agricultural loans, farmer finance, agri-lending
+  active: true
+- id: gyanmoney
+  name: GyanMoney
+  category: fintech
+  grievance_email: support@gyanmoney.com
+  website: https://www.gyanmoney.com
+  notes: Loan marketplace, financial products comparison
+  active: true
+- id: wikisetu
+  name: WikiSetu
+  category: fintech
+  grievance_email: grievance@loantap.in
+  website: https://www.wikisetu.com
+  notes: Loan against property, secured loans marketplace
+  active: true
+- id: comparebuddy
+  name: CompareBuddy
+  category: fintech
+  grievance_email: support@comparebuddy.com
+  website: https://www.comparebuddy.com
+  notes: Financial product comparison
+  active: true
+- id: uni
+  name: Uni (Card91)
+  category: bnpl
+  grievance_email: support@card91.com
+  website: https://www.getuni.com
+  notes: BNPL, credit card, Uni Cards
+  active: true
