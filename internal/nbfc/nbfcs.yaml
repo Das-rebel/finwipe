@@ -1550,13 +1550,6 @@ nbfcs:
   website: https://www.payins.in
   notes: Digital lending, personal loans
   active: true
-- id: rupeek-capital
-  name: Rupeek Capital
-  category: fintech
-  grievance_email: support@rupeek.com
-  website: https://www.rupeek.com
-  notes: Gold loans, digital lending
-  active: true
 - id: kaxi
   name: Kaxi
   category: fintech
@@ -1802,13 +1795,6 @@ nbfcs:
   website: https://www.sket.in
   notes: BNPL, checkout financing
   active: true
-- id: homevista-hfc
-  name: HomeVista (Piramal)
-  category: hfc
-  grievance_email: grievance@homevista.in
-  website: https://www.homevista.in
-  notes: Housing finance, home loans
-  active: true
 - id: muthoot-microfinance
   name: Muthoot Microfinance
   category: mfi
@@ -1865,13 +1851,6 @@ nbfcs:
   website: https://www.plas.co.id
   notes: 'P2P lending (note: Indonesia)'
   active: true
-- id: capitalfloat-new
-  name: Capital Float
-  category: nbfc
-  grievance_email: support@capitalfloat.com
-  website: https://www.capitalfloat.com
-  notes: Business loans, working capital, AWS group
-  active: true
 - id: hdb-financial
   name: HDB Financial Services
   category: nbfc
@@ -1920,20 +1899,6 @@ nbfcs:
   grievance_email: support@finova.in
   website: https://www.finova.in
   notes: Microfinance, business loans
-  active: true
-- id: i2ifunding-p2p
-  name: i2iFunding RNVP
-  category: p2p
-  grievance_email: loan@i2ifunding.com
-  website: https://www.i2ifunding.com
-  notes: P2P lending, invoice financing
-  active: true
-- id: cashkumar-p2p
-  name: Cashkumar
-  category: p2p
-  grievance_email: support@cashkumar.com
-  website: https://www.cashkumar.com
-  notes: P2P lending, personal loans
   active: true
 - id: rupaiya-p2p
   name: Rupaiya P2P
@@ -1984,13 +1949,6 @@ nbfcs:
   website: https://www.mblwealth.com
   notes: Gold loans, wealth management
   active: true
-- id: rupeek-gold-loans
-  name: Rupeek Gold Loans
-  category: fintech
-  grievance_email: support@rupeek.com
-  website: https://www.rupeek.com
-  notes: Gold loans, digital lending
-  active: true
 - id: muthoot-gold-loans
   name: Muthoot Finance Gold Loans
   category: nbfc
@@ -2018,13 +1976,6 @@ nbfcs:
   grievance_email: customercare@aavas.com
   website: https://www.aavas.com
   notes: Affordable housing finance, Rajasthan
-  active: true
-- id: home-credit-india
-  name: Home Credit India
-  category: nbfc
-  grievance_email: grievanceofficer@homecredit.co.in
-  website: https://www.homecredit.co.in
-  notes: Consumer lending, digital loans
   active: true
 - id: ahom-finance
   name: AHom Finance
