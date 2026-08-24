@@ -1,0 +1,14 @@
+# FinWipe Server — one-liner self-hosted stack
+services:
+  finwipe:
+    image: ghcr.io/das-rebel/finwipe-server:latest
+    ports: ["8080:8080"]
+    volumes: ["~/.finwipe:/data"]
+    environment:
+      # Optional IMAP ack-polling (Gmail app password):
+      - FINWIPE_IMAP_HOST=imap.gmail.com
+      - FINWIPE_IMAP_USER=you@gmail.com
+      - FINWIPE_IMAP_PASS=${FINWIPE_IMAP_PASS}
+      # Optional push notifications:
+      - FINWIPE_NTFY_URL=https://ntfy.sh/finwipe-change-me
+    restart: unless-stopped

@@ -1,0 +1,16 @@
+# FinWipe Server — self-hosted erasure tracker
+FROM golang:1.21-alpine AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /finwipe-server ./cmd/server
+
+FROM alpine:3.19
+RUN adduser -D finwipe && apk add --no-cache ca-certificates tzdata
+USER finwipe
+COPY --from=build /finwipe-server /usr/local/bin/finwipe-server
+EXPOSE 8080
+VOLUME ["/data"]
+ENV FINWIPE_DB=/data/finwipe.db
+ENTRYPOINT ["finwipe-server"]
