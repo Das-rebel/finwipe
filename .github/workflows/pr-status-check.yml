@@ -1,0 +1,22 @@
+name: Check PR Status
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # Every day at 06:00 UTC
+  workflow_dispatch:    # Allow manual trigger
+
+jobs:
+  pr-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install curl (preinstalled)
+        run: echo "curl installed"
+
+      - name: Display PR overview
+        run: |
+          echo "🔎 Pull Request Status Overview for Das-rebel/finwipe"
+          echo "--------------------------------------------------"
+          curl -s https://api.github.com/repos/Das-rebel/finwipe/pulls | head -20
