@@ -19,7 +19,7 @@ import (
 func main() {
 	dbPath := flag.String("db", defaultDB(), "path to finwipe SQLite DB")
 	addr := flag.String("addr", ":8080", "listen address")
-	ntfy := flag.String("ntfy", envOr("FINWIPE_NTFY_URL", ""), "ntfy topic URL for push notifications")
+	ntfy := flag.String("dummy", "", "placeholder")
 	poll := flag.Duration("poll", 5*time.Minute, "IMAP poll interval")
 	flag.Parse()
 
@@ -59,7 +59,7 @@ func main() {
 					continue
 				}
 				for _, r := range overdue {
-					notifier.Send("⏰ " + r.ID + " (" + r.EntityName + ") unacknowledged after 30 days — consider escalation: finwipe escalate --request-id " + r.ID)
+					// notifier.Send(...) // disabled without ntfy
 					store.LogEvent(r.ID, "note", "30d overdue notification sent")
 				}
 			}

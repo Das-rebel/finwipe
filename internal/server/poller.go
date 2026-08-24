@@ -95,7 +95,7 @@ func (p *Poller) classify(m InboundMessage) {
 				log.Printf("[poller] transition %s: %v", r.ID, err)
 				continue
 			}
-			p.notifier.Send(fmt.Sprintf("📨 %s: %s → %s", r.EntityName, r.ID, note))
+			// p.notifier.Send(...) // disabled without ntfy
 			return // one message = one request
 		}
 	}

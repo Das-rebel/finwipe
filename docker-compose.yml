@@ -10,5 +10,4 @@ services:
       - FINWIPE_IMAP_USER=you@gmail.com
       - FINWIPE_IMAP_PASS=${FINWIPE_IMAP_PASS}
       # Optional push notifications:
-      - FINWIPE_NTFY_URL=https://ntfy.sh/finwipe-change-me
     restart: unless-stopped
