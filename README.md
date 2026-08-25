@@ -313,3 +313,9 @@ MIT © Das-Rebel and contributors
 ```bash
 finwipe init && finwipe wizard
 ```
+
+---
+
+## 🔧 More from Das-rebel
+
+- **[A3M Router](https://github.com/Das-rebel/a3m-router)** — Open-source LLM routing gateway. Routes AI queries across 80+ providers with biology-inspired algorithms (EXP3, swarm intelligence). 92% cost savings, self-hosted. `npm install a3m-router` · `pip install a3m-router`
